@@ -153,11 +153,6 @@ function loadBuildByName(name) {
             item.classList.remove("active-build"); // Remove from others
         }
     });
-
-    // Scroll to top smoothly after loading the build
-    setTimeout( () => {
-        document.getElementsByClassName("main-content")[0].scrollTo({ top: 0, behavior: "smooth" });
-    }, 200);
 }
 
 // 6) Renames a local build from oldName to newName

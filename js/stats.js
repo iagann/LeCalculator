@@ -52,6 +52,14 @@ const stats = Object.freeze({
     ENDURANCE_THRESHOLD: statNum++,
     MAX_HEALTH_AS_ENDURANCE_THRESHOLD: statNum++,
     REDUCED_CRIT_DAMAGE_TAKEN: statNum++,
+
+    INCREASED_AILMENT_DURATION: statNum++,
+
+    WARD_PER_SECOND: statNum++,
+
+    INCREASED_DAMAGE_PER_MS: statNum++,
+    GLANCING_BLOW_CHANCE: statNum++,
+    DODGE_CHANCE_TO_GLANCING_BLOW_CHANCE: statNum++,
 });
 
 function getStatName(key) {
@@ -107,8 +115,17 @@ function getStatName(key) {
         case stats.LESS_DAMAGE_TAKEN: return "Less Damage Taken";
         case stats.ENDURANCE: return "Endurance";
         case stats.ENDURANCE_THRESHOLD: return "Endurance Threshold";
-        case stats.MAX_HEALTH_AS_ENDURANCE_THRESHOLD: return "MaxHealth as Endurance Threshold";
+        case stats.MAX_HEALTH_AS_ENDURANCE_THRESHOLD: return "Max Health as Endurance Threshold";
         case stats.REDUCED_CRIT_DAMAGE_TAKEN: return "Reduced Crit Damage Taken";
+
+        case stats.INCREASED_AILMENT_DURATION: return "Increased Ailment Duration";
+
+        case stats.WARD_PER_SECOND: return "Ward per Second";
+
+        case stats.INCREASED_DAMAGE_PER_MS: return "Increased Damage per MS";
+        case stats.GLANCING_BLOW_CHANCE: return "Glancing Blow Chance";
+        case stats.DODGE_CHANCE_TO_GLANCING_BLOW_CHANCE: return "Dodge Chance to Glancing Blow Chance";
+        
     }
     return "Unknown";
 }

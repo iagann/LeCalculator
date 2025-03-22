@@ -136,11 +136,16 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
         // Check if the expression is valid
         let isValidExpression = true;
         try {
-            let expression = expressionInput.value;
-            expression = expression.replaceAll("dex",1);
-            expression = expression.replaceAll("recurve",1);
-            const result = evaluateExpression(expression);
-            if (isNaN(result)) isValidExpression = false;
+          let expression = expressionInput.value;
+            if (expression == "") {
+              isValidExpression = false;
+            }
+            else {
+              expression = expression.replaceAll("dex",1);
+              expression = expression.replaceAll("recurve",1);
+              const result = evaluateExpression(expression);
+              if (isNaN(result)) isValidExpression = false;
+            }
         } catch {
             isValidExpression = false;
         }

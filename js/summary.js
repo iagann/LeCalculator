@@ -225,14 +225,17 @@ function processStats(statsArray) {
 
     summary.push({name:"Damage", type:"section"});
     // increased damage
-    let increasedDamage = allStats[stats.INCREASED_DAMAGE]?.total || 0;
+    const increasedMS = allStats[stats.INCREASED_MOVEMENT_SPEED]?.total || 0;
+    let increasedDamage = (allStats[stats.INCREASED_DAMAGE]?.total || 0)
+        + (allStats[stats.INCREASED_DAMAGE_PER_MS]?.total || 0) * increasedMS;
     {
         summary.push({ 
             name: "Increased Damage", 
             total: increasedDamage, 
             type: "stat",
             sources: [
-                ...(allStats[stats.INCREASED_DAMAGE]?.sources || [])
+                ...(allStats[stats.INCREASED_DAMAGE]?.sources || []),
+                ...(allStats[stats.INCREASED_DAMAGE_PER_MS]?.sources || []),
             ]
         });
     }
@@ -267,7 +270,6 @@ function processStats(statsArray) {
 
     summary.push({name:"Speed", type:"section"});
     // movement speed
-    const increasedMS = allStats[stats.INCREASED_MOVEMENT_SPEED]?.total || 0;
     {
         summary.push({ 
             name: "Increased MS", 
@@ -357,8 +359,94 @@ function processStats(statsArray) {
             ]
         });
     }
+    const increasedAilmentDUration = allStats[stats.INCREASED_AILMENT_DURATION]?.total || 0;
+    {
+        if (increasedAilmentDUration > 0)
+            summary.push({ 
+                name: "Increased Ailment Duration", 
+                total: increasedAilmentDUration, 
+                type: "stat",
+                sources: [
+                    ...(allStats[stats.INCREASED_AILMENT_DURATION]?.sources || []),
+                ]
+            });
+    }
 
-    summary.push({name:"Defences", type:"section"});
+    summary.push({name:"Resistances", type:"section"});
+    const fireRes = (allStats[stats.FIRE_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    const coldRes = (allStats[stats.COLD_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    const lightningRes = (allStats[stats.LIGHTNING_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    const physicalRes = (allStats[stats.PHYSICAL_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    const necroticRes = (allStats[stats.NECROTIC_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    const poisonRes = (allStats[stats.POISON_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    const voidRes = (allStats[stats.VOID_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    {
+        summary.push({ 
+            name: "Fire Resistance", 
+            total: fireRes, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.FIRE_RESISTANCE]?.sources || []),
+                ...(allStats[stats.ALL_RESISTANCES]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Cold Resistance", 
+            total: coldRes, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.COLD_RESISTANCE]?.sources || []),
+                ...(allStats[stats.ALL_RESISTANCES]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Lightning Resistance", 
+            total: lightningRes, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.LIGHTNING_RESISTANCE]?.sources || []),
+                ...(allStats[stats.ALL_RESISTANCES]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Physical Resistance", 
+            total: physicalRes, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.PHYSICAL_RESISTANCE]?.sources || []),
+                ...(allStats[stats.ALL_RESISTANCES]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Necrotic Resistance", 
+            total: necroticRes, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.NECROTIC_RESISTANCE]?.sources || []),
+                ...(allStats[stats.ALL_RESISTANCES]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Poison Resistance", 
+            total: poisonRes, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.POISON_RESISTANCE]?.sources || []),
+                ...(allStats[stats.ALL_RESISTANCES]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Void Resistance", 
+            total: voidRes, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.VOID_RESISTANCE]?.sources || []),
+                ...(allStats[stats.ALL_RESISTANCES]?.sources || []),
+            ]
+        });
+    }
+
+    summary.push({name:"Armor", type:"section"});
     const flatArmour = allStats[stats.FLAT_ARMOR]?.total || 0;
     {
         summary.push({ 
@@ -433,7 +521,8 @@ function processStats(statsArray) {
         });
     }
     // endurance
-    summary.push({type:"hr"});
+    summary.push({name:"Endurance", type:"section"});
+    //summary.push({type:"hr"});
     const endurance = Math.min(60, allStats[stats.ENDURANCE]?.total || 0);
     {
         summary.push({ 
@@ -494,7 +583,8 @@ function processStats(statsArray) {
         });
     }
     // vs crits
-    summary.push({type:"hr"});
+    summary.push({name:"Other Defences", type:"section"});
+    //summary.push({type:"hr"});
     const reducedCritDmgTaken = Math.min(100, allStats[stats.REDUCED_CRIT_DAMAGE_TAKEN]?.total || 0);
     {
         summary.push({ 
@@ -543,41 +633,57 @@ function processStats(statsArray) {
             ]
         });
     }
-    let dodgeChange = 0;
-    let glancingBlowChance = 0;
+    let dodgeChance = 0;
+    let glancingBlowChance = (allStats[stats.GLANCING_BLOW_CHANCE]?.total || 0);
+    let dodgeToGlancingBlowChance = (allStats[stats.DODGE_CHANCE_TO_GLANCING_BLOW_CHANCE]?.total || 0);
     {
         const x = totalDodgeRating;
         const x2 = Math.pow(x, 2);
         const a = 100;
-        dodgeChange = 1 * x / (80 + 0.05 * Math.pow(a + 5, 2) + 1 * x) * 0.25;
-        dodgeChange += 0.001 * x2 / (32 * (a + 5) + 0.001 * x2) * 0.6;
-        dodgeChange *= 100;
-        dodgeChange = Math.min(dodgeChange, 85);
+        dodgeChance = 1 * x / (80 + 0.05 * Math.pow(a + 5, 2) + 1 * x) * 0.25;
+        dodgeChance += 0.001 * x2 / (32 * (a + 5) + 0.001 * x2) * 0.6;
+        dodgeChance *= 100;
+        dodgeChance = Math.min(dodgeChance, 85);
+        if (dodgeToGlancingBlowChance > 0) {
+            glancingBlowChance += dodgeChance * dodgeToGlancingBlowChance/100;
+            dodgeChance = 0;
+        }
+        glancingBlowChance = Math.min(100, glancingBlowChance);
 
         summary.push({ 
             name: "Dodge Chance", 
-            total: dodgeChange, 
+            total: dodgeChance, 
             type: "stat",
             sources: []
         });
     }
-    if (glancingBlowChance > 0) {
-        summary.push({type:"hr"});
-        summary.push({ 
-            name: "Glancing Blow Chance", 
-            total: glancingBlowChance, 
-            type: "stat",
-            sources: []
-        });
-    }
-    const lessDamageTaken =  100 - (allStats[stats.LESS_DAMAGE_TAKEN]?.total || 100);
+    let lessDamageTaken =  (allStats[stats.LESS_DAMAGE_TAKEN]?.total || 100);
+    if (glancingBlowChance == 100)
+        lessDamageTaken *= (1 - 0.35);
+    lessDamageTaken =  100 - lessDamageTaken;
     if (lessDamageTaken > 0) {
         summary.push({type:"hr"});
+        
+        if (glancingBlowChance > 0) {
+            summary.push({ 
+                name: "Glancing Blow Chance", 
+                total: glancingBlowChance, 
+                type: "stat",
+                sources: [
+                    ...(allStats[stats.GLANCING_BLOW_CHANCE]?.sources || []),
+                    (dodgeToGlancingBlowChance > 0) ? (allStats[stats.DODGE_CHANCE_TO_GLANCING_BLOW_CHANCE]?.sources || []) : []
+                ]
+            });
+        }
+
         summary.push({ 
             name: "Less Damage Taken", 
             total: lessDamageTaken, 
             type: "stat",
-            sources: [...(allStats[stats.LESS_DAMAGE_TAKEN]?.sources || []),]
+            sources: [
+                ...(allStats[stats.LESS_DAMAGE_TAKEN]?.sources || []),
+                (glancingBlowChance == 100) ? `100% glancing blow chance, Less Damage Taken: 35` : []
+            ]
         });
     }
 
@@ -591,6 +697,8 @@ function processStats(statsArray) {
             dpsAilment *= (100 + increasedDamage) / 100;
             dpsAilment *= moreDamage / 100;
             dpsAilment *= (100 + penetration) / 100;
+            if (increasedAilmentDUration > 0)
+                dpsAilment *= (100 + increasedAilmentDUration) / 100;
         }
         summary.push({ 
             name: "DPS Ailment", 
@@ -598,9 +706,11 @@ function processStats(statsArray) {
             type: "stat",
             sources: [
                 `dpsAilment * chanceToAilment/100 * hitsPerSecond 
-                    * (100+increasedDamage)/100 * (moreDamage)/100 * (100+penetration)/100 = 
+                    * (100+increasedDamage)/100 * (moreDamage)/100 * (100+penetration)/100${(increasedAilmentDUration > 0) ? ` * (100+duration)/100` : ""}= 
                     ${dpsAilment.toFixed(3)} * ${chanceToAilment}/100 * ${hitsPerSecond.toFixed(3)} 
-                    * (100+${increasedDamage})/100 * (${moreDamage.toFixed(3)})/100 * (100+${penetration})/100 = ${dpsAilment.toFixed(3)}`,
+                    * (100+${increasedDamage})/100 * (${moreDamage.toFixed(3)})/100 * (100+${penetration})/100
+                    ${(increasedAilmentDUration > 0) ? ` * (100+${increasedAilmentDUration})/100` : ""}
+                     = ${dpsAilment.toFixed(3)}`,
                 ...(allStats[stats.AILMENT_DAMAGE]?.sources || []),
             ]
         });
@@ -742,7 +852,7 @@ function renderSummary(summaryArray) {
         // Stat text
         const statText = document.createElement("span");
         statText.classList.add("summary-text");
-        statText.innerHTML = `<strong>${summaryStat.name}:</strong> ${summaryStat.total}`;
+        statText.innerHTML = `<strong>${summaryStat.name}:</strong> ${summaryStat.total.replace(/\B(?=(\d{3})+(?!\d))/g, " ")}`;
 
         // Tooltip
         const tooltip = document.createElement("div");

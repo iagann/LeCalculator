@@ -132,6 +132,11 @@ window.loadFromBase64 = function(inputStr) {
         updateSummary();
         validateStatEntries();
         updateSectionSearchOptions();
+        
+        // Scroll to top smoothly after loading the build
+        setTimeout( () => {
+            document.getElementsByClassName("main-content")[0].scrollTo({ top: 0, behavior: "smooth" });
+        }, 200);
 
     } catch (error) {
         console.error("Failed to parse data:", error);
