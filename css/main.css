@@ -1,0 +1,196 @@
+.container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    /* No margin-left here; let .main-area handle shifting */
+  }
+  
+  /* .main-area: shifts left/right on collapse */
+  .main-area {
+    display: flex;
+    flex: 1; /* Fill remaining space */
+    margin-left: 220px; /* default offset for the panel */
+    transition: margin-left 0.3s ease;
+  }
+  
+  /* If the left panel is collapsed, reduce .main-area margin */
+  #left-panel.collapsed ~ .container .main-area {
+    margin-left: 0px; /* enough room for the toggle button on the left */
+  }
+  
+  /* The main-content styles remain the same */
+  .main-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #1e1e1e;
+  }
+  
+  /* Example styles for sections, stats, etc. */
+  .section {
+    background-color: #222;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+  }
+  .section:hover {
+    background-color: #2a2a2a;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: grab;
+  }
+  
+  .stat-list {
+    margin-top: 10px;
+  }
+  .stat-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 5px 0;
+    transition: background-color 0.2s ease;
+    border-top: 1px solid #444;
+  }
+  /* Invalid stat entry - highlights background */
+  .invalid {
+    background-color: rgba(255, 0, 0, 0.15); /* Softer red background */
+    border: 1px solid #ff4d4d; /* Red border */
+    box-shadow: 0px 0px 8px rgba(255, 77, 77, 0.6); /* Softer glow */
+    animation: pulseError 1.5s infinite ease-in-out; /* Longer, smoother glow */
+  }
+  
+  /* Smooth glowing animation */
+  @keyframes pulseError {
+    0% {
+      box-shadow: 0px 0px 5px rgba(255, 77, 77, 0.4);
+      background-color: rgba(255, 0, 0, 0.1);
+    }
+    50% {
+      box-shadow: 0px 0px 15px rgba(255, 77, 77, 0.8);
+      background-color: rgba(255, 0, 0, 0.2);
+    }
+    100% {
+      box-shadow: 0px 0px 5px rgba(255, 77, 77, 0.4);
+      background-color: rgba(255, 0, 0, 0.1);
+    }
+  }
+
+  .stat-entry:hover {
+    background-color: #333;
+  }
+  
+  /* If a section is collapsed, hide the stat-list */
+  .collapsed .stat-list {
+    display: none;
+  }
+  .sortable-ghost {
+    opacity: 0.6;
+  }
+  
+
+  /* Override datalist dropdown to be fullscreen */
+datalist {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw; /* Full screen width */
+  height: 100vh; /* Full screen height */
+  background: rgba(30, 30, 30, 0.95); /* Dark background */
+  overflow-y: auto; /* Allows scrolling */
+  z-index: 1000; /* Ensures it appears on top */
+  border: none;
+  padding: 10px;
+  font-size: 18px;
+}
+
+/* Make each dropdown option more readable */
+datalist option {
+  padding: 12px;
+  font-size: 16px;
+  color: white;
+  background: #333;
+  cursor: pointer;
+}
+
+/* Highlight hovered option */
+datalist option:hover {
+  background: #6200ea;
+}
+
+.stat-entry > input[type="text"]:first-of-type {
+  text-align: right;
+}
+
+/*
+.section-glow {
+  box-shadow: 0 0 20px 0px rgba(87, 174, 255, 0.4);
+  transition: box-shadow 0.3s ease;
+}
+
+.stat-glow {
+  background-color: rgba(98, 0, 234, 0.4);
+  box-shadow: 0 0 20px 0px rgba(98, 0, 234, 0.4);
+  transition: box-shadow 0.3s ease; 
+}
+
+.section-fade {
+  display: none;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 1s ease, max-height 1s ease;
+}
+*/
+
+.search-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+#section-search {
+  background-color: #2a2a2a;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 5px 26px 5px 5px; /* right padding for the button */
+  margin: 5px 0;
+  border-radius: 4px;
+  width: 250px;
+}
+
+#section-search:focus {
+  box-shadow: 0 0 6px #6200ea;
+  background-color: #2b2b2b;
+}
+
+/* Clear (✖) button inside the input */
+#clear-search {
+  position: absolute;
+  right: 6px;
+  /*
+  top: 50%;
+  transform: translateY(-50%);
+  */
+  top: 5px;
+  height: 18px;
+  width: 18px;
+  border: none;
+  border-radius: 50%;
+  background-color: #444;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+#clear-search:hover {
+  background-color: #6200ea;
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>LE Calculator by iagan3228</title>
+  
+  <!-- CSS (split into multiple files as requested) -->
+  <link rel="stylesheet" href="css/general.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/buildList.css">
+  <link rel="stylesheet" href="css/summary.css">
+  <link rel="stylesheet" href="css/dragDrop.css">
+
+  <!-- Sortable.js (CDN) for drag & drop -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  
+  <!-- LZString & Stats -->
+  <script src="js/lz-string.min.js"></script>
+  <script src="js/stats.js"></script>
+
+  <!-- Your app logic (deferred so HTML loads first) -->
+  <script defer src="js/base64Handler.js"></script>
+  <script defer src="js/sections.js"></script>
+  <script defer src="js/sectionsSearch.js"></script>
+  <script defer src="js/statsManager.js"></script>
+  <script defer src="js/dragDrop.js"></script>
+  <script defer src="js/summary.js"></script>
+  <script defer src="js/buildManager.js"></script>
+  <!--script defer src="js/mainGlow.js"></script-->
+</head>
+<body>
+
+  <!-- Left panel (collapsible) -->
+  <div id="left-panel">
+    <div class="left-panel-content">
+      <h2>Builds</h2>
+
+      <button onclick="createNewBuild()">New</button>
+      <button onclick="copyBuildCodeToClipboard()">Copy</button>
+      <button onclick="openLoadDialog()">Load</button>
+      
+      <hr />
+
+      <!-- List of local saved builds (draggable) -->
+      <ul id="build-list"></ul>
+    </div>
+  </div>
+
+  <!-- Toggle button (placed separately outside the panel) -->
+  <button id="toggle-panel-btn" onclick="toggleLeftPanel()">◄</button>
+
+  <!-- Main container: includes the middle and right panels -->
+  <div class="container">
+
+    <!-- .main-area (slides left/right) -->
+    <div class="main-area">
+      <div class="main-content">
+        <h1>LE Calculator by iagan3228</h1>
+
+        <label for="buildNameInput">Build Name:</label>
+        <input type="text" id="buildNameInput" placeholder="My Cool Build">
+
+        <hr />
+
+        <div class="section-controls">
+          <h2>Sections:</h2>
+          <button onclick="addSection()">Add</button>
+          <button onclick="expandAllSections()">Expand All</button>
+          <button onclick="collapseAllSections()">Collapse All</button>
+          <div class="search-wrapper">
+            <input type="text" id="section-search" placeholder="Search Sections or Stats..." oninput="filterSectionsByName()" list="section-stat-options">
+            <button id="clear-search" onclick="clearSectionSearch()" title="Clear Search">✖</button>
+            <datalist id="section-stat-options"></datalist>
+          </div>
+        
+          <!-- These two are added dynamically via JS when search is active -->
+          <button id="expand-visible" onclick="expandVisibleSections()" style="display: none;">Expand Visible</button>
+          <button id="collapse-visible" onclick="collapseVisibleSections()" style="display: none;">Collapse Visible</button>
+        </div>
+        
+
+        <hr />
+
+        <div id="sections"></div>
+      </div>
+    </div>
+
+    <!-- Right panel for summary -->
+    <div class="summary-panel">
+      <h2>Stat Summary</h2>
+      <div id="summary-content"></div>
+    </div>
+
+  </div>
+
+  <!-- Load dialog for pasting base64 build code -->
+  <div id="loadDialog" class="dialog">
+    <div class="dialog-content">
+      <p>Paste your Build Code:</p>
+      <input type="text" id="loadInput" placeholder="Paste code here..." />
+      <button id="closeLoadDialogBtn" class="btn-close" onclick="closeLoadDialog()">Close</button>
+    </div>
+  </div>
+
+</body>
+</html>

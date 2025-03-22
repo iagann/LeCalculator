@@ -1,0 +1,105 @@
+/* Left panel visible by default */
+#left-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 218px;
+    height: 100%;
+    background-color: #1e1e1e;
+    border-right: 2px solid #444;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+  }
+  
+  /* If you want to show it fully by default, do NOT add .collapsed in HTML */
+  #left-panel.collapsed {
+    transform: translateX(-220px);
+  }
+
+ .left-panel-content button {
+  margin-right: 5px;
+ }
+  
+  /* Toggle button (always visible) */
+  #toggle-panel-btn {
+    position: fixed;
+    left: 218px; /* Aligned with the panel edge */
+    top: 0px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    background-color: #6200ea;
+    border: none;
+    color: #fff;
+    transition: left 0.3s ease;
+  }
+  
+  /* Move button to the edge when collapsed */
+  #left-panel.collapsed + #toggle-panel-btn {
+    left: 00px;
+  }
+  
+  /* Left Panel Content */
+  .left-panel-content {
+    padding: 20px;
+    margin-top: 60px;
+  }
+  
+/* Build List */
+#build-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#build-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Keeps build name on the left & delete button on the right */
+  padding: 8px 12px;
+  border-top: 1px solid #444; /* Similar to stat separator */
+  background-color: #222;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+/* Hover effect */
+#build-list li:hover {
+  background-color: #333;
+}
+
+/* First item doesn't need a top border */
+#build-list li:first-child {
+  border-top: none;
+}
+
+/* Highlight the current build */
+#build-list li.active-build {
+  background-color: #6200ea; /* Highlight color */
+  color: white;
+  font-weight: bold;
+  border-left: 5px solid #bb86fc; /* Accent border */
+  transform: scale(1.02); /* Slight pop-out effect */
+}
+
+/* Build Name Styling */
+.build-name {
+  flex-grow: 1; /* Ensures it takes available space */
+  overflow: hidden;
+  white-space: break-spaces;
+  text-overflow: ellipsis;
+}
+
+/* Delete Button Styling */
+.btn-delete {
+  background: none;
+  border: none;
+  color: #ff5555;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.btn-delete:hover {
+  color: #ff9999;
+}
