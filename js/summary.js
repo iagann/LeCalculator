@@ -59,69 +59,62 @@ function updateSummary() {
       }
       
       function computeDelta(element, sectionCache) {
-        const toggledStats = [];
+        // 1) Build final states after toggling
+        const finalSectionEnabled = new Map();
+        const finalStatEnabled = new Map();
       
-        // Step A: Build final “effective” enabled states for sections & stats
-        // If the user toggled an entire section, invert that section's state.
-        // If the user toggled one stat, invert that single stat’s state.
-        // Everything else remains as it was.
-        const newSectionState = new Map();
-        const newStatState = new Map();
-      
-        // 1) Determine new states
         sectionCache.forEach(sec => {
-          let finalSecEnabled = sec.enabled;
+          let secEnabled = sec.enabled;
+          // If toggling the entire section
           if (sec.element === element) {
-            // Toggling entire section
-            finalSecEnabled = !sec.enabled;
+            secEnabled = !sec.enabled;  // invert
           }
-          newSectionState.set(sec.element, finalSecEnabled);
+          finalSectionEnabled.set(sec.element, secEnabled);
       
           sec.statEntries.forEach(stat => {
-            let finalStatEnabled = stat.enabled;
+            let stEnabled = stat.enabled;
+            // If toggling this stat individually
             if (stat.element === element) {
-              // Toggling this single stat
-              finalStatEnabled = true;
+              stEnabled = !stat.enabled;  // invert
             }
-            newStatState.set(stat.element, finalStatEnabled);
+            finalStatEnabled.set(stat.element, stEnabled);
           });
         });
-
-        // Step B: Build toggledStats with clear rules
+      
+        // 2) Collect toggledStats
+        const toggledStats = [];
+      
         sectionCache.forEach(sec => {
-          const secIsEnabled = newSectionState.get(sec.element);
+          const secIsEnabled = finalSectionEnabled.get(sec.element);
       
           sec.statEntries.forEach(stat => {
-            const statIsEnabled = newStatState.get(stat.element);
+            const statIsEnabled = finalStatEnabled.get(stat.element);
+            // If EITHER the section is enabled & the stat is enabled, OR the stat is enabled on its own,
+            // we include it. That satisfies "disabled section + enabled stat" => keep the stat’s contribution
+            //if (!stat.statID) return;
       
-            // If the entire section is disabled *and* we are *not* toggling this stat → skip
-            if (!secIsEnabled && stat.element !== element) {
-              return;
-            }
-      
-            // If the stat is effectively disabled → skip
-            if (!statIsEnabled) {
-              return;
-            }
-
-            // Otherwise, if there’s a valid statID, use it
-            if (stat.statID) {
+            const includeThisStat = (secIsEnabled && statIsEnabled) || (statIsEnabled && stat.element == element);
+            // Another way: if (statIsEnabled || secIsEnabled && statIsEnabled) ...
+            // But the above OR is effectively the same as "statIsEnabled" (once you consider the parent's effect).
+            // We'll be explicit for clarity:
+            if (includeThisStat) {
               toggledStats.push([stat.statID, stat.expr, sec.name]);
             }
           });
         });
       
-        // Step C: Recompute summary with toggled stats
+        // 3) Compute new summary from toggledStats
         const newSummary = processStats(toggledStats);
-        const deltas = {};
       
+        // 4) Compare vs baseMap for each highlight stat
+        const deltas = {};
         highlightSummaryNames.forEach(name => {
           const oldVal = baseMap[name] || 0;
           const newVal = newSummary.find(s => s.name === name)?.total || 0;
-
+      
           let perc = 0;
           if (Math.abs(oldVal) < 1e-12) {
-            perc = (newVal === 0 ? 0 : 100);
+            perc = newVal === 0 ? 0 : 100;
           } else {
             perc = ((newVal - oldVal) / oldVal) * 100;
           }
@@ -896,6 +889,71 @@ function processStats(statsArray, firstRun = true) {
                      = ${dpsAilment.toFixed(3)}`,
                 ...(allStats[stats.AILMENT_DAMAGE]?.sources || []),
             ]
+        });
+    }
+
+    summary.push({name:"EHP", type:"section"});
+    // ehp
+    {
+        const a = preusoHpAfterEndurance / ((100-lessDamageTaken)/100);
+        let r = [];
+        r[stats.FIRE_RESISTANCE] = (100 / (175 - Math.min(75,fireRes))) / (100 - totalArmourDr) * 100;
+        r[stats.COLD_RESISTANCE] = (100 / (175 - Math.min(75,coldRes))) / (100 - totalArmourDr) * 100;
+        r[stats.LIGHTNING_RESISTANCE] = (100 / (175 - Math.min(75,lightningRes))) / (100 - totalArmourDr) * 100;
+        r[stats.PHYSICAL_RESISTANCE] = (100 / (175 - Math.min(75,physicalRes))) / (100 - totalArmourDrPhys) * 100;
+        r[stats.NECROTIC_RESISTANCE] = (100 / (175 - Math.min(75,necroticRes))) / (100 - totalArmourDr) * 100;
+        r[stats.POISON_RESISTANCE] = (100 / (175 - Math.min(75,poisonRes))) / (100 - totalArmourDr) * 100;
+        r[stats.VOID_RESISTANCE] = (100 / (175 - Math.min(75,voidRes))) / (100 - totalArmourDr) * 100;
+        const b = (r[stats.FIRE_RESISTANCE] 
+            + r[stats.COLD_RESISTANCE] 
+            + r[stats.LIGHTNING_RESISTANCE] 
+            + r[stats.PHYSICAL_RESISTANCE] 
+            + r[stats.NECROTIC_RESISTANCE] 
+            //+ r[stats.POISON_RESISTANCE] 
+            + r[stats.VOID_RESISTANCE])
+            / 6; // ignore poison res :)
+
+        summary.push({ 
+            name: "Avg Max Hit", 
+            total: a * b, 
+            type: "stat",
+            sources: []
+        });
+        summary.push({ 
+            name: "Max Fire Hit", 
+            total: a * r[stats.FIRE_RESISTANCE], 
+            type: "stat",
+            sources: []
+        });
+        summary.push({ 
+            name: "Max Cold Hit", 
+            total: a * r[stats.COLD_RESISTANCE], 
+            type: "stat",
+            sources: []
+        });
+        summary.push({ 
+            name: "Max Lightning Hit", 
+            total: a * r[stats.LIGHTNING_RESISTANCE], 
+            type: "stat",
+            sources: []
+        });
+        summary.push({ 
+            name: "Max Physical Hit", 
+            total: a * r[stats.PHYSICAL_RESISTANCE], 
+            type: "stat",
+            sources: []
+        });
+        summary.push({ 
+            name: "Max Poison Hit?", 
+            total: a * r[stats.POISON_RESISTANCE], 
+            type: "stat",
+            sources: []
+        });
+        summary.push({ 
+            name: "Max Void Hit", 
+            total: a * r[stats.VOID_RESISTANCE], 
+            type: "stat",
+            sources: []
         });
     }
 
