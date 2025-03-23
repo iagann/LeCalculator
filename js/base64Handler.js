@@ -61,7 +61,6 @@ function updateSaveString() {
     });
   
     const jsonStr = JSON.stringify(allSections);
-    savedBuildCode = LZString.compressToBase64(jsonStr);
     savedBuildCode = compressBuild(jsonStr);
 
     console.log(jsonStr);
