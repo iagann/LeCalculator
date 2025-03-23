@@ -28,16 +28,25 @@ function updateSaveString() {
         
       let sectionArray;
       if (sectionEnabled)
-        sectionArray = [sectionName];
+        sectionArray = [sectionName, sectionEnabled];
       else
         sectionArray = [sectionName, sectionEnabled];
+
+    if (sectionName == "[passive falconer] Outlanders' Tenacity") {
+        section.querySelectorAll(".stat-entry");
+    }
   
       section.querySelectorAll(".stat-entry").forEach(statEntry => {
         const statName = statEntry.querySelector('input[placeholder="Choose Stat..."]')?.value || "";
         const expression = statEntry.querySelector('input[placeholder="Math Expression"]')?.value || "";
         const statEnabled = statEntry.querySelector(".stat-enabled")?.checked ?? true;
+
+        if (sectionName == "[passive falconer] Outlanders' Tenacity") {
+            console.log(statName);
+        }
   
         const statKey = statNameToIndex[statName];
+        var statValue = isNaN(Number(expression)) ? expression : Number(expression);
   
         if (statKey) {
           const statID = statKey;
@@ -52,7 +61,13 @@ function updateSaveString() {
     });
   
     const jsonStr = JSON.stringify(allSections);
-    savedBuildCode = LZString.compressToEncodedURIComponent(jsonStr);
+    savedBuildCode = LZString.compressToBase64(jsonStr);
+    savedBuildCode = compressBuild(jsonStr);
+
+    console.log(jsonStr);
+    var a = compressBuild(jsonStr);
+    console.log(a);
+    console.log(decompressBuild(a));
   }
   
 
@@ -69,7 +84,7 @@ document.getElementById("loadInput").addEventListener("input", function() {
 
     // Decompress Base64 and parse JSON to check the build name
     try {
-        const jsonStr = LZString.decompressFromEncodedURIComponent(inputStr);
+        const jsonStr = decompressBuild(inputStr);
         const parsedData = JSON.parse(jsonStr);
 
         if (!Array.isArray(parsedData) || parsedData.length === 0) {
@@ -98,7 +113,7 @@ document.getElementById("loadInput").addEventListener("input", function() {
 
 window.loadFromBase64 = function(inputStr) {
     try {
-      const jsonStr = LZString.decompressFromEncodedURIComponent(inputStr);
+      const jsonStr = decompressBuild(inputStr);
       if (!jsonStr) return;
   
       const parsedData = JSON.parse(jsonStr);

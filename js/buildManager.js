@@ -147,7 +147,7 @@ function saveCurrentBuildLocally() {
     const params = new URLSearchParams(window.location.search);
     const savedBuildName = params.get("build");
     if (currentBuildName != savedBuildName)  {
-        if (localStorage.getItem(currentBuildName)) {
+        if (localStorage.getItem(getBuildKey(currentBuildName))) {
             if(!confirm(`A build named "${currentBuildName}" already exists! Overwrite it?`))
                 return;
         }
@@ -280,7 +280,7 @@ function copyBuildCodeToClipboard() {
     }
 
     // Generate base64 code (modify this if your function is different)
-    updateSaveString();
+    saveCurrentBuildLocally();
     const buildCode = savedBuildCode; // Ensure `updateSaveString()` sets this
 
     if (!buildCode) {
