@@ -1532,15 +1532,21 @@ const avgHitsLookup = {
   
   
   function applySectionSort() {
-    const selected = document.getElementById("sort-select").value;
+    const sortSelect = document.getElementById("sort-select");
+  const selected = sortSelect.value;
+  const reverseLabel = document.getElementById("sort-reverse-label");
   
-    // Reset section order if nothing selected
-    if (!selected) {
-      document.querySelectorAll(".section-wrapper").forEach(wrapper => {
-        wrapper.style.order = 0;
-      });
-      return;
-    }
+  // If no sort selected, hide reverse checkbox, reset orders
+  if (!selected) {
+    reverseLabel.style.display = "none"; // Hide checkbox
+    document.querySelectorAll(".section-wrapper").forEach(wrapper => {
+      wrapper.style.order = 0;
+    });
+    return;
+  }
+
+  // Otherwise, show the reverse checkbox
+  reverseLabel.style.display = "inline-block";
   
     const sectionContribs = [];
   
@@ -1561,6 +1567,10 @@ const avgHitsLookup = {
   
     // Sort descending by value
     sectionContribs.sort((a, b) => a.value - b.value);
+
+    if (document.getElementById("sort-reverse-cb").checked) {
+        sectionContribs.reverse(); // or: .sort((a,b) => a.value - b.value)
+      }
   
     sectionContribs.forEach((entry, index) => {
       entry.wrapper.style.order = index + 1;

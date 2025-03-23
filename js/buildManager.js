@@ -82,6 +82,10 @@ document.addEventListener("DOMContentLoaded", () => {
           applySectionSort(this.value); // Apply selected sort
         }
       });
+
+      document.getElementById("sort-reverse-cb").addEventListener("change", () => {
+        applySectionSort();
+      });
 });
 
 function updateBuildNameInURL() {
