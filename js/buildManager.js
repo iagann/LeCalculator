@@ -146,12 +146,6 @@ function saveCurrentBuildLocally() {
 
     const params = new URLSearchParams(window.location.search);
     const savedBuildName = params.get("build");
-    if (currentBuildName != savedBuildName)  {
-        if (localStorage.getItem(getBuildKey(currentBuildName))) {
-            if(!confirm(`A build named "${currentBuildName}" already exists! Overwrite it?`))
-                return;
-        }
-    }
 
     // 1) Generate the base64 code from the DOM
     //    Make sure your "updateSaveString()" sets a global or returns the code

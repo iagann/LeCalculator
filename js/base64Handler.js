@@ -40,10 +40,6 @@ function updateSaveString() {
         const statName = statEntry.querySelector('input[placeholder="Choose Stat..."]')?.value || "";
         const expression = statEntry.querySelector('input[placeholder="Math Expression"]')?.value || "";
         const statEnabled = statEntry.querySelector(".stat-enabled")?.checked ?? true;
-
-        if (sectionName == "[passive falconer] Outlanders' Tenacity") {
-            console.log(statName);
-        }
   
         const statKey = statNameToIndex[statName];
         var statValue = isNaN(Number(expression)) ? expression : Number(expression);
@@ -62,11 +58,6 @@ function updateSaveString() {
   
     const jsonStr = JSON.stringify(allSections);
     savedBuildCode = compressBuild(jsonStr);
-
-    console.log(jsonStr);
-    var a = compressBuild(jsonStr);
-    console.log(a);
-    console.log(decompressBuild(a));
   }
   
 
