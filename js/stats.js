@@ -133,3 +133,7 @@ function getStatName(key) {
 function getAllStatNames() {
     return Object.values(stats).map(getStatName);
 }
+
+const statNameToIndex = Object.fromEntries(
+    Object.entries(stats).map(([key, value]) => [getStatName(value), value])
+  );

@@ -25,19 +25,26 @@ function updateSaveString() {
     document.querySelectorAll(".section").forEach(section => {
       const sectionName = section.querySelector('input[placeholder="Section Name"]')?.value || "";
       const sectionEnabled = section.querySelector(".section-enabled")?.checked ?? true;
-  
-      const sectionArray = [sectionName, sectionEnabled];
+        
+      let sectionArray;
+      if (sectionEnabled)
+        sectionArray = [sectionName];
+      else
+        sectionArray = [sectionName, sectionEnabled];
   
       section.querySelectorAll(".stat-entry").forEach(statEntry => {
         const statName = statEntry.querySelector('input[placeholder="Choose Stat..."]')?.value || "";
         const expression = statEntry.querySelector('input[placeholder="Math Expression"]')?.value || "";
         const statEnabled = statEntry.querySelector(".stat-enabled")?.checked ?? true;
   
-        const statKey = Object.keys(stats).find(key => getStatName(stats[key]) === statName);
+        const statKey = statNameToIndex[statName];
   
         if (statKey) {
-          const statID = stats[statKey];
-          sectionArray.push([statID, expression, statEnabled]);
+          const statID = statKey;
+          if (statEnabled)
+            sectionArray.push([statID, expression]);
+          else
+            sectionArray.push([statID, expression, statEnabled]);
         }
       });
   
@@ -45,7 +52,7 @@ function updateSaveString() {
     });
   
     const jsonStr = JSON.stringify(allSections);
-    savedBuildCode = LZString.compressToBase64(jsonStr);
+    savedBuildCode = LZString.compressToEncodedURIComponent(jsonStr);
   }
   
 
@@ -62,7 +69,7 @@ document.getElementById("loadInput").addEventListener("input", function() {
 
     // Decompress Base64 and parse JSON to check the build name
     try {
-        const jsonStr = LZString.decompressFromBase64(inputStr);
+        const jsonStr = LZString.decompressFromEncodedURIComponent(inputStr);
         const parsedData = JSON.parse(jsonStr);
 
         if (!Array.isArray(parsedData) || parsedData.length === 0) {
@@ -91,7 +98,7 @@ document.getElementById("loadInput").addEventListener("input", function() {
 
 window.loadFromBase64 = function(inputStr) {
     try {
-      const jsonStr = LZString.decompressFromBase64(inputStr);
+      const jsonStr = LZString.decompressFromEncodedURIComponent(inputStr);
       if (!jsonStr) return;
   
       const parsedData = JSON.parse(jsonStr);
