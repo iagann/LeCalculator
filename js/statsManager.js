@@ -9,6 +9,16 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
   dragHandle.classList.add("drag-handle");
   dragHandle.innerHTML = "☰"; // Drag icon
 
+  const enabledCheckbox = document.createElement("input");
+  enabledCheckbox.type = "checkbox";
+  enabledCheckbox.classList.add("stat-enabled");
+  enabledCheckbox.checked = true;
+  enabledCheckbox.title = "Enable/Disable this stat";
+  enabledCheckbox.onclick = () => {
+    updateSummary();
+    saveCurrentBuildLocally();
+  };
+
   // Stat Selector (Text Input)
   const statSelect = document.createElement("input");
   statSelect.type = "text";
@@ -72,6 +82,7 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
 
   // Append Elements
   statDiv.appendChild(dragHandle);
+  statDiv.appendChild(enabledCheckbox);
   statDiv.appendChild(statSelect);
   statDiv.appendChild(datalist);
   statDiv.appendChild(mathInput);
@@ -126,8 +137,8 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
   
   function validateStatEntries() {
     document.querySelectorAll(".stat-entry").forEach(statEntry => {
-        const statInput = statEntry.querySelector("input[type='text']:first-of-type"); // Stat name
-        const expressionInput = statEntry.querySelector("input[type='text']:last-of-type"); // Math expression
+        const statInput = statEntry.querySelector("input[type='text']"); // Stat name
+        const expressionInput = statEntry.querySelector("input[placeholder='Math Expression']");
     
         // Check if the stat name is valid
         const statKey = Object.keys(stats).find(key => getStatName(stats[key]) === statInput.value);

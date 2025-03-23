@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Update URL while typing
     buildNameInput.addEventListener("input", () => {
-        updateBuildNameInURL();
+        //updateBuildNameInURL();
     });
 
     // Save when user presses Enter
@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (event.key === "Enter") {
             event.preventDefault(); // Prevents form submission if inside a form
             saveCurrentBuildLocally();
+            updateBuildNameInURL();
             updateSectionSearchOptions();
             buildNameInput.blur(); // Remove focus after saving
         }
@@ -39,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Save when focus is lost
     buildNameInput.addEventListener("blur", () => {
         saveCurrentBuildLocally();
+        updateBuildNameInURL();
         updateSectionSearchOptions();
     });
 
@@ -49,11 +51,37 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      const searchInput = document.getElementById("section-search");
-      if (searchInput) {
-        searchInput.value = "";
-        filterSectionsByName(); // Reapply filtering to show everything
-      }
+    const searchInput = document.getElementById("section-search");
+    if (searchInput) {
+    searchInput.value = "";
+    filterSectionsByName(); // Reapply filtering to show everything
+    }
+
+    document.addEventListener("change", e => {
+        if (e.target.matches(".section-enabled")) {
+            const section = e.target.closest(".section");
+            section.classList.toggle("dimmed", !e.target.checked);
+        }
+    });
+
+    document.addEventListener("change", e => {
+        if (e.target.matches(".stat-enabled")) {
+          const statEntry = e.target.closest(".stat-entry");
+          statEntry.classList.toggle("dimmed", !e.target.checked);
+        }
+      });
+
+    document.getElementById("sort-select").addEventListener("change", function () {
+        const defaultOption = this.options[0];
+      
+        if (this.value === "") {
+          defaultOption.textContent = "Sort by Contribution...";
+          applySectionSort(null); // Reset sort
+        } else {
+          defaultOption.textContent = "Disable Sorting";
+          applySectionSort(this.value); // Apply selected sort
+        }
+      });
 });
 
 function updateBuildNameInURL() {
@@ -99,6 +127,10 @@ function handleBuildNameChange() {
     currentBuildName = newName;
 }
 
+function getBuildKey(buildName) {
+    return `build:${buildName}`;
+  }
+
 // 3) Save current build to localStorage using "currentBuildName" as the key
 function saveCurrentBuildLocally() {
     currentBuildName = document.getElementById("buildNameInput").value;
@@ -107,13 +139,23 @@ function saveCurrentBuildLocally() {
         alert("Please enter a build name first.");
         return;
     }
+
+    const params = new URLSearchParams(window.location.search);
+    const savedBuildName = params.get("build");
+    if (currentBuildName != savedBuildName)  {
+        if (localStorage.getItem(currentBuildName)) {
+            if(!confirm(`A build named "${currentBuildName}" already exists! Overwrite it?`))
+                return;
+        }
+    }
+
     // 1) Generate the base64 code from the DOM
     //    Make sure your "updateSaveString()" sets a global or returns the code
     //    For example:
     const base64Code = getCurrentBuildBase64(); // We'll define a helper below
 
     // 2) Store in localStorage
-    window.localStorage.setItem(currentBuildName, base64Code);
+    window.localStorage.setItem(getBuildKey(currentBuildName), base64Code);
 
     //alert(`Saved "${currentBuildName}" successfully!`);
     refreshBuildList();
@@ -130,7 +172,7 @@ function loadBuildLocally() {
 
 // 5) Actually load from localStorage by a specific name
 function loadBuildByName(name) {
-    const code = window.localStorage.getItem(name);
+    const code = window.localStorage.getItem(getBuildKey(name));
     if (!code) {
         alert(`No saved build found for "${name}"!`);
         return;
@@ -159,10 +201,10 @@ function loadBuildByName(name) {
 function renameLocalBuild(oldName, newName) {
     if (!oldName || !newName) return;
 
-    const oldData = window.localStorage.getItem(oldName);
+    const oldData = window.localStorage.getItem(getBuildKey(oldName));
     if (oldData) {
-        window.localStorage.setItem(newName, oldData);
-        window.localStorage.removeItem(oldName);
+        window.localStorage.setItem(getBuildKey(newName), oldData);
+        window.localStorage.removeItem(getBuildKey(oldName));
     }
     refreshBuildList();
 }
@@ -172,38 +214,37 @@ function refreshBuildList() {
     const buildList = document.getElementById("build-list");
     buildList.innerHTML = "";
 
-    const currentBuildName = new URLSearchParams(window.location.search).get("build"); // Get active build
+    const currentBuildName = new URLSearchParams(window.location.search).get("build");
 
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
+        if (!key.startsWith("build:")) continue; // Skip non-build items
+
+        const buildName = key.slice("build:".length); // Remove prefix for display
 
         // Create list item
         const li = document.createElement("li");
-        li.setAttribute("data-build-name", key); // Ensure it has a dataset attribute
-        li.onclick = () => loadBuildByName(key);
+        li.setAttribute("data-build-name", buildName);
+        li.onclick = () => loadBuildByName(buildName);
 
-        // Highlight the active build
-        if (key === currentBuildName) {
+        if (buildName === currentBuildName) {
             li.classList.add("active-build");
         }
 
-        // Build Name (Left-aligned)
         const buildNameSpan = document.createElement("span");
-        buildNameSpan.textContent = key;
+        buildNameSpan.textContent = buildName;
         buildNameSpan.classList.add("build-name");
 
-        // Delete Button (Right-aligned)
         const deleteBtn = document.createElement("button");
         deleteBtn.classList.add("btn-delete");
-        deleteBtn.innerHTML = "&#10006;"; // Unicode for 'X'
+        deleteBtn.innerHTML = "&#10006;";
         deleteBtn.onclick = (event) => {
-            event.stopPropagation(); // Prevent clicking from loading the build
-            if (confirm(`Delete build "${key}"?`)) {
-                deleteBuild(key);
+            event.stopPropagation();
+            if (confirm(`Delete build "${buildName}"?`)) {
+                deleteBuild(buildName);
             }
         };
 
-        // Append elements
         li.appendChild(buildNameSpan);
         li.appendChild(deleteBtn);
         buildList.appendChild(li);
@@ -213,7 +254,7 @@ function refreshBuildList() {
 
 // Delete function
 function deleteBuild(buildName) {
-    localStorage.removeItem(buildName);
+    localStorage.removeItem(getBuildKey(buildName));
     refreshBuildList();
     createNewBuild();
 }

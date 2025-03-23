@@ -1,31 +1,211 @@
 // summary.js
 
+let highlightSummaryNames = new Set();
 function updateSummary() {
     const allStats = [];
-
+  
     document.querySelectorAll(".section").forEach(section => {
-        const sectionName = section.querySelector(".section-header input[type='text']:first-of-type").value;
-
-        section.querySelectorAll(".stat-entry").forEach(statEntry => {
-            const statName = statEntry.querySelector("input[type='text']").value;
-            const statKey = Object.keys(stats).find(key => getStatName(stats[key]) === statName);
-
-            const expressionInput = statEntry.querySelector("input[type='text']:last-of-type");
-            const expression = expressionInput ? expressionInput.value : "";
-
-            if (statKey) {
-                const statID = stats[statKey];
-                allStats.push([statID, expression, sectionName]);  // Now includes section name
-            }
-        });
+      const sectionEnabled = section.querySelector(".section-enabled")?.checked;
+      if (!sectionEnabled) return;
+  
+      const sectionName = section.querySelector(".section-header input[placeholder='Section Name']").value;
+  
+      section.querySelectorAll(".stat-entry").forEach(statEntry => {
+        const statEnabled = statEntry.querySelector(".stat-enabled")?.checked;
+        if (!statEnabled) return;
+  
+        const statName = statEntry.querySelector("input[placeholder='Choose Stat...']")?.value;
+        const statKey = Object.keys(stats).find(key => getStatName(stats[key]) === statName);
+  
+        const expression = statEntry.querySelector("input[placeholder='Math Expression']")?.value || "";
+  
+        if (statKey) {
+          const statID = stats[statKey];
+          allStats.push([statID, expression, sectionName]);
+        }
+      });
+    });
+  
+    const baseSummary = processStats(allStats);
+    renderSummary(baseSummary);
+  
+    const baseMap = {};
+    highlightSummaryNames.forEach(name => {
+      const found = baseSummary.find(s => s.name === name);
+      baseMap[name] = found ? found.total : 0;
     });
 
-    // Process into summary format
-    const statSummary = processStats(allStats);
+    function collectSectionCache() {
+        const sectionCache = [];
+      
+        document.querySelectorAll(".section").forEach((sec) => {
+          const sectionEnabled = sec.querySelector(".section-enabled")?.checked;
+          const sectionName = sec.querySelector(".section-header input[placeholder='Section Name']")?.value || "";
+      
+          const statEntries = Array.from(sec.querySelectorAll(".stat-entry")).map(stat => {
+            const statEnabled = stat.querySelector(".stat-enabled")?.checked;
+            const statName = stat.querySelector("input[placeholder='Choose Stat...']")?.value;
+            const statKey = Object.keys(stats).find(k => getStatName(stats[k]) === statName);
+            const statID = statKey ? stats[statKey] : null;
+            const expr = stat.querySelector("input[placeholder='Math Expression']")?.value || "";
+      
+            return { element: stat, enabled: statEnabled, statID, expr };
+          });
+      
+          sectionCache.push({ element: sec, enabled: sectionEnabled, name: sectionName, statEntries });
+        });
+      
+        return sectionCache;
+      }
+      
+      function computeDelta(element, sectionCache) {
+        const toggledStats = [];
+      
+        // Step A: Build final “effective” enabled states for sections & stats
+        // If the user toggled an entire section, invert that section's state.
+        // If the user toggled one stat, invert that single stat’s state.
+        // Everything else remains as it was.
+        const newSectionState = new Map();
+        const newStatState = new Map();
+      
+        // 1) Determine new states
+        sectionCache.forEach(sec => {
+          let finalSecEnabled = sec.enabled;
+          if (sec.element === element) {
+            // Toggling entire section
+            finalSecEnabled = !sec.enabled;
+          }
+          newSectionState.set(sec.element, finalSecEnabled);
+      
+          sec.statEntries.forEach(stat => {
+            let finalStatEnabled = stat.enabled;
+            if (stat.element === element) {
+              // Toggling this single stat
+              finalStatEnabled = true;
+            }
+            newStatState.set(stat.element, finalStatEnabled);
+          });
+        });
 
-    // Render into the right panel
-    renderSummary(statSummary);
-}
+        // Step B: Build toggledStats with clear rules
+        sectionCache.forEach(sec => {
+          const secIsEnabled = newSectionState.get(sec.element);
+      
+          sec.statEntries.forEach(stat => {
+            const statIsEnabled = newStatState.get(stat.element);
+      
+            // If the entire section is disabled *and* we are *not* toggling this stat → skip
+            if (!secIsEnabled && stat.element !== element) {
+              return;
+            }
+      
+            // If the stat is effectively disabled → skip
+            if (!statIsEnabled) {
+              return;
+            }
+
+            // Otherwise, if there’s a valid statID, use it
+            if (stat.statID) {
+              toggledStats.push([stat.statID, stat.expr, sec.name]);
+            }
+          });
+        });
+      
+        // Step C: Recompute summary with toggled stats
+        const newSummary = processStats(toggledStats);
+        const deltas = {};
+      
+        highlightSummaryNames.forEach(name => {
+          const oldVal = baseMap[name] || 0;
+          const newVal = newSummary.find(s => s.name === name)?.total || 0;
+
+          let perc = 0;
+          if (Math.abs(oldVal) < 1e-12) {
+            perc = (newVal === 0 ? 0 : 100);
+          } else {
+            perc = ((newVal - oldVal) / oldVal) * 100;
+          }
+          deltas[name] = perc;
+        });
+      
+        return deltas;
+      }
+      
+  
+    function formatPercent(value, wasEnabled) {
+        const pct = value.toFixed(1) + "%";
+      
+        if (Math.abs(value) < 0.05) {
+          return `<span style="color:gray">+0.0%</span>`;
+        }
+      
+        const isPositive = value >= 0;
+      
+        if (wasEnabled) {
+          // The stat/section is currently ENABLED.
+          // If removing it results in a negative delta → it contributes positively → green
+          return isPositive
+            ? `<span style="color:green">+${pct}</span>`
+            : `<span style="color:red">${pct}</span>`;
+        } else {
+          // The stat/section is currently DISABLED.
+          // If adding it results in a positive delta → it would contribute → green
+          return isPositive
+            ? `<span style="color:green">+${pct}</span>`
+            : `<span style="color:red">${pct}</span>`;
+        }
+      }
+      
+  
+    document.querySelectorAll(".contribution-info").forEach(el => el.remove());
+  
+    function addContribInfo(parentElem, deltas, wasEnabled) {
+        const container = document.createElement("span");
+        container.classList.add("contribution-info");
+        container.style.borderLeft = "1px solid #888";
+        container.style.marginLeft = "8px";
+        container.style.paddingLeft = "8px";
+        container.style.display = "inline-block";
+        container.style.verticalAlign = "middle";
+    
+        const itemWidth = "120px";
+    
+        highlightSummaryNames.forEach(name => {
+            const val = deltas[name];
+            const span = document.createElement("span");
+            span.style.display = "inline-block";
+            span.style.width = itemWidth;
+            span.style.marginRight = "5px";
+            span.style.verticalAlign = "top";
+            span.innerHTML = `<div style="text-align:right">${name}:<br>${formatPercent(val, wasEnabled)}</div>`;
+            container.appendChild(span);
+        });
+    
+        parentElem.insertAdjacentElement("afterend", container);
+    }
+    
+    const sectionCache = collectSectionCache();
+    document.querySelectorAll(".section").forEach(sec => {
+        const secCopy = sec;
+        const deltas = computeDelta(secCopy, sectionCache);
+        const deleteBtn = secCopy.querySelector(".btn-delete");
+        if (deleteBtn) {
+          addContribInfo(deleteBtn, deltas, secCopy.querySelector(".section-enabled")?.checked);
+        }
+      
+        sec.querySelectorAll(".stat-entry").forEach(stat => {
+          const statDeltas = computeDelta(stat, sectionCache);
+          const statDeleteBtn = stat.querySelector(".btn-delete");
+          if (statDeleteBtn) {
+            addContribInfo(statDeleteBtn, statDeltas, stat.querySelector(".stat-enabled")?.checked);
+          }
+        });
+      });
+      
+    updateSortDropdown();
+    applySectionSort();
+  }
+  
 
 function statIsMore(statId) {
     return statId == stats.MORE_DAMAGE || statId == stats.MORE_ARMOUR || statId == stats.MORE_HIT_SPEED || statId == stats.LESS_DAMAGE_TAKEN;
@@ -66,7 +246,7 @@ function processExpressions() {
 let allStats = {};
 let dexterity = 0;
 let recurveChance = 0;
-function processStats(statsArray) {
+function processStats(statsArray, firstRun = true) {
     allStats = {};
 
     statsArray.forEach(([statId, expression, sectionName]) => {
@@ -110,6 +290,9 @@ function processStats(statsArray) {
         recurveChance = 100 + (allStats[stats.ADDITIONAL_RECURVE_CHANCE]?.total || -100);
 
         processExpressions();
+
+        if (firstRun) 
+            return processStats(statsArray, false);
 
         summary.push({ 
             name: "Strength", 
@@ -728,19 +911,29 @@ function formatNumber(value) {
     return (rounded % 1 === 0) ? rounded.toFixed(0) : rounded.toFixed(2);
 }
 
+const expressionCache = new Map();
+
 function evaluateExpression(expr) {
     if (!expr.trim()) return 0;
 
     // Convert commas to dots for float compatibility
-    let cleanedExpr = expr.replace(/,/g, ".");
+    const cleanedExpr = expr.replace(/,/g, ".");
+
+    // Check cache
+    if (expressionCache.has(cleanedExpr)) {
+        return expressionCache.get(cleanedExpr);
+    }
 
     try {
-        return Function(`"use strict"; return (${cleanedExpr});`)();
+        const result = Function(`"use strict"; return (${cleanedExpr});`)();
+        expressionCache.set(cleanedExpr, result);
+        return result;
     } catch (error) {
-        //console.error("Invalid expression:", expr);
+        expressionCache.set(cleanedExpr, NaN); // Avoid retrying bad expressions
         return NaN;
     }
 }
+
 
 function renderSummary(summaryArray) {
     const summaryContainer = document.getElementById("summary-content");
@@ -849,6 +1042,36 @@ function renderSummary(summaryArray) {
         collapseButton.textContent = "▼";
         collapseButton.onclick = () => toggleTooltip(index);
 
+        // Create and restore checkbox
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.classList.add("highlight-toggle");
+        checkbox.dataset.summaryName = summaryStat.name;
+        checkbox.style.marginRight = "5px";
+
+        // Restore saved state from localStorage
+        checkbox.checked = localStorage.getItem(`highlight:${summaryStat.name}`) === "true";
+
+        // Save state on toggle
+        checkbox.addEventListener("change", () => {
+            localStorage.setItem(`highlight:${summaryStat.name}`, checkbox.checked);
+        
+            // Clear the old highlight list
+            highlightSummaryNames = new Set();
+        
+            // Rebuild from localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith("highlight:") && localStorage.getItem(key) === "true") {
+                    const name = key.slice("highlight:".length);
+                    highlightSummaryNames.add(name);
+                }
+            }
+        
+            updateSummary();
+        });
+        
+
         // Stat text
         const statText = document.createElement("span");
         statText.classList.add("summary-text");
@@ -869,6 +1092,7 @@ function renderSummary(summaryArray) {
             tooltip.style.padding = "10px 12px";
         }
 
+        statDiv.appendChild(checkbox);
         statDiv.appendChild(collapseButton);
         statDiv.appendChild(statText);
 
@@ -1264,5 +1488,83 @@ const avgHitsLookup = {
       return avgHitsLookup[key];
     }
     return NaN;
+  }
+  
+  function updateSortDropdown() {
+    const select = document.getElementById("sort-select");
+  
+    // Cache current non-default options
+    const currentOptions = Array.from(select.options)
+      .slice(1)
+      .map(opt => opt.value);
+  
+    const newOptions = [...highlightSummaryNames];
+    const hasChanged = currentOptions.length !== newOptions.length ||
+                       currentOptions.some((val, i) => val !== newOptions[i]);
+  
+    if (!hasChanged) {
+      select.style.display = highlightSummaryNames.size > 0 ? "inline-block" : "none";
+      return;
+    }
+  
+    // Save current selection before rebuilding
+    const currentValue = select.value;
+  
+    // Rebuild options
+    select.innerHTML = "";
+  
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = currentValue === "" ? "Sort by Contribution..." : "Disable Sorting";
+    select.appendChild(defaultOption);
+  
+    highlightSummaryNames.forEach(name => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+  
+    select.value = currentValue;
+    select.style.display = highlightSummaryNames.size > 0 ? "inline-block" : "none";
+  }
+  
+  
+  
+  function applySectionSort() {
+    const selected = document.getElementById("sort-select").value;
+  
+    // Reset section order if nothing selected
+    if (!selected) {
+      document.querySelectorAll(".section-wrapper").forEach(wrapper => {
+        wrapper.style.order = 0;
+      });
+      return;
+    }
+  
+    const sectionContribs = [];
+  
+    document.querySelectorAll(".section").forEach(section => {
+      const contribSpans = Array.from(section.querySelectorAll(".contribution-info span"));
+      const targetSpan = contribSpans.find(span => span.textContent.startsWith(selected + ":"));
+  
+      if (!targetSpan) return;
+  
+      const match = targetSpan.textContent.match(/([+-]?[0-9.]+)%/);
+      const value = match ? parseFloat(match[1]) : 0;
+  
+      sectionContribs.push({
+        wrapper: section.closest(".section-wrapper"),
+        value: value
+      });
+    });
+  
+    // Sort descending by value
+    sectionContribs.sort((a, b) => a.value - b.value);
+  
+    sectionContribs.forEach((entry, index) => {
+      entry.wrapper.style.order = index + 1;
+      //console.log(entry.wrapper.children[0], entry.wrapper.style.order);
+    });
   }
   

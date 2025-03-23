@@ -14,41 +14,40 @@ function saveToClipboard() {
 // base64Handler.js
 let savedBuildCode = "";
 
+/*
+NoIgEgpghgTgLgZwhA1hGACAkgcwHYCWcEIANKMAEZRIC6ZAjKSAMxkCszDjALFwAz8MAKgwBOMj37MATP0kzZ80jIBszKSFrkQwBCgIAbQ7QyRYiZGhhkZADmar2GANQYAJhAAeGAPQYZMhZFEBgIAGMAVxgANwgRDAZ2WwB2ASF/QNIWPhAGQVSudnltCn0jEwwAZQALaII0PAQghxA7BJYSnT0DY1NaggAzOEYWZmKtbvK+jABBcIJ3DAAxQxoUUeZO204QOUmy3sqABUi8cLhokmyQhiyZNJAACiSEngBKBKeWVwwWT9E3FKuiIEAAtqYAMJQNZgogAT0Y6hAyVITDaOy2ymRdyC6LsygeRS6FFBEIwADkCDUjARmqQcVkGGMMSpHilVLxmCllCwWfsVLkkkFdvtgcAyaZIMYMAAlaDhGq2MRcAB0/GcojCUVi1xY6PyqJYu3Y90eDAYPEKKKyxoEmL2JJBxHJAHV4TAwTTPBhIQB7KAjNE41R2IKPCbZdGRmSiq1orhMoW44NbMTKBjI1RsUg8flA7qS6pQPA4SIEPDxMABmDua0pZyZRhcTlsrHW7bZXKxrkgHjJcVF+VLWUVnAYAAyEGGm1ZBtbJts3d5jwFLBVeSdEpdpmHcrH+5wNSDzOYYYTeQX4yXSnDt+yG/yB2d4NMxxgUAgcD9MAIJYwABCECGCeyKxry6IyGu6KqNiia9qGZDIgOhY7hgACyn41IYFYAOQIGYkSUL+9KZtyqJSEUzaXr2DYIeeyF4o4yi5K2IScoOaHLAQ6DwhgAAiH44H6eDVDUfoQKRyLprOnb4rOAqxlsRrosakgsnYKGkmhADSwFwDU/4AWsCBwAesw4BAeBBvqGjxkSeytuujgdLRqIOTw7RNrmQqKbsDBhoO7h+pUAAqNQwCJ8R+oMcxgpQRAECJQQhJo2QspoQUhaYE6wJZYlQMFADu2DBYYiRIcwEhRu2WWVLlMD5bUhV+iVWBlQElUgNVtmsFuizZZOeXxM1xWlSFfxdT1qn9WVOXDQVY3tRN8bSUxfXPhKc3VN+kRwENwmEP+y3ldwDLXmiuTbHV/S7ftuWHX+oknZ150or213dJQhiSQgY6mMZUDhCg1RnNa+Rbt9v3/XKEAEPgGAxQJQkifSMjLptUMIH9pb9AADgQv6IIjsXcWEkjSBt4pYzjOCmOF8QWdFsWuhWxA2LmBoTNTP3YzDACieDuAeBkjd+nqSLsPCBOKeM0H9cQYJFZYQLd0DuHxYAlnWF4MAk56WuM+ubXLfOK8rkSqxgADi5Y/UEOJCICtghJqFWy/LBDm36KumPzMQ0EleCSDiQQbjwCRabopsK/EFtW/xfruPl2sYMcsAwIi2RZpHkiPD8ohR8AMde/EYKwCgCDl3gpiCVAFbmTAkVFfSdqsMbHtm2XFdVyWpjLH6UQEWT1wGh33Ql4r5cwJX1dQiJ4RWXAH5mclNyyOPFCT93M+9zXaeRYYImWUs/HgnSeroikCRPp3scYNPs99xhEDC3AgZBw7Ag3ybntTz3c9YaDB+hcT+2QIy5zRPySBzlNy/y7g/ABz9ZhN1ajtH8YIRTf38GwO+pdEG70Af6OIv5SwrEJiQPBitvqFVfiWReMAoRHygCDJGo1WqkS4MbXMq5N7Rz/vEGhnh3D0PQG+aICBywng0vA++Qi6HnDEWJSKkQlhI34pEfQvZ8h8OLgIjA8iRGKMYXMPGfpTJAyzp5JQW5t4YEGDCcIUUTGs0MJ4GAlZsbVCcXtbRTsMDnhYMhXRdiHGGCcZWExsooB43FvhDArNSyt1uLnKh8QwkRKUQAeT2msIW6AEC4QwKFKyQMERfxANfQuCgtipInvojJzjTAWSMFWM4J4uGiBSFoWgQA
+*/
+
 // 1) Update the build code from the DOM structure
 function updateSaveString() {
-    // Collect all sections in an array-of-arrays
     const allSections = [document.getElementById("buildNameInput").value];
-
+  
     document.querySelectorAll(".section").forEach(section => {
-        // Start this section array with the section name
-        const sectionName = section.querySelector("input[type='text']").value;
-        const sectionArray = [ sectionName ];
-
-        // For each stat-entry, push [statID, expression] pairs
-        section.querySelectorAll(".stat-entry").forEach(statEntry => {
-            const statName = statEntry.querySelector("input[type='text']:first-of-type").value;
-            // Look up the numeric stat ID from the stats enum
-            const statKey = Object.keys(stats).find(key => getStatName(stats[key]) === statName);
-
-            const expressionInput = statEntry.querySelector("input[type='text']:last-of-type");
-            const expression = expressionInput ? expressionInput.value : "";
-
-            // Only push if we found a valid stat ID
-            if (statKey) {
-                // e.g. stats.FLAT_DAMAGE = 1
-                const statID = stats[statKey];
-                sectionArray.push(statID, expression);
-            }
-        });
-
-        allSections.push(sectionArray);
+      const sectionName = section.querySelector('input[placeholder="Section Name"]')?.value || "";
+      const sectionEnabled = section.querySelector(".section-enabled")?.checked ?? true;
+  
+      const sectionArray = [sectionName, sectionEnabled];
+  
+      section.querySelectorAll(".stat-entry").forEach(statEntry => {
+        const statName = statEntry.querySelector('input[placeholder="Choose Stat..."]')?.value || "";
+        const expression = statEntry.querySelector('input[placeholder="Math Expression"]')?.value || "";
+        const statEnabled = statEntry.querySelector(".stat-enabled")?.checked ?? true;
+  
+        const statKey = Object.keys(stats).find(key => getStatName(stats[key]) === statName);
+  
+        if (statKey) {
+          const statID = stats[statKey];
+          sectionArray.push([statID, expression, statEnabled]);
+        }
+      });
+  
+      allSections.push(sectionArray);
     });
-
-    // Convert to JSON, then compress
+  
     const jsonStr = JSON.stringify(allSections);
-    //console.log("save JSON", allSections);
     savedBuildCode = LZString.compressToBase64(jsonStr);
-}
+  }
+  
 
 function openLoadDialog() {
   document.getElementById("loadDialog").style.display = "block";
@@ -92,64 +91,81 @@ document.getElementById("loadInput").addEventListener("input", function() {
 
 window.loadFromBase64 = function(inputStr) {
     try {
-        const jsonStr = LZString.decompressFromBase64(inputStr);
-        if (!jsonStr) return;
-
-        // allSections is an array of arrays
-        // e.g. [ [ "SectionName", 0, "expr", 1, "expr2" ], [ "AnotherSection", ... ] ]
-        const parsedData = JSON.parse(jsonStr);
-        const loadedBuildName = parsedData[0]; 
-        const allSections = parsedData.slice(1); // Everything except the first element
-        currentBuildName = loadedBuildName;
-        document.getElementById("buildNameInput").value = currentBuildName;
-
-        // Clear out the current sections
-        document.getElementById("sections").innerHTML = "";
-
-        // For each section array => reconstruct the DOM
-        allSections.forEach(sectionArr => {
-            // 1) The first element is the section name
-            const sectionName = sectionArr[0];
-            // 2) Create a new section in the DOM
-            const sectionDiv = addSection(sectionName); 
-            const statList = sectionDiv.querySelector(".stat-list");
-
-            // 3) The rest are in [statID, expression, statID, expression, ...] pairs
-            for (let i = 1; i < sectionArr.length; i += 2) {
-                const statID = sectionArr[i];
-                const expression = sectionArr[i + 1];
-
-                // Convert the numeric ID to a display name
-                const statName = getStatName(statID); 
-                // Add the stat to the DOM
-                addStatEntry(statList, statName, expression, true);
-            }
-        });
-
-        // Re-init dragging for all sections & stats
-        makeSectionsDraggable();
-        updateSummary();
-        updateSummary();
-        validateStatEntries();
-        updateSectionSearchOptions();
-        
-        // Scroll to top smoothly after loading the build
-        setTimeout( () => {
-            document.getElementsByClassName("main-content")[0].scrollTo({ top: 0, behavior: "smooth" });
-        }, 200);
-
+      const jsonStr = LZString.decompressFromBase64(inputStr);
+      if (!jsonStr) return;
+  
+      const parsedData = JSON.parse(jsonStr);
+      const loadedBuildName = parsedData[0]; 
+      const allSections = parsedData.slice(1);
+      currentBuildName = loadedBuildName;
+      document.getElementById("buildNameInput").value = currentBuildName;
+  
+      // Clear out current sections
+      document.getElementById("sections").innerHTML = "";
+  
+      allSections.forEach(sectionArr => {
+        const sectionName = sectionArr[0];
+        const sectionEnabled = sectionArr[1] ?? true;
+  
+        // Create new section
+        const sectionDiv = addSection(sectionName);
+        const statList = sectionDiv.querySelector(".stat-list");
+  
+        // Restore section enabled state
+        const sectionCheckbox = sectionDiv.querySelector(".section-enabled");
+        if (sectionCheckbox) {
+          sectionCheckbox.checked = sectionEnabled;
+          sectionDiv.classList.toggle("dimmed", !sectionEnabled); // if you're using .dimmed for opacity
+        }
+  
+        // Loop through remaining items (triplets: [statID, expression, statEnabled])
+        for (let i = 2; i < sectionArr.length; i++) {
+          const entry = sectionArr[i];
+          const statID = entry[0];
+          const expression = entry[1];
+          const statEnabled = entry[2] ?? true;
+  
+          const statName = getStatName(statID);
+          const statEntry = addStatEntry(statList, statName, expression, true);
+  
+          const statCheckbox = statEntry.querySelector(".stat-enabled");
+          if (statCheckbox) {
+            statCheckbox.checked = statEnabled;
+            statEntry.classList.toggle("dimmed", !statEnabled);
+          }
+        }
+      });
+  
+      makeSectionsDraggable();
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("highlight:") && localStorage.getItem(key) === "true") {
+          const name = key.slice("highlight:".length);
+          highlightSummaryNames.add(name);
+        }
+      }
+      updateSummary();
+      validateStatEntries();
+      updateSectionSearchOptions();
+  
+      // Scroll to top
+      setTimeout(() => {
+        document.getElementsByClassName("main-content")[0].scrollTo({ top: 0, behavior: "smooth" });
+      }, 200);
+  
     } catch (error) {
-        console.error("Failed to parse data:", error);
-        alert("Invalid Build Code! Could not load data.");
+      console.error("Failed to parse data:", error);
+      alert("Invalid Build Code! Could not load data.");
     }
-};
+  };
+  
 
 function closeLoadDialog() {
     document.getElementById("loadDialog").style.display = "none";
 }
 
 function createNewBuild() {
-    const base64Default = "NoIgRghgzgpiA0pKwQRniAzAgrB1aALPgAwkAEAVOQJwKEkYBMJ9TzrAup0A";
+    const base64Default = "NoIgRghgzgpiA0piVgXQQFwE4FcaIEZ4QBmTXGVRAVmIPLyuAIBY6AGdgAgCouBOBpUQt2xAEzshTFuIlT42RonEA2YqOmpUQA==";
 
     // Reset the build name
     const buildNameInput = document.getElementById("buildNameInput");

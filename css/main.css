@@ -55,6 +55,7 @@
     padding: 5px 0;
     transition: background-color 0.2s ease;
     border-top: 1px solid #444;
+    background-color: #282828;
   }
   /* Invalid stat entry - highlights background */
   .invalid {
@@ -122,7 +123,7 @@ datalist option:hover {
   background: #6200ea;
 }
 
-.stat-entry > input[type="text"]:first-of-type {
+.stat-entry > input[type="text"]:nth-of-type(2) {
   text-align: right;
 }
 
@@ -193,4 +194,24 @@ datalist option:hover {
 
 #clear-search:hover {
   background-color: #6200ea;
+}
+
+#sections {
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+/* For disabled stats */
+.stat-entry.dimmed {
+  background-color: #131313;
+  color: #aaa;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* For disabled sections */
+.section.dimmed {
+  background-color: #161616;
+  color: #aaa;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }

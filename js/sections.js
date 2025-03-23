@@ -7,6 +7,16 @@ function addSection(name = "", cloneFrom = null) {
   const headerDiv = document.createElement("div");
   headerDiv.classList.add("section-header");
 
+  const enabledCheckbox = document.createElement("input");
+  enabledCheckbox.type = "checkbox";
+  enabledCheckbox.classList.add("section-enabled");
+  enabledCheckbox.checked = true; // enabled by default
+  enabledCheckbox.title = "Enable/Disable this section";
+  enabledCheckbox.onclick = () => {
+    updateSummary();
+    saveCurrentBuildLocally();
+  };
+
   const titleInput = document.createElement("input");
   titleInput.type = "text";
   titleInput.value = name;
@@ -68,6 +78,7 @@ function addSection(name = "", cloneFrom = null) {
   };
 
   headerDiv.appendChild(dragHandle);
+  headerDiv.appendChild(enabledCheckbox);
   headerDiv.appendChild(collapseBtn);
   headerDiv.appendChild(titleInput);
   headerDiv.appendChild(addStatBtn);
@@ -80,13 +91,14 @@ function addSection(name = "", cloneFrom = null) {
   statList.classList.add("stat-list");
   sectionDiv.appendChild(statList);
 
-
+  const wrapperDiv = document.createElement("div");
+  wrapperDiv.classList.add("section-wrapper");
+  wrapperDiv.appendChild(sectionDiv);
   if (cloneFrom) {
-    //sectionsDiv.appendChild(sectionDiv);
-    sectionsDiv.insertBefore(sectionDiv, cloneFrom.nextSibling)
+    sectionsDiv.insertBefore(wrapperDiv, cloneFrom.parentElement.nextSibling);
   }
   else {
-    sectionsDiv.appendChild(sectionDiv);
+    sectionsDiv.appendChild(wrapperDiv);
   }
 
   makeStatsDraggable(sectionDiv);

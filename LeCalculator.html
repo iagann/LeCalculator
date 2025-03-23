@@ -77,6 +77,11 @@
           <!-- These two are added dynamically via JS when search is active -->
           <button id="expand-visible" onclick="expandVisibleSections()" style="display: none;">Expand Visible</button>
           <button id="collapse-visible" onclick="collapseVisibleSections()" style="display: none;">Collapse Visible</button>
+
+          <select id="sort-select" onchange="applySectionSort()" style="display: none; margin-left: 10px;">
+            <option value="">Sort by Contribution...</option>
+            <!-- JS will populate more -->
+          </select>
         </div>
         
 
