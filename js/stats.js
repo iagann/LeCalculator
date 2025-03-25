@@ -60,6 +60,13 @@ const stats = Object.freeze({
     INCREASED_DAMAGE_PER_MS: statNum++,
     GLANCING_BLOW_CHANCE: statNum++,
     DODGE_CHANCE_TO_GLANCING_BLOW_CHANCE: statNum++,
+
+    BASE_HIT_DAMAGE: statNum++,
+    ADDED_FLAT_DAMAGE: statNum++,
+    INCREASED_CRITICAL_STIKE_CHANCE: statNum++,
+    BASE_CRITICAL_STIKE_CHANCE: statNum++,
+    CRITICAL_STIKE_MULTIPLIER: statNum++,
+    
 });
 
 function getStatName(key) {
@@ -125,7 +132,12 @@ function getStatName(key) {
         case stats.INCREASED_DAMAGE_PER_MS: return "Increased Damage per MS";
         case stats.GLANCING_BLOW_CHANCE: return "Glancing Blow Chance";
         case stats.DODGE_CHANCE_TO_GLANCING_BLOW_CHANCE: return "Dodge Chance to Glancing Blow Chance";
-        
+
+        case stats.BASE_HIT_DAMAGE: return "BASE HIT DAMAGE";
+        case stats.ADDED_FLAT_DAMAGE: return "Added Flat Damage";
+        case stats.INCREASED_CRITICAL_STIKE_CHANCE: return "Increased Critical Strike Chance";
+        case stats.BASE_CRITICAL_STIKE_CHANCE: return "Base Critical Strike Chance";
+        case stats.CRITICAL_STIKE_MULTIPLIER: return "Critical Strike Multiplier";
     }
     return "Unknown";
 }

@@ -399,8 +399,71 @@ function processStats(statsArray, firstRun = true) {
         });
     }
 
-    summary.push({name:"Damage", type:"section"});
     // increased damage
+    let baseFlat = (allStats[stats.BASE_HIT_DAMAGE]?.total || 0);
+    let damageEffectiveness = (allStats[stats.DAMAGE_EFFECTIVENESS]?.total || 0);
+    let totalFlat = 0;
+    let moreFromCrits = 0;
+    if (baseFlat > 0 && damageEffectiveness > 0) {
+        summary.push({name:"Flat Damage", type:"section"});
+        totalFlat = baseFlat + (allStats[stats.ADDED_FLAT_DAMAGE]?.total || 0) * damageEffectiveness / 100;
+        summary.push({ 
+            name: "Total Flat Damage", 
+            total: totalFlat, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.BASE_HIT_DAMAGE]?.sources || []),
+                ...(allStats[stats.DAMAGE_EFFECTIVENESS]?.sources || []),
+                ...(allStats[stats.ADDED_FLAT_DAMAGE]?.sources || []),
+            ]
+        });
+
+        summary.push({name:"Crits", type:"section"});
+        let baseCrit = (allStats[stats.BASE_CRITICAL_STIKE_CHANCE]?.total || 0);
+        let increasedCrit = (allStats[stats.INCREASED_CRITICAL_STIKE_CHANCE]?.total || 0);
+        let critMulti = 200 + (allStats[stats.CRITICAL_STIKE_MULTIPLIER]?.total || 0);
+        let totalCritChance = Math.min(100, baseCrit * (increasedCrit + 100) / 100);
+        moreFromCrits = - totalCritChance + totalCritChance * critMulti / 100;
+        summary.push({ 
+            name: "Total Base Crit Chance", 
+            total: baseCrit, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.BASE_CRITICAL_STIKE_CHANCE]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Total Increased Crit Chance", 
+            total: increasedCrit, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.INCREASED_CRITICAL_STIKE_CHANCE]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Total Increased Crit Multi", 
+            total: critMulti - 200, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.CRITICAL_STIKE_MULTIPLIER]?.sources || []),
+            ]
+        });
+        summary.push({type:"hr"});
+        summary.push({ 
+            name: "Total Crit Chance", 
+            total: totalCritChance, 
+            type: "stat",
+            sources: []
+        });
+        summary.push({ 
+            name: "Total More Damage from Crits", 
+            total: moreFromCrits, 
+            type: "stat",
+            sources: []
+        });
+    }
+
+    summary.push({name:"Damage increases", type:"section"});
     const increasedMS = allStats[stats.INCREASED_MOVEMENT_SPEED]?.total || 0;
     let increasedDamage = (allStats[stats.INCREASED_DAMAGE]?.total || 0)
         + (allStats[stats.INCREASED_DAMAGE_PER_MS]?.total || 0) * increasedMS;
@@ -890,6 +953,23 @@ function processStats(statsArray, firstRun = true) {
                 ...(allStats[stats.AILMENT_DAMAGE]?.sources || []),
             ]
         });
+
+
+        if (baseFlat > 0 && damageEffectiveness > 0) {
+            let dpsHit = hitsPerSecond;
+            dpsHit *= totalFlat;
+            dpsHit *= (moreFromCrits + 100) / 100;
+            dpsHit *= (100 + increasedDamage) / 100;
+            dpsHit *= moreDamage / 100;
+            dpsHit *= (100 + penetration) / 100;
+
+            summary.push({ 
+                name: "Hit DPS", 
+                total: dpsHit, 
+                type: "stat",
+                sources: []
+            });
+        }
     }
 
     summary.push({name:"EHP", type:"section"});
