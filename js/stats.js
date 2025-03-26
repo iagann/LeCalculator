@@ -67,6 +67,8 @@ const stats = Object.freeze({
     BASE_CRITICAL_STIKE_CHANCE: statNum++,
     CRITICAL_STIKE_MULTIPLIER: statNum++,
     
+    WARD_RETENTION: statNum++,
+    WARD_THRESHOLD: statNum++,
 });
 
 function getStatName(key) {
@@ -138,6 +140,9 @@ function getStatName(key) {
         case stats.INCREASED_CRITICAL_STIKE_CHANCE: return "Increased Critical Strike Chance";
         case stats.BASE_CRITICAL_STIKE_CHANCE: return "Base Critical Strike Chance";
         case stats.CRITICAL_STIKE_MULTIPLIER: return "Critical Strike Multiplier";
+
+        case stats.WARD_RETENTION: return "Ward Retention";
+        case stats.WARD_THRESHOLD: return "Ward Decay Threshold";
     }
     return "Unknown";
 }

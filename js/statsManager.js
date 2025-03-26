@@ -153,7 +153,10 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
             }
             else {
               expression = expression.replaceAll("dex",1);
+              expression = expression.replaceAll("int",1);
               expression = expression.replaceAll("recurve",1);
+              expression = expression.replaceAll("hps",1);
+              expression = expression.replaceAll("maxHP",1);
               const result = evaluateExpression(expression);
               if (isNaN(result)) isValidExpression = false;
             }

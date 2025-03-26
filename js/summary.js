@@ -208,15 +208,18 @@ function statIsOpposite(statId) {
     return statId == stats.LESS_DAMAGE_TAKEN;
 }
 
+var processExpressionsCount = 0;
 function processExpressions() {
     let allStatsArray = Object.entries(allStats);
     for (const [statId, statData] of allStatsArray) {
         if (statData.expression) {
             let expression = statData.expression;
-            if (dexterity > 0)
-                expression = expression.replaceAll("dex", dexterity);
-            if (recurveChance > 0)
-                expression = expression.replaceAll("recurve", getAvgRecurveHits(recurveChance - 100));
+            if (dexterity > 0)  expression = expression.replaceAll("dex", dexterity);
+            if (intelligence > 0) expression = expression.replaceAll("int", intelligence);
+            if (recurveChance > 0) expression = expression.replaceAll("recurve", getAvgRecurveHits(recurveChance - 100));
+            if (hitsPerSecond > 0) expression = expression.replaceAll("hps", hitsPerSecond);
+            if (hitsPerSecond > 0) expression = expression.replaceAll("maxHP", maxHealth);
+            //console.log("expression", processExpressionsCount, "=>" ,statData.expression, expression);
             const statValue = evaluateExpression(expression);
             if (!isNaN(statValue)) {
                 statData.expression = null;
@@ -234,11 +237,15 @@ function processExpressions() {
             }
         }
     }
+    processExpressionsCount++;
 }
 
 let allStats = {};
 let dexterity = 0;
+let intelligence = 0;
 let recurveChance = 0;
+let hitsPerSecond = 0;
+let maxHealth = 0;
 function processStats(statsArray, firstRun = true) {
     allStats = {};
 
@@ -273,14 +280,23 @@ function processStats(statsArray, firstRun = true) {
     summary.push({name:"Attributes", type:"section"});
     const allAttributes = allStats[stats.ALL_ATTRIBUTES]?.total || 0;
     const strength = allAttributes + (allStats[stats.STRENGTH]?.total || 0);
-        dexterity = allAttributes + (allStats[stats.DEXTERITY]?.total || 0);
-    const intelligence = allAttributes + (allStats[stats.INTELLIGENCE]?.total || 0);
+    dexterity = allAttributes + (allStats[stats.DEXTERITY]?.total || 0);
+    intelligence = allAttributes + (allStats[stats.INTELLIGENCE]?.total || 0);
     const attunement = allAttributes + (allStats[stats.ATTUNEMENT]?.total || 0);
     const vitality = allAttributes + (allStats[stats.VITALITY]?.total || 0);
+
     {
+        const flatHealth = vitality * 6 + (allStats[stats.FLAT_HEALTH]?.total || 0);
+        const increasedHealth = allStats[stats.INCREASED_HEALTH]?.total || 0;
+        maxHealth = flatHealth * (1 + increasedHealth / 100);
+
         processExpressions();
 
         recurveChance = 100 + (allStats[stats.ADDITIONAL_RECURVE_CHANCE]?.total || -100);
+
+        processExpressions();
+
+        hitsPerSecond = allStats[stats.HITS_PER_SECOND]?.total || 0;
 
         processExpressions();
 
@@ -333,17 +349,13 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
     }
-    // general
-    summary.push({name:"General", type:"section"});
-    let totalHealth = 0;
+
+    summary.push({name:"HP, mana, ward", type:"section"});
     {
         // health
-        const flatHealth = vitality * 6 + (allStats[stats.FLAT_HEALTH]?.total || 0);
-        const increasedHealth = allStats[stats.INCREASED_HEALTH]?.total || 0;
-        totalHealth = flatHealth * (1 + increasedHealth / 100);
         summary.push({ 
             name: "Health", 
-            total: totalHealth, 
+            total: maxHealth, 
             type: "stat",
             sources: [
                 ...(allStats[stats.FLAT_HEALTH]?.sources || []), 
@@ -353,11 +365,29 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
 
+         // health regen
+         const flatHealthRegen = (allStats[stats.FLAT_HEALTH_REGEN]?.total || 0);
+         const increasedHealthRegen = allStats[stats.INCREASED_HEALTH_REGEN]?.total || 0;
+         const totalHealthRegen = flatHealthRegen * (1 + increasedHealthRegen / 100);
+         summary.push({ 
+             name: "Health Regen", 
+             total: totalHealthRegen, 
+             type: "stat",
+             sources: [
+                 ...(allStats[stats.FLAT_HEALTH_REGEN]?.sources || []), 
+                 ...(allStats[stats.INCREASED_HEALTH_REGEN]?.sources || [])
+             ]
+         });
+
+        
+
         // mana
         const flatMana = attunement * 2 + (allStats[stats.FLAT_MANA]?.total || 0);
         const increasedMana = allStats[stats.INCREASED_MANA]?.total || 0;
         const totalMana = flatMana * (1 + increasedMana / 100);
-        if (totalMana > 100)
+        const wasManaHr = totalMana > 100;
+        if (wasManaHr) {
+            summary.push({type: "hr"});
             summary.push({ 
                 name: "Mana", 
                 total: totalMana, 
@@ -369,34 +399,73 @@ function processStats(statsArray, firstRun = true) {
                     ...(allStats[stats.INCREASED_MANA]?.sources || [])
                 ]
             });
-
-        // health regen
-        const flatHealthRegen = (allStats[stats.FLAT_HEALTH_REGEN]?.total || 0);
-        const increasedHealthRegen = allStats[stats.INCREASED_HEALTH_REGEN]?.total || 0;
-        const totalHealthRegen = flatHealthRegen * (1 + increasedHealthRegen / 100);
-        summary.push({ 
-            name: "Health Regen", 
-            total: totalHealthRegen, 
-            type: "stat",
-            sources: [
-                ...(allStats[stats.FLAT_HEALTH_REGEN]?.sources || []), 
-                ...(allStats[stats.INCREASED_HEALTH_REGEN]?.sources || [])
-            ]
-        });
+        }
 
         // mana regen
         const flatManaRegen = allStats[stats.FLAT_MANA_REGEN]?.total || 0;
         const increasedManaRegen = allStats[stats.INCREASED_MANA_REGEN]?.total || 0;
         const totalManaRegen = flatManaRegen * (1 + increasedManaRegen / 100);
-        summary.push({ 
-            name: "Mana Regen", 
-            total: totalManaRegen, 
-            type: "stat",
-            sources: [
-                ...(allStats[stats.FLAT_MANA_REGEN]?.sources || []),
-                ...(allStats[stats.INCREASED_MANA_REGEN]?.sources || [])
-            ]
-        });
+        if (totalManaRegen > 0) {
+            if (!wasManaHr)
+                summary.push({type: "hr"});
+
+            summary.push({ 
+                name: "Mana Regen", 
+                total: totalManaRegen, 
+                type: "stat",
+                sources: [
+                    ...(allStats[stats.FLAT_MANA_REGEN]?.sources || []),
+                    ...(allStats[stats.INCREASED_MANA_REGEN]?.sources || [])
+                ]
+            });
+        }
+
+        const wps = allStats[stats.WARD_PER_SECOND]?.total || 0;
+        let stableWard = 0;
+        if (wps > 0) {
+            summary.push({type: "hr"});
+            summary.push({ 
+                name: "Ward Per Second", 
+                total: wps, 
+                type: "stat",
+                sources: [
+                    ...(allStats[stats.WARD_PER_SECOND]?.sources || []),
+                ]
+            });
+
+            const retention = intelligence * 2 + (allStats[stats.WARD_RETENTION]?.total || 0);
+            summary.push({ 
+                name: "Ward Retention", 
+                total: retention, 
+                type: "stat",
+                sources: [
+                    ...(allStats[stats.WARD_RETENTION]?.sources || []),
+                    ...(allStats[stats.INTELLIGENCE]?.sources || []),
+                    ...(allStats[stats.ALL_ATTRIBUTES]?.sources || []),
+                ]
+            });
+
+            const wardThreshold = (allStats[stats.WARD_THRESHOLD]?.total || 0);
+            summary.push({ 
+                name: "Ward Threshold", 
+                total: wardThreshold, 
+                type: "stat",
+                sources: [
+                    ...(allStats[stats.WARD_THRESHOLD]?.sources || []),
+                ]
+            });
+
+            stableWard = wardThreshold + 10000 * (- 0.2 + Math.sqrt(0.04 + 0.0002 * (wps * (1 + 0.5 * retention / 100))));
+            summary.push({ 
+                name: "Stable Ward", 
+                total: stableWard, 
+                type: "stat",
+                sources: [
+                    `wardThreshold + 10000 * (- 0.2 + Math.sqrt(0.04 + 0.0002 * (ward per second * (1 + 0.5 * retention / 100))))`
+                ]
+            });
+        }
+        
     }
 
     // increased damage
@@ -549,7 +618,6 @@ function processStats(statsArray, firstRun = true) {
     }
 
     // hits per second
-    let hitsPerSecond = allStats[stats.HITS_PER_SECOND]?.total || 0;
     let hitSpeedSummary = `${hitsPerSecond.toFixed(3)}`; 
     {
         hitsPerSecond *= (100 + increasedHitSpeed) / 100;
@@ -784,7 +852,7 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
     }
-    const hpAsEnduranceThreshold = (allStats[stats.MAX_HEALTH_AS_ENDURANCE_THRESHOLD]?.total || 0) / 100 * totalHealth;
+    const hpAsEnduranceThreshold = (allStats[stats.MAX_HEALTH_AS_ENDURANCE_THRESHOLD]?.total || 0) / 100 * maxHealth;
     {
         summary.push({ 
             name: "Maximum Health as Endurance Threshold", 
@@ -795,7 +863,7 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
     }
-    const totalEnduranceThreshold = Math.min(totalHealth, enduranceThreshold + hpAsEnduranceThreshold);
+    const totalEnduranceThreshold = Math.min(maxHealth, enduranceThreshold + hpAsEnduranceThreshold);
     {
         summary.push({ 
             name: "Total Endurance Threshold", 
@@ -807,14 +875,14 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
     }
-    let preusoHpAfterEndurance = totalHealth - totalEnduranceThreshold + totalEnduranceThreshold * 100 / (100 - endurance);
+    let preusoHpAfterEndurance = maxHealth - totalEnduranceThreshold + totalEnduranceThreshold * 100 / (100 - endurance);
     {
         summary.push({ 
             name: "Preudo HP after Endurance", 
             total: preusoHpAfterEndurance, 
             type: "stat",
             sources: [
-                `HP part without Endurance: total HP - endurance threshold = ${(totalHealth - totalEnduranceThreshold).toFixed(3)}`,
+                `HP part without Endurance: total HP - endurance threshold = ${(maxHealth - totalEnduranceThreshold).toFixed(3)}`,
                 `Preudo Endurance HP: endurance threshold * (100 - endurance) / 100 
                     = ${totalEnduranceThreshold.toFixed(3)} * (100 - ${endurance}) / 100 
                     = ${(totalEnduranceThreshold * 100 / (100 - endurance)).toFixed(3)}`
