@@ -3,17 +3,12 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 218px;
+    width: 300px;
     height: 100%;
     background-color: #1e1e1e;
     border-right: 2px solid #444;
     overflow-y: auto;
     transition: transform 0.3s ease;
-  }
-  
-  /* If you want to show it fully by default, do NOT add .collapsed in HTML */
-  #left-panel.collapsed {
-    transform: translateX(-220px);
   }
 
  .left-panel-content button {
@@ -23,7 +18,7 @@
   /* Toggle button (always visible) */
   #toggle-panel-btn {
     position: fixed;
-    left: 218px; /* Aligned with the panel edge */
+    left: 300px; /* Aligned with the panel edge */
     top: 0px;
     width: 30px;
     height: 30px;
@@ -36,13 +31,13 @@
   
   /* Move button to the edge when collapsed */
   #left-panel.collapsed + #toggle-panel-btn {
-    left: 00px;
+    left: 0px;
   }
   
   /* Left Panel Content */
   .left-panel-content {
     padding: 20px;
-    margin-top: 60px;
+    /*margin-top: 60px;*/
   }
   
 /* Build List */
@@ -102,4 +97,15 @@
 
 .btn-delete:hover {
   color: #ff9999;
+}
+
+/***********************************************************
+  * LEFT PANEL (COLLAPSIBLE)
+  ***********************************************************/
+  #left-panel.collapsed {
+  transform: translateX(-100%);
+}
+
+#left-panel:not(.collapsed) {
+  transform: translateX(0);
 }

@@ -99,6 +99,10 @@ function updateBuildNameInURL() {
     window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
 
     currentBuildName = newName;
+
+    const title = `${currentBuildName} — LE Calculator by iagan3228`;
+    document.title = title;
+    //document.getElementById("topTitle").innerText = title;
 }
 
 // 1) Toggle left panel
@@ -132,7 +136,7 @@ function handleBuildNameChange() {
 }
 
 function getBuildKey(buildName) {
-    return `build:${buildName}`;
+    return `build:${buildName}`.trim();
   }
 
 // 3) Save current build to localStorage using "currentBuildName" as the key
@@ -193,6 +197,8 @@ function loadBuildByName(name) {
             item.classList.remove("active-build"); // Remove from others
         }
     });
+
+    updateBuildNameInURL();
 }
 
 // 6) Renames a local build from oldName to newName

@@ -6,26 +6,27 @@
   <title>LE Calculator by iagan3228</title>
   
   <!-- CSS (split into multiple files as requested) -->
-  <link rel="stylesheet" href="css/general.css?v=20250323">
-  <link rel="stylesheet" href="css/main.css?v=20250323">
-  <link rel="stylesheet" href="css/buildList.css?v=20250323">
-  <link rel="stylesheet" href="css/summary.css?v=20250323">
-  <link rel="stylesheet" href="css/dragDrop.css?v=20250323">
+  <link rel="stylesheet" href="css/general.css?v=20250327">
+  <link rel="stylesheet" href="css/main.css?v=20250327">
+  <link rel="stylesheet" href="css/buildList.css?v=20250327">
+  <link rel="stylesheet" href="css/summary.css?v=20250327">
+  <link rel="stylesheet" href="css/dragDrop.css?v=20250327">
 
   <!-- Sortable.js (CDN) for drag & drop -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
   
   <!-- Your app logic (deferred so HTML loads first) -->
-  <script       src="js/stats.js?v=2025032306"></script>
-  <script defer src="js/pako.js?v=2025032302"></script>
-  <script defer src="js/base64Handler.js?v=2025032304"></script>
-  <script defer src="js/sections.js?v=2025032302"></script>
-  <script defer src="js/sectionsSearch.js?v=2025032302"></script>
-  <script defer src="js/statsManager.js?v=2025032306"></script>
-  <script defer src="js/dragDrop.js?v=2025032302"></script>
-  <script defer src="js/summary.js?v=2025032306"></script>
-  <script defer src="js/buildManager.js?v=2025032304"></script>
+  <script       src="js/stats.js?v=20250327"></script>
+  <script defer src="js/pako.js?v=20250327"></script>
+  <script defer src="js/base64Handler.js?v=20250327"></script>
+  <script defer src="js/sections.js?v=20250327"></script>
+  <script defer src="js/sectionsSearch.js?v=20250327"></script>
+  <script defer src="js/statsManager.js?v=20250327"></script>
+  <script defer src="js/dragDrop.js?v=20250327"></script>
+  <script defer src="js/summary.js?v=20250327"></script>
+  <script defer src="js/buildManager.js?v=20250327"></script>
   <!--script defer src="js/mainGlow.js"></script-->
 </head>
 <body>
@@ -55,10 +56,15 @@
     <!-- .main-area (slides left/right) -->
     <div class="main-area">
       <div class="main-content">
-        <h1>LE Calculator by iagan3228</h1>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <a target="_blank" href="https://lastepoch.com/"><img src="pngaaa.com-4901781.png" alt="Logo" style="height: 60px; padding-bottom: 24px;"></a>
+          <h1 id="topTitle">Build Stats Calculator by iagan3228</h1>
+        </div>
 
-        <label for="buildNameInput">Build Name:</label>
-        <input type="text" id="buildNameInput" placeholder="My Cool Build">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label for="buildNameInput">Build Name:</label>
+          <input type="text" id="buildNameInput" placeholder="My Cool Build" style="flex: 1;">
+        </div>
 
         <hr />
 

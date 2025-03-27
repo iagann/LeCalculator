@@ -42,7 +42,7 @@ function updateSaveString() {
         const statEnabled = statEntry.querySelector(".stat-enabled")?.checked ?? true;
   
         const statKey = statNameToIndex[statName];
-        var statValue = isNaN(Number(expression)) ? expression : Number(expression);
+        //var statValue = isNaN(Number(expression)) ? expression : Number(expression);
   
         if (statKey) {
           const statID = statKey;

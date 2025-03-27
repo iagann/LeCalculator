@@ -18,7 +18,7 @@ const stats = Object.freeze({
     INCREASED_MOVEMENT_SPEED: statNum++,
 
     FLAT_HEALTH: statNum++,
-    FLAT_DAMAGE: statNum++,
+    DODGE_CONVERTED_TO_ENDURANCE: statNum++,
     FLAT_ARMOR: statNum++,
 
     FIRE_RESISTANCE: statNum++,
@@ -57,7 +57,7 @@ const stats = Object.freeze({
 
     WARD_PER_SECOND: statNum++,
 
-    INCREASED_DAMAGE_PER_MS: statNum++,
+    CHANCE_TO_TAKE_ZERO_DAMAGE: statNum++,
     GLANCING_BLOW_CHANCE: statNum++,
     DODGE_CHANCE_TO_GLANCING_BLOW_CHANCE: statNum++,
 
@@ -69,6 +69,13 @@ const stats = Object.freeze({
     
     WARD_RETENTION: statNum++,
     WARD_THRESHOLD: statNum++,
+    CRITICAL_STRIKE_AVOIDANCE: statNum++,
+
+    ARMOUR_SHRED_CHANCE_PHYS : statNum++,
+    ARMOUR_SHRED_CHANCE_NON_PHYS : statNum++,
+    ARMOUR_SHRED_DURATION : statNum++,
+    ARMOUR_SHRED_EFFECT : statNum++,
+    ARMOUR_MITIGATION_APPLIED_TO_DOT : statNum++,
 });
 
 function getStatName(key) {
@@ -92,7 +99,6 @@ function getStatName(key) {
         case stats.INCREASED_MOVEMENT_SPEED: return "Increased Movement Speed";
 
         case stats.FLAT_HEALTH: return "Flat Health";
-        case stats.FLAT_DAMAGE: return "Flat Damage";
         case stats.FLAT_ARMOR: return "Flat Armor";
 
         case stats.FIRE_RESISTANCE: return "Fire Resistance";
@@ -131,7 +137,7 @@ function getStatName(key) {
 
         case stats.WARD_PER_SECOND: return "Ward per Second";
 
-        case stats.INCREASED_DAMAGE_PER_MS: return "Increased Damage per MS";
+        case stats.CHANCE_TO_TAKE_ZERO_DAMAGE: return "Chance to take 0 Damage when Hit";
         case stats.GLANCING_BLOW_CHANCE: return "Glancing Blow Chance";
         case stats.DODGE_CHANCE_TO_GLANCING_BLOW_CHANCE: return "Dodge Chance to Glancing Blow Chance";
 
@@ -143,6 +149,13 @@ function getStatName(key) {
 
         case stats.WARD_RETENTION: return "Ward Retention";
         case stats.WARD_THRESHOLD: return "Ward Decay Threshold";
+        case stats.CRITICAL_STRIKE_AVOIDANCE: return "Critical Strike Avoidance";
+        case stats.DODGE_CONVERTED_TO_ENDURANCE: return "Dodge Rating converted to Endurance Threshold";
+        case stats.ARMOUR_SHRED_CHANCE_PHYS: return "Chance to Shred Armour on Hit (phys)";
+        case stats.ARMOUR_SHRED_CHANCE_NON_PHYS: return "Chance to Shred Armour on Hit (non-phys)";
+        case stats.ARMOUR_SHRED_DURATION: return "Increased Armour Shred Duration";
+        case stats.ARMOUR_SHRED_EFFECT: return "Increased Armour Effect";
+        case stats.ARMOUR_MITIGATION_APPLIED_TO_DOT: return "Armour Mitigation Applied to Damage Over Time";
     }
     return "Unknown";
 }

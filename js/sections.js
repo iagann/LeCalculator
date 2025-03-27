@@ -29,6 +29,7 @@ function addSection(name = "", cloneFrom = null) {
 
   const collapseBtn = document.createElement("button");
   collapseBtn.textContent = "▼";
+  collapseBtn.title = "Expand/collapse section";
   collapseBtn.onclick = () => toggleCollapse(sectionDiv, collapseBtn);
 
   const addStatBtn = document.createElement("button");
@@ -61,9 +62,12 @@ function addSection(name = "", cloneFrom = null) {
       updateSummary();
       saveCurrentBuildLocally();
       updateSectionSearchOptions();
+
+      alert(`Section ${titleInput.value} was duplicated!`);
   };
 
   const deleteSectionBtn = document.createElement("button");
+  deleteSectionBtn.title = "Delete section";
   deleteSectionBtn.classList.add("btn-delete");
   deleteSectionBtn.textContent = "✖";
   deleteSectionBtn.onclick = () => {

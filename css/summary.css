@@ -151,3 +151,6 @@
   outline: none;
 }
 
+.stat-number {
+  white-space: nowrap;
+}

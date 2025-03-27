@@ -9,7 +9,7 @@
   .main-area {
     display: flex;
     flex: 1; /* Fill remaining space */
-    margin-left: 220px; /* default offset for the panel */
+    margin-left: 300px; /* default offset for the panel */
     transition: margin-left 0.3s ease;
   }
   
