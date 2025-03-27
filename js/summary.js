@@ -1949,6 +1949,7 @@ const avgHitsLookup = {
   
   function updateSortDropdown() {
     const select = document.getElementById("sort-select");
+    const reset = document.getElementById("reset-contributions");
   
     // Cache current non-default options
     const currentOptions = Array.from(select.options)
@@ -1960,8 +1961,9 @@ const avgHitsLookup = {
                        currentOptions.some((val, i) => val !== newOptions[i]);
   
     if (!hasChanged) {
-      select.style.display = highlightSummaryNames.size > 0 ? "inline-block" : "none";
-      return;
+        select.style.display = highlightSummaryNames.size > 0 ? "inline-block" : "none";
+        reset.style.display = highlightSummaryNames.size > 0 ? "inline-block" : "none";
+        return;
     }
   
     // Save current selection before rebuilding
@@ -1984,6 +1986,7 @@ const avgHitsLookup = {
   
     select.value = currentValue;
     select.style.display = highlightSummaryNames.size > 0 ? "inline-block" : "none";
+    reset.style.display = highlightSummaryNames.size > 0 ? "inline-block" : "none";
   }
   
   function applySectionSort() {
@@ -2033,3 +2036,14 @@ const avgHitsLookup = {
     });
   }
   
+
+  function resetAllContributions() {
+    highlightSummaryNames.forEach(name => {
+        const highlight = `highlight:${name}`;
+        //console.log(highlight);
+        localStorage.removeItem(highlight);
+    });
+
+    highlightSummaryNames.clear();
+    updateSummary(); // Recalculate with everything disabled
+  }

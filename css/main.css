@@ -41,7 +41,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    cursor: grab;
+    /*cursor: grab;*/
   }
   
   .stat-list {
@@ -215,4 +215,10 @@ datalist option:hover {
   background-color: #161616;
   color: #aaa;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#reset-contributions {
+  margin-left: 8px;
+  padding: 4px 8px;
+  font-size: 13px;
 }

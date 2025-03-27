@@ -6,5 +6,5 @@
 }
 
 .drag-handle:active {
-    cursor: grabbing;
+    /*cursor: grabbing;*/
 }

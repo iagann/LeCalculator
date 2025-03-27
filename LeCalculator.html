@@ -7,9 +7,9 @@
   
   <!-- CSS (split into multiple files as requested) -->
   <link rel="stylesheet" href="css/general.css?v=20250327">
-  <link rel="stylesheet" href="css/main.css?v=20250327">
+  <link rel="stylesheet" href="css/main.css?v=2025032701">
   <link rel="stylesheet" href="css/buildList.css?v=20250327">
-  <link rel="stylesheet" href="css/summary.css?v=20250327">
+  <link rel="stylesheet" href="css/summary.css?v=2025032701">
   <link rel="stylesheet" href="css/dragDrop.css?v=20250327">
 
   <!-- Sortable.js (CDN) for drag & drop -->
@@ -25,7 +25,7 @@
   <script defer src="js/sectionsSearch.js?v=20250327"></script>
   <script defer src="js/statsManager.js?v=20250327"></script>
   <script defer src="js/dragDrop.js?v=20250327"></script>
-  <script defer src="js/summary.js?v=20250327"></script>
+  <script defer src="js/summary.js?v=2025032701"></script>
   <script defer src="js/buildManager.js?v=20250327"></script>
   <!--script defer src="js/mainGlow.js"></script-->
 </head>
@@ -91,6 +91,9 @@
             <input type="checkbox" id="sort-reverse-cb">
             Reverse Sort Order
           </label>
+          <button id="reset-contributions" onclick="resetAllContributions()" title="Uncheck all enabled stats">
+            Remove All Impacts
+          </button>
         </div>
         
 
