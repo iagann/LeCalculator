@@ -14,10 +14,6 @@ function saveToClipboard() {
 // base64Handler.js
 let savedBuildCode = "";
 
-/*
-NoIgEgpghgTgLgZwhA1hGACAkgcwHYCWcEIANKMAEZRIC6ZAjKSAMxkCszDjALFwAz8MAKgwBOMj37MATP0kzZ80jIBszKSFrkQwBCgIAbQ7QyRYiZGhhkZADmar2GANQYAJhAAeGAPQYZMhZFEBgIAGMAVxgANwgRDAZ2WwB2ASF/QNIWPhAGQVSudnltCn0jEwwAZQALaII0PAQghxA7BJYSnT0DY1NaggAzOEYWZmKtbvK+jABBcIJ3DAAxQxoUUeZO204QOUmy3sqABUi8cLhokmyQhiyZNJAACiSEngBKBKeWVwwWT9E3FKuiIEAAtqYAMJQNZgogAT0Y6hAyVITDaOy2ymRdyC6LsygeRS6FFBEIwADkCDUjARmqQcVkGGMMSpHilVLxmCllCwWfsVLkkkFdvtgcAyaZIMYMAAlaDhGq2MRcAB0/GcojCUVi1xY6PyqJYu3Y90eDAYPEKKKyxoEmL2JJBxHJAHV4TAwTTPBhIQB7KAjNE41R2IKPCbZdGRmSiq1orhMoW44NbMTKBjI1RsUg8flA7qS6pQPA4SIEPDxMABmDua0pZyZRhcTlsrHW7bZXKxrkgHjJcVF+VLWUVnAYAAyEGGm1ZBtbJts3d5jwFLBVeSdEpdpmHcrH+5wNSDzOYYYTeQX4yXSnDt+yG/yB2d4NMxxgUAgcD9MAIJYwABCECGCeyKxry6IyGu6KqNiia9qGZDIgOhY7hgACyn41IYFYAOQIGYkSUL+9KZtyqJSEUzaXr2DYIeeyF4o4yi5K2IScoOaHLAQ6DwhgAAiH44H6eDVDUfoQKRyLprOnb4rOAqxlsRrosakgsnYKGkmhADSwFwDU/4AWsCBwAesw4BAeBBvqGjxkSeytuujgdLRqIOTw7RNrmQqKbsDBhoO7h+pUAAqNQwCJ8R+oMcxgpQRAECJQQhJo2QspoQUhaYE6wJZYlQMFADu2DBYYiRIcwEhRu2WWVLlMD5bUhV+iVWBlQElUgNVtmsFuizZZOeXxM1xWlSFfxdT1qn9WVOXDQVY3tRN8bSUxfXPhKc3VN+kRwENwmEP+y3ldwDLXmiuTbHV/S7ftuWHX+oknZ150or213dJQhiSQgY6mMZUDhCg1RnNa+Rbt9v3/XKEAEPgGAxQJQkifSMjLptUMIH9pb9AADgQv6IIjsXcWEkjSBt4pYzjOCmOF8QWdFsWuhWxA2LmBoTNTP3YzDACieDuAeBkjd+nqSLsPCBOKeM0H9cQYJFZYQLd0DuHxYAlnWF4MAk56WuM+ubXLfOK8rkSqxgADi5Y/UEOJCICtghJqFWy/LBDm36KumPzMQ0EleCSDiQQbjwCRabopsK/EFtW/xfruPl2sYMcsAwIi2RZpHkiPD8ohR8AMde/EYKwCgCDl3gpiCVAFbmTAkVFfSdqsMbHtm2XFdVyWpjLH6UQEWT1wGh33Ql4r5cwJX1dQiJ4RWXAH5mclNyyOPFCT93M+9zXaeRYYImWUs/HgnSeroikCRPp3scYNPs99xhEDC3AgZBw7Ag3ybntTz3c9YaDB+hcT+2QIy5zRPySBzlNy/y7g/ABz9ZhN1ajtH8YIRTf38GwO+pdEG70Af6OIv5SwrEJiQPBitvqFVfiWReMAoRHygCDJGo1WqkS4MbXMq5N7Rz/vEGhnh3D0PQG+aICBywng0vA++Qi6HnDEWJSKkQlhI34pEfQvZ8h8OLgIjA8iRGKMYXMPGfpTJAyzp5JQW5t4YEGDCcIUUTGs0MJ4GAlZsbVCcXtbRTsMDnhYMhXRdiHGGCcZWExsooB43FvhDArNSyt1uLnKh8QwkRKUQAeT2msIW6AEC4QwKFKyQMERfxANfQuCgtipInvojJzjTAWSMFWM4J4uGiBSFoWgQA
-*/
-
 // 1) Update the build code from the DOM structure
 function updateSaveString() {
     const allSections = [document.getElementById("buildNameInput").value];
@@ -41,10 +37,10 @@ function updateSaveString() {
         const expression = statEntry.querySelector('input[placeholder="Math Expression"]')?.value || "";
         const statEnabled = statEntry.querySelector(".stat-enabled")?.checked ?? true;
   
-        const statKey = statNameToIndex[statName];
+        const statKey = statName in statNameToIndex ? statNameToIndex[statName] : NaN;
         //var statValue = isNaN(Number(expression)) ? expression : Number(expression);
   
-        if (statKey) {
+        if (!isNaN(statKey)) {
           const statID = statKey;
           if (statEnabled)
             sectionArray.push([statID, expression]);
