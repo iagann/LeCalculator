@@ -65,18 +65,9 @@ function updateSummary() {
       
         sectionCache.forEach(sec => {
           let secEnabled = sec.enabled;
-          // If toggling the entire section
-          if (sec.element === element) {
-            secEnabled = !sec.enabled;  // invert
-          }
           finalSectionEnabled.set(sec.element, secEnabled);
-      
           sec.statEntries.forEach(stat => {
             let stEnabled = stat.enabled;
-            // If toggling this stat individually
-            if (stat.element === element) {
-              stEnabled = !stat.enabled;  // invert
-            }
             finalStatEnabled.set(stat.element, stEnabled);
           });
         });
@@ -89,16 +80,28 @@ function updateSummary() {
       
           sec.statEntries.forEach(stat => {
             const statIsEnabled = finalStatEnabled.get(stat.element);
-            // If EITHER the section is enabled & the stat is enabled, OR the stat is enabled on its own,
-            // we include it. That satisfies "disabled section + enabled stat" => keep the stat’s contribution
-            //if (!stat.statID) return;
-      
-            const includeThisStat = (secIsEnabled && statIsEnabled) || (statIsEnabled && stat.element == element);
-            // Another way: if (statIsEnabled || secIsEnabled && statIsEnabled) ...
-            // But the above OR is effectively the same as "statIsEnabled" (once you consider the parent's effect).
-            // We'll be explicit for clarity:
+
+            let includeThisStat = false;
+            let invertExpr = false;
+            // if everything is enabled and nothing is toggled
+            if (secIsEnabled && statIsEnabled && sec.element!= element && stat.element != element) {
+                includeThisStat = true;
+            }
+            // if toggled section is disabled, add enabled stats
+            else if (!secIsEnabled && statIsEnabled && sec.element == element) {
+                includeThisStat = true;
+            }
+            // if toggling stat in disabled section
+            else if (!secIsEnabled && stat.element == element) {
+                includeThisStat = true;
+                // enabled stat is not counted in base, so to calculate delta need to add the opposite expression
+                invertExpr = statIsEnabled;
+            }
+            
             if (includeThisStat) {
-              toggledStats.push([stat.statID, stat.expr, sec.name]);
+                // if toggling a disabled stat, whether this section is enabled or not, invert expression
+                const expr = (invertExpr) ? `-(${stat.expr})` : stat.expr;
+                toggledStats.push([stat.statID, expr, sec.name]);
             }
           });
         });
@@ -1974,7 +1977,7 @@ const avgHitsLookup = {
   
     const defaultOption = document.createElement("option");
     defaultOption.value = "";
-    defaultOption.textContent = currentValue === "" ? "Sort by Contribution..." : "Disable Sorting";
+    defaultOption.textContent = currentValue === "" ? "Sort by Impact..." : "Disable Sorting";
     select.appendChild(defaultOption);
   
     highlightSummaryNames.forEach(name => {

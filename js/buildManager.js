@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const defaultOption = this.options[0];
       
         if (this.value === "") {
-          defaultOption.textContent = "Sort by Contribution...";
+          defaultOption.textContent = "Sort by Impact...";
           applySectionSort(null); // Reset sort
         } else {
           defaultOption.textContent = "Disable Sorting";
