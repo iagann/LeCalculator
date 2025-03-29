@@ -87,6 +87,10 @@ function updateSummary() {
             if (secIsEnabled && statIsEnabled && sec.element!= element && stat.element != element) {
                 includeThisStat = true;
             }
+            // section is enabled, but stat is disabled and toggled, not enabled in base, need to enable for delta
+            else if (secIsEnabled && !statIsEnabled && stat.element == element) {
+                includeThisStat = true;
+            }
             // if toggled section is disabled, add enabled stats
             else if (!secIsEnabled && statIsEnabled && sec.element == element) {
                 includeThisStat = true;
