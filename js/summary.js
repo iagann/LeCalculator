@@ -239,7 +239,10 @@ function processExpressions() {
     for (const [statId, statData] of allStatsArray) {
         if (statData.expression) {
             expression = statData.expression;
-            
+
+            /*if (expression.includes("attu"))
+                console.log(1);*/
+
             if (containsLetters(expression))
             {
                 replaceExpression("dex", dexterity);
@@ -253,7 +256,10 @@ function processExpressions() {
                 replaceExpression("dodgeRating", totalDodgeRating);
                 wasExpression = wasExpression || expression != statData.expression;
             }
-            //console.log("expression", processExpressionsCount, "=>" ,statData.expression, expression);
+            
+            if (statId == 50)
+                console.log("expression", statId, getStatName(statId), processExpressionsCount, "=>" ,statData.expression, expression);
+            
             const statValue = evaluateExpression(expression);
             if (!isNaN(statValue)) {
                 statData.expression = null;
@@ -267,6 +273,10 @@ function processExpressions() {
                     if (isNaN(statData.total))
                         statData.total = 0;
                     statData.total += statValue;
+                    
+                    if (statId == 50)
+                        console.log("statData.total", statId, getStatName(statId), statData.total - statValue, "=>", statData.total);
+                    
                 }
             }
             
@@ -332,8 +342,15 @@ function processStats(statsArray, firstRun = true) {
         }
 
         if (isNaN(statValue)) {
-            allStats[statId].expression = expression;
+            if (allStats[statId].expression) {
+                allStats[statId].expression += " + " + expression;
+            }
+            else {
+                allStats[statId].expression = expression;
+            }
             allStats[statId].sources.push(`[${sectionName}] ${getStatName(statId)}: ${expression}`);
+            if (statId == 50)
+                console.log("allStats[statId].total expression", statId, getStatName(statId), expression);
         }
         else {
             if (statIsMore(statId)) {
@@ -343,6 +360,9 @@ function processStats(statsArray, firstRun = true) {
             else {
                 allStats[statId].total += statValue;
             }
+
+            if (statId == 50)
+                console.log("allStats[statId].total", statId, getStatName(statId), allStats[statId].total - statValue, "=>", allStats[statId].total);
             
             allStats[statId].sources.push(`[${sectionName}] ${getStatName(statId)}: ${statValue}`);
         }
@@ -359,7 +379,9 @@ function processStats(statsArray, firstRun = true) {
     attunement = allAttributes + (allStats[stats.ATTUNEMENT]?.total || 0);
     const vitality = allAttributes + (allStats[stats.VITALITY]?.total || 0);
 
+    //const test1 = (allStats[stats.ADDED_FLAT_DAMAGE]?.total || 0);
     processExpressions();
+    //const test2 = (allStats[stats.ADDED_FLAT_DAMAGE]?.total || 0);
 
     const flatDodge = (allStats[stats.DODGE_RATING]?.total || 0) + dexterity * 4;
     const increasedDodge = allStats[stats.INCREASED_DODGE_RATING]?.total || 0;
@@ -376,6 +398,7 @@ function processStats(statsArray, firstRun = true) {
     const increasedHitSpeed = allStats[stats.INCREASED_HITS]?.total || 0;
     const moreHits = (allStats[stats.MORE_HIT_SPEED]?.total || 100);
     
+
     {
         totalEnduranceThreshold = enduranceThreshold + hpAsEnduranceThreshold;
         if ((allStats[stats.DODGE_CONVERTED_TO_ENDURANCE]?.total || 0)) {
@@ -569,8 +592,8 @@ function processStats(statsArray, firstRun = true) {
         
     }
 
-    // increased damage
     let baseFlat = (allStats[stats.BASE_HIT_DAMAGE]?.total || 0);
+    // increased damage
     let damageEffectiveness = (allStats[stats.DAMAGE_EFFECTIVENESS]?.total || 0);
     let totalFlat = 0;
     let moreFromCrits = 0;
