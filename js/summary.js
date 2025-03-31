@@ -210,11 +210,18 @@ function updateSummary() {
   
 
 function statIsMore(statId) {
-    return statId == stats.MORE_DAMAGE || statId == stats.MORE_ARMOUR || statId == stats.MORE_HIT_SPEED || statId == stats.LESS_DAMAGE_TAKEN;
+    return statId == stats.MORE_DAMAGE
+    || statId == stats.MORE_ARMOUR
+    || statId == stats.MORE_HIT_SPEED
+    || statId == stats.LESS_DAMAGE_TAKEN
+    || statId == stats.LESS_HIT_DAMAGE_TAKEN
+    || statId == stats.LESS_DOT_DAMAGE_TAKEN;
 }
 
 function statIsOpposite(statId) {
-    return statId == stats.LESS_DAMAGE_TAKEN;
+    return statId == stats.LESS_DAMAGE_TAKEN
+    || statId == stats.LESS_HIT_DAMAGE_TAKEN
+    || statId == stats.LESS_DOT_DAMAGE_TAKEN;
 }
 
 var processExpressionsCount = 0;
@@ -1183,31 +1190,47 @@ function processStats(statsArray, firstRun = true) {
         });
     }
 
-    let lessDamageTaken =  (allStats[stats.LESS_DAMAGE_TAKEN]?.total || 100);
-    if (glancingBlowChance == 100)
-        lessDamageTaken *= (1 - 0.35);
-    lessDamageTaken =  100 - lessDamageTaken;
-    const armourAppliedToDots = (allStats[stats.ARMOUR_MITIGATION_APPLIED_TO_DOT]?.total || 0);
-    const lessDotDamageTakenPhys = armourAppliedToDots / 100 * totalArmourDrPhys;
-    const lessDotDamageTakenNonPhys = armourAppliedToDots / 100 * totalArmourDrNonPhys;
-    if (lessDamageTaken > 0) {
-        summary.push({type:"hr"});
-        
-        if (glancingBlowChance > 0) {
-            summary.push({ 
-                name: "Glancing Blow Chance", 
-                total: glancingBlowChance, 
-                type: "stat",
-                sources: [
-                    ...(allStats[stats.GLANCING_BLOW_CHANCE]?.sources || []),
-                    (dodgeToGlancingBlowChance > 0) ? (allStats[stats.DODGE_CHANCE_TO_GLANCING_BLOW_CHANCE]?.sources || []) : []
-                ]
-            });
-        }
+    if (glancingBlowChance > 0) {
+        summary.push({ 
+            name: "Glancing Blow Chance", 
+            total: glancingBlowChance, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.GLANCING_BLOW_CHANCE]?.sources || []),
+                (dodgeToGlancingBlowChance > 0) ? (allStats[stats.DODGE_CHANCE_TO_GLANCING_BLOW_CHANCE]?.sources || []) : []
+            ]
+        });
+    }
 
+    let lessDamageTaken = (allStats[stats.LESS_DAMAGE_TAKEN]?.total || 100);
+    let lessHitDamageTaken = lessDamageTaken * (allStats[stats.LESS_HIT_DAMAGE_TAKEN]?.total || 100) / 100;
+    const t =  (allStats[stats.LESS_HIT_DAMAGE_TAKEN]?.total || 100);
+    const lessDotDamageTaken = lessDamageTaken * (allStats[stats.LESS_DOT_DAMAGE_TAKEN]?.total || 100) / 100;
+    if (glancingBlowChance == 100)
+        lessHitDamageTaken *= (1 - 0.35);
+    const armourAppliedToDots = (allStats[stats.ARMOUR_MITIGATION_APPLIED_TO_DOT]?.total || 0);
+    let lessDotDamageTakenPhys = (100 - armourAppliedToDots / 100 * totalArmourDrPhys) * lessDotDamageTaken / 100;
+    let lessDotDamageTakenNonPhys = (100 - armourAppliedToDots / 100 * totalArmourDrNonPhys) * lessDotDamageTaken / 100;
+    lessDamageTaken = 100 - lessDamageTaken;
+    lessHitDamageTaken = 100 - lessHitDamageTaken;
+    lessDotDamageTakenPhys = 100 - lessDotDamageTakenPhys;
+    lessDotDamageTakenNonPhys = 100 - lessDotDamageTakenNonPhys;
+
+    if (lessHitDamageTaken > 0 || lessDotDamageTakenNonPhys > 0) {
+        summary.push({type:"hr"});
+/*
         summary.push({ 
             name: "Less Damage Taken", 
             total: lessDamageTaken, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.LESS_DAMAGE_TAKEN]?.sources || []),
+            ]
+        });
+*/
+        summary.push({ 
+            name: "Less Hit Damage Taken", 
+            total: lessHitDamageTaken, 
             type: "stat",
             sources: [
                 ...(allStats[stats.LESS_DAMAGE_TAKEN]?.sources || []),
@@ -1216,20 +1239,24 @@ function processStats(statsArray, firstRun = true) {
         });
 
         summary.push({ 
-            name: "Dot Mitigation", 
+            name: "Less Dot Damage Taken", 
             total: lessDotDamageTakenNonPhys, 
             type: "stat",
             sources: [
+                ...(allStats[stats.LESS_DAMAGE_TAKEN]?.sources || []),
                 ...(allStats[stats.ARMOUR_MITIGATION_APPLIED_TO_DOT]?.sources || []),
+                ...(allStats[stats.LESS_DOT_DAMAGE_TAKEN]?.sources || []),
             ]
         });
 
         summary.push({ 
-            name: "Phys Dot Mitigation", 
+            name: "Less Phys Dot Damage Taken", 
             total: lessDotDamageTakenPhys, 
             type: "stat",
             sources: [
+                ...(allStats[stats.LESS_DAMAGE_TAKEN]?.sources || []),
                 ...(allStats[stats.ARMOUR_MITIGATION_APPLIED_TO_DOT]?.sources || []),
+                ...(allStats[stats.LESS_DOT_DAMAGE_TAKEN]?.sources || []),
             ]
         });
     }
@@ -1293,7 +1320,7 @@ function processStats(statsArray, firstRun = true) {
         r[stats.NECROTIC_RESISTANCE] = (100 / (175 - Math.min(75,necroticRes))) / (100 - totalArmourDrNonPhys) * 100;
         r[stats.POISON_RESISTANCE] = (100 / (175 - Math.min(75,poisonRes))) / (100 - totalArmourDrNonPhys) * 100;
         r[stats.VOID_RESISTANCE] = (100 / (175 - Math.min(75,voidRes))) / (100 - totalArmourDrNonPhys) * 100;
-        const b = (r[stats.FIRE_RESISTANCE] 
+        let b = (r[stats.FIRE_RESISTANCE] 
             + r[stats.COLD_RESISTANCE] 
             + r[stats.LIGHTNING_RESISTANCE] 
             + r[stats.PHYSICAL_RESISTANCE] 
@@ -1301,6 +1328,7 @@ function processStats(statsArray, firstRun = true) {
             + r[stats.POISON_RESISTANCE] 
             + r[stats.VOID_RESISTANCE])
             / 7;
+        b = b / ((100 - lessHitDamageTaken) / 100);
 
         summary.push({ 
             name: "Avg Max Hit", 
