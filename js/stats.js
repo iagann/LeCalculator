@@ -78,6 +78,8 @@ const stats = Object.freeze({
     ARMOUR_MITIGATION_APPLIED_TO_DOT : statNum++,
     LESS_HIT_DAMAGE_TAKEN : statNum++,
     LESS_DOT_DAMAGE_TAKEN : statNum++,
+
+    FLAT_ARMOUR_SHRED : statNum++,
 });
 
 function getStatName(key) {
@@ -160,6 +162,8 @@ function getStatName(key) {
         case stats.ARMOUR_MITIGATION_APPLIED_TO_DOT: return "Armour Mitigation Applied to Damage Over Time";
         case stats.LESS_HIT_DAMAGE_TAKEN: return "Less Hit Damage Taken";
         case stats.LESS_DOT_DAMAGE_TAKEN: return "Less Damage Over Time Taken";
+
+        case stats.FLAT_ARMOUR_SHRED: return "Flat Armour Shred";
     }
     return "Unknown";
 }

@@ -809,8 +809,9 @@ function processStats(statsArray, firstRun = true) {
         const armourShredStacksPhys = hitsPerSecond * chanceToShredArmourPhys / 100 * (100 + armourShredDuration) / 100;
         const armourShredStacksNonPhys = hitsPerSecond * chanceToShredArmourNonPhys / 100 * (100 + armourShredDuration) / 100;
         const armourShredEffect = allStats[stats.ARMOUR_SHRED_EFFECT]?.total || 0;
-        const armourShredDrPhys = armourDr(100 * armourShredStacksPhys * (100 + armourShredEffect) / 100, true);
-        const armourShredDrNonPhys = armourDr(100 * armourShredStacksNonPhys * (100 + armourShredEffect) / 100, true);
+        const flatArmourShred = allStats[stats.FLAT_ARMOUR_SHRED]?.total || 0;
+        const armourShredDrPhys = armourDr(flatArmourShred + 100 * armourShredStacksPhys * (100 + armourShredEffect) / 100, true);
+        const armourShredDrNonPhys = armourDr(flatArmourShred + 100 * armourShredStacksNonPhys * (100 + armourShredEffect) / 100, false);
         armourShredDr = Math.max(armourShredDrPhys, armourShredDrNonPhys);
         summary.push({ 
             name: "Chance to Shred Armour Phys", 
@@ -863,6 +864,14 @@ function processStats(statsArray, firstRun = true) {
             type: "stat",
             sources: [
                 ...(allStats[stats.ARMOUR_SHRED_EFFECT]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Flat Armour Shred", 
+            total: flatArmourShred, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.FLAT_ARMOUR_SHRED]?.sources || []),
             ]
         });
         summary.push({ 
