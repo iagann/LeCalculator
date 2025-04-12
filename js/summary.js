@@ -252,6 +252,7 @@ function processExpressions() {
 
             if (containsLetters(expression))
             {
+                replaceExpression("str", strength);
                 replaceExpression("dex", dexterity);
                 replaceExpression("int", intelligence);
                 replaceExpression("attu", attunement);
@@ -263,27 +264,27 @@ function processExpressions() {
                 replaceExpression("dodgeRating", totalDodgeRating);
                 wasExpression = wasExpression || expression != statData.expression;
             }
-            
+            /*
             if (statId == 50)
                 console.log("expression", statId, getStatName(statId), processExpressionsCount, "=>" ,statData.expression, expression);
-            
+            */
             const statValue = evaluateExpression(expression);
             if (!isNaN(statValue)) {
                 statData.expression = null;
                 if (statIsMore(statId)) {
                     if (isNaN(statData.total))
                         statData.total = 100;
-                    //console.log("more processExpressions", expression, statId, getStatName(statId), statValue, statData.total);
                     statData.total *= (100 + (statIsOpposite(statId) ? -statValue : statValue)) / 100;
+                    //console.log("more processExpressions", expression, statId, getStatName(statId), statValue, statData.total);
                 }
                 else {
                     if (isNaN(statData.total))
                         statData.total = 0;
                     statData.total += statValue;
-                    
+                    /*
                     if (statId == 50)
                         console.log("statData.total", statId, getStatName(statId), statData.total - statValue, "=>", statData.total);
-                    
+                    */
                 }
             }
             
@@ -317,6 +318,7 @@ function armourDr(value, isPhys) {
 }
 
 let allStats = {};
+let strength = 0;
 let dexterity = 0;
 let intelligence = 0;
 let attunement = 0;
@@ -356,21 +358,24 @@ function processStats(statsArray, firstRun = true) {
                 allStats[statId].expression = expression;
             }
             allStats[statId].sources.push(`[${sectionName}] ${getStatName(statId)}: ${expression}`);
+            /*
             if (statId == 50)
                 console.log("allStats[statId].total expression", statId, getStatName(statId), expression);
+            */
         }
         else {
             if (statIsMore(statId)) {
-                //console.log("more processStats", statId, getStatName(statId), statValue, allStats[statId].total);
+                var was = allStats[statId].total;
                 allStats[statId].total *= (100 + (statIsOpposite(statId) ? -statValue : statValue)) / 100;
+                //console.log("more processStats", statId, getStatName(statId), statValue, was, "=>", allStats[statId].total);
             }
             else {
                 allStats[statId].total += statValue;
             }
-
+            /*
             if (statId == 50)
                 console.log("allStats[statId].total", statId, getStatName(statId), allStats[statId].total - statValue, "=>", allStats[statId].total);
-            
+            */
             allStats[statId].sources.push(`[${sectionName}] ${getStatName(statId)}: ${statValue}`);
         }
     });
@@ -380,7 +385,7 @@ function processStats(statsArray, firstRun = true) {
     // attributes
     summary.push({name:"Attributes", type:"section"});
     const allAttributes = allStats[stats.ALL_ATTRIBUTES]?.total || 0;
-    const strength = allAttributes + (allStats[stats.STRENGTH]?.total || 0);
+    strength = allAttributes + (allStats[stats.STRENGTH]?.total || 0);
     dexterity = allAttributes + (allStats[stats.DEXTERITY]?.total || 0);
     intelligence = allAttributes + (allStats[stats.INTELLIGENCE]?.total || 0);
     attunement = allAttributes + (allStats[stats.ATTUNEMENT]?.total || 0);
@@ -480,14 +485,28 @@ function processStats(statsArray, firstRun = true) {
     {
         // health
         summary.push({ 
-            name: "Health", 
-            total: maxHealth, 
+            name: "Flat Health", 
+            total: flatHealth, 
             type: "stat",
             sources: [
                 ...(allStats[stats.FLAT_HEALTH]?.sources || []), 
                 ...(allStats[stats.VITALITY]?.sources || []), 
                 ...(allStats[stats.ALL_ATTRIBUTES]?.sources || []), 
+            ]
+        });
+        summary.push({ 
+            name: "Increased Health", 
+            total: increasedHealth, 
+            type: "stat",
+            sources: [
                 ...(allStats[stats.INCREASED_HEALTH]?.sources || [])
+            ]
+        });
+        summary.push({ 
+            name: "Total Health", 
+            total: maxHealth, 
+            type: "stat",
+            sources: [
             ]
         });
 
@@ -1213,7 +1232,6 @@ function processStats(statsArray, firstRun = true) {
 
     let lessDamageTaken = (allStats[stats.LESS_DAMAGE_TAKEN]?.total || 100);
     let lessHitDamageTaken = lessDamageTaken * (allStats[stats.LESS_HIT_DAMAGE_TAKEN]?.total || 100) / 100;
-    const t =  (allStats[stats.LESS_HIT_DAMAGE_TAKEN]?.total || 100);
     const lessDotDamageTaken = lessDamageTaken * (allStats[stats.LESS_DOT_DAMAGE_TAKEN]?.total || 100) / 100;
     if (glancingBlowChance == 100)
         lessHitDamageTaken *= (1 - 0.35);
@@ -1320,15 +1338,16 @@ function processStats(statsArray, firstRun = true) {
     summary.push({name:"EHP", type:"section"});
     // ehp
     {
-        const a = (preusoHpAfterEndurance + stableWard) / ((100-lessDamageTaken)/100);
+        const a = (preusoHpAfterEndurance + stableWard);
         let r = [];
-        r[stats.FIRE_RESISTANCE] = (100 / (175 - Math.min(75,fireRes))) / (100 - totalArmourDrNonPhys) * 100;
-        r[stats.COLD_RESISTANCE] = (100 / (175 - Math.min(75,coldRes))) / (100 - totalArmourDrNonPhys) * 100;
-        r[stats.LIGHTNING_RESISTANCE] = (100 / (175 - Math.min(75,lightningRes))) / (100 - totalArmourDrNonPhys) * 100;
-        r[stats.PHYSICAL_RESISTANCE] = (100 / (175 - Math.min(75,physicalRes))) / (100 - totalArmourDrPhys) * 100;
-        r[stats.NECROTIC_RESISTANCE] = (100 / (175 - Math.min(75,necroticRes))) / (100 - totalArmourDrNonPhys) * 100;
-        r[stats.POISON_RESISTANCE] = (100 / (175 - Math.min(75,poisonRes))) / (100 - totalArmourDrNonPhys) * 100;
-        r[stats.VOID_RESISTANCE] = (100 / (175 - Math.min(75,voidRes))) / (100 - totalArmourDrNonPhys) * 100;
+        const m = Math.pow(100,3);
+        r[stats.FIRE_RESISTANCE] = m / (175 - Math.min(75,fireRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.COLD_RESISTANCE] = m / (175 - Math.min(75,coldRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.LIGHTNING_RESISTANCE] = m / (175 - Math.min(75,lightningRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.PHYSICAL_RESISTANCE] = m / (175 - Math.min(75,physicalRes)) / (100 - totalArmourDrPhys) / (100 - lessHitDamageTaken);
+        r[stats.NECROTIC_RESISTANCE] = m / (175 - Math.min(75,necroticRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.POISON_RESISTANCE] = m / (175 - Math.min(75,poisonRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.VOID_RESISTANCE] = m / (175 - Math.min(75,voidRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
         let b = (r[stats.FIRE_RESISTANCE] 
             + r[stats.COLD_RESISTANCE] 
             + r[stats.LIGHTNING_RESISTANCE] 
@@ -1337,7 +1356,7 @@ function processStats(statsArray, firstRun = true) {
             + r[stats.POISON_RESISTANCE] 
             + r[stats.VOID_RESISTANCE])
             / 7;
-        b = b / ((100 - lessHitDamageTaken) / 100);
+        b = b;
 
         summary.push({ 
             name: "Avg Max Hit", 

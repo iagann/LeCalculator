@@ -107,7 +107,7 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
     datalist.innerHTML = ""; // Clear old options
   
     getAllStatNames()
-      .sort()
+      //.sort()
       .forEach(statName => {
         const option = document.createElement("option");
         option.value = statName;
@@ -125,7 +125,7 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
     datalist.innerHTML = "";
   
     getAllStatNames()
-      .sort()
+      //.sort()
       .forEach(statName => {
         if (statName.toLowerCase().includes(value)) {
           const option = document.createElement("option");
@@ -152,6 +152,7 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
               isValidExpression = false;
             }
             else {
+              expression = expression.replaceAll("str",1);
               expression = expression.replaceAll("dex",1);
               expression = expression.replaceAll("int",1);
               expression = expression.replaceAll("attu",1);

@@ -169,7 +169,24 @@ function getStatName(key) {
 }
 
 function getAllStatNames() {
-    return Object.values(stats).map(getStatName);
+    const frequencyMap = {};
+
+    // Count frequencies of used stat names
+    document.querySelectorAll(".stat-entry input[list]").forEach(input => {
+        const name = input.value.trim();
+        if (name) frequencyMap[name] = (frequencyMap[name] || 0) + 1;
+    });
+
+    // Get all stat names from stats object
+    const allNames = Object.values(stats).map(getStatName);
+
+    // Sort by frequency (desc), fallback alphabetically
+    return allNames.slice().sort((a, b) => {
+        const freqA = frequencyMap[a] || 0;
+        const freqB = frequencyMap[b] || 0;
+        if (freqA !== freqB) return freqB - freqA;
+        return a.localeCompare(b);
+    });
 }
 
 const statNameToIndex = Object.fromEntries(
