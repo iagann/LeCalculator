@@ -260,6 +260,7 @@ function processExpressions() {
                 replaceExpression("hps", hitsPerSecond);
                 replaceExpression("maxHP", maxHealth);
                 replaceExpression("enduranceThreshold", totalEnduranceThreshold);
+                replaceExpression("endurance", totalEndurance);
                 replaceExpression("ms", increasedMS);
                 replaceExpression("dodgeRating", totalDodgeRating);
                 wasExpression = wasExpression || expression != statData.expression;
@@ -325,6 +326,7 @@ let attunement = 0;
 let recurveChance = 0;
 let hitsPerSecond = 0;
 let maxHealth = 0;
+let totalEndurance = 0;
 let totalEnduranceThreshold = 0;
 let increasedMS = 0;
 let totalDodgeRating = 0;
@@ -417,6 +419,8 @@ function processStats(statsArray, firstRun = true) {
             totalEnduranceThreshold += totalDodgeRating;
         }
         totalEnduranceThreshold = Math.min(maxHealth, totalEnduranceThreshold);
+
+        totalEndurance = Math.min(60, allStats[stats.ENDURANCE]?.total || 0);
 
         processExpressions();
 
@@ -1050,11 +1054,10 @@ function processStats(statsArray, firstRun = true) {
     // endurance
     summary.push({name:"Endurance", type:"section"});
     //summary.push({type:"hr"});
-    const endurance = Math.min(60, allStats[stats.ENDURANCE]?.total || 0);
     {
         summary.push({ 
             name: "Endurance", 
-            total: endurance, 
+            total: totalEndurance, 
             type: "stat",
             sources: [
                 ...(allStats[stats.ENDURANCE]?.sources || []),
@@ -1095,7 +1098,7 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
     }
-    let preusoHpAfterEndurance = maxHealth - totalEnduranceThreshold + totalEnduranceThreshold * 100 / (100 - endurance);
+    let preusoHpAfterEndurance = maxHealth - totalEnduranceThreshold + totalEnduranceThreshold * 100 / (100 - totalEndurance);
     {
         summary.push({ 
             name: "Preudo HP after Endurance", 
@@ -1104,8 +1107,8 @@ function processStats(statsArray, firstRun = true) {
             sources: [
                 `HP part without Endurance: total HP - endurance threshold = ${(maxHealth - totalEnduranceThreshold).toFixed(3)}`,
                 `Preudo Endurance HP: endurance threshold * (100 - endurance) / 100 
-                    = ${totalEnduranceThreshold.toFixed(3)} * (100 - ${endurance}) / 100 
-                    = ${(totalEnduranceThreshold * 100 / (100 - endurance)).toFixed(3)}`
+                    = ${totalEnduranceThreshold.toFixed(3)} * (100 - ${totalEndurance}) / 100 
+                    = ${(totalEnduranceThreshold * 100 / (100 - totalEndurance)).toFixed(3)}`
             ]
         });
     }
@@ -1462,11 +1465,13 @@ function evaluateExpression(expr) {
 
     // Check cache
     if (expressionCache.has(cleanedExpr)) {
-        return expressionCache.get(cleanedExpr);
+        //return expressionCache.get(cleanedExpr);
     }
 
     try {
+        //console.log("evaluate", cleanedExpr);
         const result = Function(`"use strict"; return (${cleanedExpr});`)();
+        //console.log("evaluate", result);
         expressionCache.set(cleanedExpr, result);
         return result;
     } catch (error) {

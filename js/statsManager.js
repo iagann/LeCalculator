@@ -152,6 +152,8 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
               isValidExpression = false;
             }
             else {
+              //console.log("validate", expression);
+
               expression = expression.replaceAll("str",1);
               expression = expression.replaceAll("dex",1);
               expression = expression.replaceAll("int",1);
@@ -160,10 +162,15 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
               expression = expression.replaceAll("hps",1);
               expression = expression.replaceAll("maxHP",1);
               expression = expression.replaceAll("enduranceThreshold",1);
+              expression = expression.replaceAll("endurance",1);
               expression = expression.replaceAll("ms",1);
+
+              //console.log("validate", expression);
               
               const result = evaluateExpression(expression);
               if (isNaN(result)) isValidExpression = false;
+
+              console.log("validate", result, isValidExpression);
             }
         } catch {
             isValidExpression = false;
