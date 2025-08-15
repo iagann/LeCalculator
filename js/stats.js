@@ -80,6 +80,10 @@ const stats = Object.freeze({
     LESS_DOT_DAMAGE_TAKEN : statNum++,
 
     FLAT_ARMOUR_SHRED : statNum++,
+
+    BLOCK_CHANCE: statNum++,
+    BLOCK_EFFECTIVENESS: statNum++,
+    INCREASED_BLOCK_EFFECTIVENESS: statNum++,
 });
 
 function getStatName(key) {
@@ -164,6 +168,10 @@ function getStatName(key) {
         case stats.LESS_DOT_DAMAGE_TAKEN: return "Less Damage Over Time Taken";
 
         case stats.FLAT_ARMOUR_SHRED: return "Flat Armour Shred";
+
+        case stats.BLOCK_CHANCE: return "Block Chance";
+        case stats.BLOCK_EFFECTIVENESS: return "Block Effectiveness";
+        case stats.INCREASED_BLOCK_EFFECTIVENESS: return "Increased Block Effectiveness";
     }
     return "Unknown";
 }

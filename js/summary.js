@@ -420,7 +420,7 @@ function processStats(statsArray, firstRun = true) {
         }
         totalEnduranceThreshold = Math.min(maxHealth, totalEnduranceThreshold);
 
-        totalEndurance = Math.min(60, allStats[stats.ENDURANCE]?.total || 0);
+        totalEndurance = allStats[stats.ENDURANCE]?.total || 0;
 
         processExpressions();
 
@@ -1098,7 +1098,8 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
     }
-    let preusoHpAfterEndurance = maxHealth - totalEnduranceThreshold + totalEnduranceThreshold * 100 / (100 - totalEndurance);
+    let preusoHpAfterEndurance = maxHealth - totalEnduranceThreshold
+    + totalEnduranceThreshold * 100 / (100 - Math.min(60, totalEndurance));
     {
         summary.push({ 
             name: "Preudo HP after Endurance", 
@@ -1107,8 +1108,8 @@ function processStats(statsArray, firstRun = true) {
             sources: [
                 `HP part without Endurance: total HP - endurance threshold = ${(maxHealth - totalEnduranceThreshold).toFixed(3)}`,
                 `Preudo Endurance HP: endurance threshold * (100 - endurance) / 100 
-                    = ${totalEnduranceThreshold.toFixed(3)} * (100 - ${totalEndurance}) / 100 
-                    = ${(totalEnduranceThreshold * 100 / (100 - totalEndurance)).toFixed(3)}`
+                    = ${totalEnduranceThreshold.toFixed(3)} * (100 - ${Math.min(60, totalEndurance)}) / 100 
+                    = ${(totalEnduranceThreshold * 100 / (100 - Math.min(60, totalEndurance))).toFixed(3)}`
             ]
         });
     }
@@ -1210,6 +1211,48 @@ function processStats(statsArray, firstRun = true) {
             sources: []
         });
     }
+
+    let blockChance = allStats[stats.BLOCK_CHANCE]?.total || 0;
+    let blockEffect = (allStats[stats.BLOCK_EFFECTIVENESS]?.total || 0)
+        * (100 + (allStats[stats.INCREASED_BLOCK_EFFECTIVENESS]?.total || 0)) / 100;
+    let blockDr = 0;
+    {
+        const x = blockEffect;
+        const x2 = x*x;
+        const a = 100;
+
+        blockDr = 3 * x / (40 + 0.03 * Math.pow(a + 5, 2) + 3 * x) * 0.25;
+        blockDr += (1.2 * x + 0.0006 * x2) / (60 * (a + 5) + 1.2 * x + 0.0006 * x2) * 0.6;
+        blockDr *= 100;
+        blockDr = Math.min(85, blockDr);
+
+        summary.push({ 
+            name: "Block Chance", 
+            total: blockChance, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.BLOCK_CHANCE]?.sources || []),
+            ]
+        });
+        blockChance = Math.min(100, blockChance);
+        summary.push({ 
+            name: "Block Effectiveness", 
+            total: blockEffect, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.BLOCK_EFFECTIVENESS]?.sources || []),
+                ...(allStats[stats.INCREASED_BLOCK_EFFECTIVENESS]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Block Dr", 
+            total: blockDr, 
+            type: "stat",
+            sources: [
+            ]
+        });
+    }
+
     let chanceToTake0 = (allStats[stats.CHANCE_TO_TAKE_ZERO_DAMAGE]?.total || 0);
     {
         
@@ -1238,6 +1281,8 @@ function processStats(statsArray, firstRun = true) {
     const lessDotDamageTaken = lessDamageTaken * (allStats[stats.LESS_DOT_DAMAGE_TAKEN]?.total || 100) / 100;
     if (glancingBlowChance == 100)
         lessHitDamageTaken *= (1 - 0.35);
+    if (blockChance == 100)
+        lessHitDamageTaken *= (100 - blockDr) / 100;
     const armourAppliedToDots = (allStats[stats.ARMOUR_MITIGATION_APPLIED_TO_DOT]?.total || 0);
     let lessDotDamageTakenPhys = (100 - armourAppliedToDots / 100 * totalArmourDrPhys) * lessDotDamageTaken / 100;
     let lessDotDamageTakenNonPhys = (100 - armourAppliedToDots / 100 * totalArmourDrNonPhys) * lessDotDamageTaken / 100;
@@ -1406,7 +1451,10 @@ function processStats(statsArray, firstRun = true) {
 
         let ehpHits = a * b;
         if (glancingBlowChance < 100)
-            ehpHits *= (100 + (1 - 0.35)*(glancingBlowChance)) / 100;
+            ehpHits *= 100 / (100 - (1 - 0.35)*(glancingBlowChance));
+        if (blockChance < 100)
+            ehpHits *= 100 / (100 - blockDr * blockChance / 100);
+            
         ehpHits *= 100 / (100 - dodgeChance);
         ehpHits *= 100 / (100 - chanceToTake0);
         summary.push({type: "hr"});
@@ -1461,7 +1509,7 @@ function evaluateExpression(expr) {
     if (!expr.trim()) return 0;
 
     // Convert commas to dots for float compatibility
-    const cleanedExpr = expr.replace(/,/g, ".");
+    const cleanedExpr = expr; // expr.replace(/,/g, ".");
 
     // Check cache
     if (expressionCache.has(cleanedExpr)) {
