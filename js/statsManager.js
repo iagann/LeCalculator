@@ -158,6 +158,7 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
               expression = expression.replaceAll("dex",1);
               expression = expression.replaceAll("int",1);
               expression = expression.replaceAll("attu",1);
+              expression = expression.replaceAll("vit",1);
               expression = expression.replaceAll("recurve",1);
               expression = expression.replaceAll("hps",1);
               expression = expression.replaceAll("maxHP",1);

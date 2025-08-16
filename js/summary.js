@@ -256,6 +256,7 @@ function processExpressions() {
                 replaceExpression("dex", dexterity);
                 replaceExpression("int", intelligence);
                 replaceExpression("attu", attunement);
+                replaceExpression("vit", vitality);
                 replaceExpression("recurve", getAvgRecurveHits(recurveChance - 100));
                 replaceExpression("hps", hitsPerSecond);
                 replaceExpression("maxHP", maxHealth);
@@ -323,6 +324,7 @@ let strength = 0;
 let dexterity = 0;
 let intelligence = 0;
 let attunement = 0;
+let vitality = 0;
 let recurveChance = 0;
 let hitsPerSecond = 0;
 let maxHealth = 0;
@@ -391,7 +393,7 @@ function processStats(statsArray, firstRun = true) {
     dexterity = allAttributes + (allStats[stats.DEXTERITY]?.total || 0);
     intelligence = allAttributes + (allStats[stats.INTELLIGENCE]?.total || 0);
     attunement = allAttributes + (allStats[stats.ATTUNEMENT]?.total || 0);
-    const vitality = allAttributes + (allStats[stats.VITALITY]?.total || 0);
+    vitality = allAttributes + (allStats[stats.VITALITY]?.total || 0);
 
     //const test1 = (allStats[stats.ADDED_FLAT_DAMAGE]?.total || 0);
     processExpressions();
@@ -482,9 +484,24 @@ function processStats(statsArray, firstRun = true) {
                 ...(allStats[stats.ALL_ATTRIBUTES]?.sources || [])
             ]
         });
+
+        summary.push({ 
+            name: "Total", 
+            total: strength + dexterity + intelligence + attunement + vitality, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.VITALITY]?.sources || []), 
+                ...(allStats[stats.DEXTERITY]?.sources || []), 
+                ...(allStats[stats.INTELLIGENCE]?.sources || []), 
+                ...(allStats[stats.ATTUNEMENT]?.sources || []), 
+                ...(allStats[stats.VITALITY]?.sources || []), 
+                ...(allStats[stats.ALL_ATTRIBUTES]?.sources || [])
+            ]
+        });
     }
 
     let stableWard = 0;
+    let totalMana = 0;
     summary.push({name:"HP, mana, ward", type:"section"});
     {
         // health
@@ -534,7 +551,7 @@ function processStats(statsArray, firstRun = true) {
         {
             const flatMana = attunement * 2 + (allStats[stats.FLAT_MANA]?.total || 0);
             const increasedMana = allStats[stats.INCREASED_MANA]?.total || 0;
-            const totalMana = flatMana * (1 + increasedMana / 100);
+            totalMana = flatMana * (1 + increasedMana / 100);
             const wasManaHr = totalMana > 100;
             if (wasManaHr) {
                 summary.push({type: "hr"});
@@ -1098,12 +1115,29 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
     }
-    let preusoHpAfterEndurance = maxHealth - totalEnduranceThreshold
-    + totalEnduranceThreshold * 100 / (100 - Math.min(60, totalEndurance));
+
+    let manaBeforeHealth = (allStats[stats.MANA_BEFORE_HEALTH]?.total || 0);
+    let enduranceAppliedToMana = (allStats[stats.ENDURANCE_APPLIED_TO_MANA]?.total || 0);
+
+    let preusoHp = maxHealth
+        - totalEnduranceThreshold 
+        + totalEnduranceThreshold * 100 / (100 - Math.min(60, totalEndurance));
+    let preudoManaBeforeHealth = totalMana;
+    if (manaBeforeHealth > 0) {
+        const manaConsumedBeforeHpDepletes = Math.max(totalMana, preusoHp / manaBeforeHealth * 100);
+        preudoManaBeforeHealth = Math.min(preudoManaBeforeHealth, manaConsumedBeforeHpDepletes);
+        preudoManaBeforeHealth *= 5;
+        if (enduranceAppliedToMana > 0) {
+            preudoManaBeforeHealth *= (100 + enduranceAppliedToMana / 100 * Math.min(60, totalEndurance)) / 100;
+        }
+            
+    }
+    preusoHp += preudoManaBeforeHealth;
+
     {
         summary.push({ 
             name: "Preudo HP after Endurance", 
-            total: preusoHpAfterEndurance, 
+            total: preusoHp, 
             type: "stat",
             sources: [
                 `HP part without Endurance: total HP - endurance threshold = ${(maxHealth - totalEnduranceThreshold).toFixed(3)}`,
@@ -1248,8 +1282,7 @@ function processStats(statsArray, firstRun = true) {
             name: "Block Dr", 
             total: blockDr, 
             type: "stat",
-            sources: [
-            ]
+            sources: []
         });
     }
 
@@ -1261,6 +1294,25 @@ function processStats(statsArray, firstRun = true) {
             total: chanceToTake0, 
             type: "stat",
             sources: []
+        });
+    }
+
+    {
+        summary.push({ 
+            name: "Damage Dealt to Mana Before Health", 
+            total: manaBeforeHealth, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.MANA_BEFORE_HEALTH]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Endurance applies to all damage dealt to mana", 
+            total: enduranceAppliedToMana, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.ENDURANCE_APPLIED_TO_MANA]?.sources || []),
+            ]
         });
     }
 
@@ -1386,7 +1438,7 @@ function processStats(statsArray, firstRun = true) {
     summary.push({name:"EHP", type:"section"});
     // ehp
     {
-        const a = (preusoHpAfterEndurance + stableWard);
+        const a = (preusoHp + stableWard);
         let r = [];
         const m = Math.pow(100,3);
         r[stats.FIRE_RESISTANCE] = m / (175 - Math.min(75,fireRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);

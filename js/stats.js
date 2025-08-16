@@ -84,6 +84,9 @@ const stats = Object.freeze({
     BLOCK_CHANCE: statNum++,
     BLOCK_EFFECTIVENESS: statNum++,
     INCREASED_BLOCK_EFFECTIVENESS: statNum++,
+
+    MANA_BEFORE_HEALTH: statNum++,
+    ENDURANCE_APPLIED_TO_MANA: statNum++,
 });
 
 function getStatName(key) {
@@ -172,6 +175,9 @@ function getStatName(key) {
         case stats.BLOCK_CHANCE: return "Block Chance";
         case stats.BLOCK_EFFECTIVENESS: return "Block Effectiveness";
         case stats.INCREASED_BLOCK_EFFECTIVENESS: return "Increased Block Effectiveness";
+
+        case stats.MANA_BEFORE_HEALTH: return "Damage Dealt to Mana Before Health";
+        case stats.ENDURANCE_APPLIED_TO_MANA: return "Endurance applies to all damage dealt to mana";
     }
     return "Unknown";
 }
