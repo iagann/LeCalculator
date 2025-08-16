@@ -89,6 +89,9 @@ const stats = Object.freeze({
     ENDURANCE_APPLIED_TO_MANA: statNum++,
 
     INCREASED_ENDURANCE_THRESHOLD: statNum++,
+
+    SKILL_COOLDOWN: statNum++,
+    CDR: statNum++,
 });
 
 function getStatName(key) {
@@ -182,6 +185,9 @@ function getStatName(key) {
         case stats.ENDURANCE_APPLIED_TO_MANA: return "Endurance applies to all damage dealt to mana";
     
         case stats.INCREASED_ENDURANCE_THRESHOLD: return "Increased Endurance Threshold";
+
+        case stats.SKILL_COOLDOWN: return "SKILL COOLDOWN";
+        case stats.CDR: return "Cooldown Reduciton Speed";
     }
     return "Unknown";
 }

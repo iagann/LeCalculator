@@ -246,10 +246,10 @@ function processExpressions() {
     for (const [statId, statData] of allStatsArray) {
         if (statData.expression) {
             expression = statData.expression;
-
-            /*if (expression.includes("attu"))
-                console.log(1);*/
-
+            /*
+            if (expression.includes("str - int"))
+                console.log(1);
+            */
             if (containsLetters(expression))
             {
                 replaceExpression("str", strength);
@@ -264,6 +264,7 @@ function processExpressions() {
                 replaceExpression("endurance", totalEndurance);
                 replaceExpression("ms", increasedMS);
                 replaceExpression("dodgeRating", totalDodgeRating);
+                replaceExpression("cdr", cdr);
                 wasExpression = wasExpression || expression != statData.expression;
             }
             /*
@@ -332,6 +333,7 @@ let totalEndurance = 0;
 let totalEnduranceThreshold = 0;
 let increasedMS = 0;
 let totalDodgeRating = 0;
+let cdr = 0;
 function processStats(statsArray, firstRun = true) {
     processExpressionsCount = 0;
 
@@ -395,9 +397,8 @@ function processStats(statsArray, firstRun = true) {
     attunement = allAttributes + (allStats[stats.ATTUNEMENT]?.total || 0);
     vitality = allAttributes + (allStats[stats.VITALITY]?.total || 0);
 
-    //const test1 = (allStats[stats.ADDED_FLAT_DAMAGE]?.total || 0);
     processExpressions();
-    //const test2 = (allStats[stats.ADDED_FLAT_DAMAGE]?.total || 0);
+    intelligence = allAttributes + (allStats[stats.INTELLIGENCE]?.total || 0);
 
     const flatDodge = (allStats[stats.DODGE_RATING]?.total || 0) + dexterity * 4;
     const increasedDodge = allStats[stats.INCREASED_DODGE_RATING]?.total || 0;
@@ -414,6 +415,8 @@ function processStats(statsArray, firstRun = true) {
     const increasedHitSpeed = allStats[stats.INCREASED_HITS]?.total || 0;
     const moreHits = (allStats[stats.MORE_HIT_SPEED]?.total || 100);
     
+    const cd = allStats[stats.SKILL_COOLDOWN]?.total || 0;
+    cdr = allStats[stats.CDR]?.total || 0;
 
     {
         totalEnduranceThreshold = enduranceThreshold + hpAsEnduranceThreshold;
@@ -431,9 +434,14 @@ function processStats(statsArray, firstRun = true) {
 
         processExpressions();
 
-        hitsPerSecond = allStats[stats.HITS_PER_SECOND]?.total || 0;
-        hitsPerSecond *= (100 + increasedHitSpeed) / 100;
-        hitsPerSecond *= moreHits/100;
+        if (cd > 0) {
+            hitsPerSecond = (1 / cd) * (100 + cdr) / 100;
+        }
+        else {
+            hitsPerSecond = allStats[stats.HITS_PER_SECOND]?.total || 0;
+            hitsPerSecond *= (100 + increasedHitSpeed) / 100;
+            hitsPerSecond *= moreHits/100;
+        }
 
         processExpressions();
 
@@ -1123,17 +1131,15 @@ function processStats(statsArray, firstRun = true) {
     let preusoHp = maxHealth
         - totalEnduranceThreshold 
         + totalEnduranceThreshold * 100 / (100 - Math.min(60, totalEndurance));
-    let preudoManaBeforeHealth = totalMana;
+    let maxManaDeplete = 0;
     if (manaBeforeHealth > 0) {
-        const manaConsumedBeforeHpDepletes = Math.max(totalMana, preusoHp / manaBeforeHealth * 100);
-        preudoManaBeforeHealth = Math.min(preudoManaBeforeHealth, manaConsumedBeforeHpDepletes);
-        preudoManaBeforeHealth *= 5;
-        if (enduranceAppliedToMana > 0) {
-            preudoManaBeforeHealth *= (100 + enduranceAppliedToMana / 100 * Math.min(60, totalEndurance)) / 100;
-        }
-            
+        const ratio = manaBeforeHealth / 100;
+        const maxHitBeforeHpDepletes = preusoHp / (1 - ratio);
+        const maxTheoreticalManaDeplete = maxHitBeforeHpDepletes * ratio / 5;
+        const enduranceRatio = (100 + enduranceAppliedToMana / 100 * Math.min(60, totalEndurance)) / 100;
+        maxManaDeplete = Math.min(totalMana * enduranceRatio, maxTheoreticalManaDeplete / enduranceRatio);
     }
-    preusoHp += preudoManaBeforeHealth;
+    preusoHp += maxManaDeplete * 5;
 
     {
         summary.push({ 
@@ -1315,6 +1321,15 @@ function processStats(statsArray, firstRun = true) {
                 ...(allStats[stats.ENDURANCE_APPLIED_TO_MANA]?.sources || []),
             ]
         });
+        summary.push({ 
+            name: "Max Mana consumed before dead", 
+            total: maxManaDeplete, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.ENDURANCE_APPLIED_TO_MANA]?.sources || []),
+            ]
+        });
+        
     }
 
     if (glancingBlowChance > 0) {
@@ -1391,6 +1406,7 @@ function processStats(statsArray, firstRun = true) {
 
     summary.push({name:"DPS", type:"section"});
     // dps
+    var dps = 0;
     {
         let dpsAilment = allStats[stats.AILMENT_DAMAGE]?.total || 0;
         if (dpsAilment > 0) {
@@ -1402,6 +1418,7 @@ function processStats(statsArray, firstRun = true) {
             if (increasedAilmentDuration > 0)
                 dpsAilment *= (100 + increasedAilmentDuration) / 100;
         }
+        dps += dpsAilment;
         summary.push({ 
             name: "DPS Ailment", 
             total: dpsAilment, 
@@ -1426,7 +1443,7 @@ function processStats(statsArray, firstRun = true) {
             dpsHit *= moreDamage / 100;
             dpsHit *= (100 + penetration) / 100;
             dpsHit *= (100 + armourShredDr) / 100;
-
+            dps += dpsHit;
             summary.push({ 
                 name: "Hit DPS", 
                 total: dpsHit, 
@@ -1438,6 +1455,7 @@ function processStats(statsArray, firstRun = true) {
 
     summary.push({name:"EHP", type:"section"});
     // ehp
+    var avgMaxHit = 0;
     {
         const a = (preusoHp + stableWard);
         let r = [];
@@ -1459,6 +1477,7 @@ function processStats(statsArray, firstRun = true) {
             / 7;
         b = b;
 
+        avgMaxHit = a * b;
         summary.push({ 
             name: "Avg Max Hit", 
             total: a * b, 
@@ -1543,6 +1562,13 @@ function processStats(statsArray, firstRun = true) {
             sources: [`including armour mitigation applied to DoTs`]
         });
     }
+    summary.push({name:"POWER", type:"section"});
+    summary.push({ 
+            name: "POWER", 
+            total: avgMaxHit * dps, 
+            type: "stat",
+            sources: [`avgMaxHit * dps`]
+        });
 
     Object.values(summary).forEach(stat => {
         stat.total = formatNumber(stat.total);
