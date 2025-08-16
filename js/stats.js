@@ -87,6 +87,8 @@ const stats = Object.freeze({
 
     MANA_BEFORE_HEALTH: statNum++,
     ENDURANCE_APPLIED_TO_MANA: statNum++,
+
+    INCREASED_ENDURANCE_THRESHOLD: statNum++,
 });
 
 function getStatName(key) {
@@ -178,6 +180,8 @@ function getStatName(key) {
 
         case stats.MANA_BEFORE_HEALTH: return "Damage Dealt to Mana Before Health";
         case stats.ENDURANCE_APPLIED_TO_MANA: return "Endurance applies to all damage dealt to mana";
+    
+        case stats.INCREASED_ENDURANCE_THRESHOLD: return "Increased Endurance Threshold";
     }
     return "Unknown";
 }

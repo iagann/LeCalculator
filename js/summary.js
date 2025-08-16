@@ -417,6 +417,7 @@ function processStats(statsArray, firstRun = true) {
 
     {
         totalEnduranceThreshold = enduranceThreshold + hpAsEnduranceThreshold;
+        totalEnduranceThreshold *= (100 + (allStats[stats.INCREASED_ENDURANCE_THRESHOLD]?.total || 0)) / 100;
         if ((allStats[stats.DODGE_CONVERTED_TO_ENDURANCE]?.total || 0)) {
             totalEnduranceThreshold += totalDodgeRating;
         }
