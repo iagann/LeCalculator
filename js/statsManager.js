@@ -1,5 +1,6 @@
 // statsManager.js
 
+var inputTimeout;
 function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummaryUpdate = false) { 
   const statDiv = document.createElement("div");
   statDiv.classList.add("stat-entry");
@@ -57,7 +58,8 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
   mathInput.placeholder = "Math Expression";
   mathInput.value = mathExpression;
   mathInput.oninput = () => {
-      updateSummary();
+      clearTimeout(inputTimeout);
+      setTimeout(()=>updateSummary(), 1000);      
       validateStatEntries();
       saveCurrentBuildLocally();
       updateSectionSearchOptions();
