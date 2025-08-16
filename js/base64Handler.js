@@ -65,7 +65,7 @@ function openLoadDialog() {
 }
 
 document.getElementById("loadInput").addEventListener("input", function() {
-    const inputStr = this.value.trim();
+    const inputStr = this.value; //.trim();
     if (!inputStr) return;
 
     // Decompress Base64 and parse JSON to check the build name
