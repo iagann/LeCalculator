@@ -46,6 +46,53 @@ html, body {
     box-shadow: 0 0 6px #6200ea;
     background-color: #2b2b2b;
   }
+
+  input[type="checkbox"] {
+  /* Remove default browser styles */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  padding: 6px 10px;
+  width: 32px;
+  height: 28px;
+  margin: 0px 5px 1px 0;
+  cursor: pointer;
+  border: 1px solid #555;
+  border-radius: 5px;
+  background-color: #2a2a2a;
+  vertical-align: middle;
+  position: relative;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Checked state */
+input[type="checkbox"]:checked {
+  background-color: #6200ea;
+  border-color: #6200ea;
+}
+
+/* Show a checkmark when checked */
+input[type="checkbox"]:checked::after {
+  content: "✔";
+  font-size: 12px;
+  color: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -58%);
+}
+
+/* Hover effect */
+input[type="checkbox"]:hover {
+  background-color: #3a3a3a;
+}
+
+/* Focus glow (same as text inputs) */
+input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: 0 0 6px #6200ea;
+}
   
   .container {
     display: flex;
