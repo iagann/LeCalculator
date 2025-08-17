@@ -671,8 +671,6 @@ function processStats(statsArray, firstRun = true) {
         let baseCrit = (allStats[stats.BASE_CRITICAL_STIKE_CHANCE]?.total || 0);
         let increasedCrit = (allStats[stats.INCREASED_CRITICAL_STIKE_CHANCE]?.total || 0);
         let critMulti = 200 + (allStats[stats.CRITICAL_STIKE_MULTIPLIER]?.total || 0);
-        let totalCritChance = Math.min(100, baseCrit * (increasedCrit + 100) / 100);
-        moreFromCrits = - totalCritChance + totalCritChance * critMulti / 100;
         summary.push({ 
             name: "Total Base Crit Chance", 
             total: baseCrit, 
@@ -697,6 +695,7 @@ function processStats(statsArray, firstRun = true) {
                 ...(allStats[stats.CRITICAL_STIKE_MULTIPLIER]?.sources || []),
             ]
         });
+        let totalCritChance = baseCrit * (increasedCrit + 100) / 100;
         summary.push({type:"hr"});
         summary.push({ 
             name: "Total Crit Chance", 
@@ -704,6 +703,8 @@ function processStats(statsArray, firstRun = true) {
             type: "stat",
             sources: []
         });
+        totalCritChance = Math.min(100, totalCritChance);
+        moreFromCrits = - totalCritChance + totalCritChance * critMulti / 100;
         summary.push({ 
             name: "Total More Damage from Crits", 
             total: moreFromCrits, 
