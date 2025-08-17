@@ -167,6 +167,7 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
               expression = expression.replaceAll("enduranceThreshold",1);
               expression = expression.replaceAll("endurance",1);
               expression = expression.replaceAll("ms",1);
+              expression = expression.replaceAll("cdr",1);
 
               //console.log("validate", expression);
               
