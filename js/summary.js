@@ -1458,7 +1458,8 @@ function processStats(statsArray, firstRun = true) {
     // ehp
     var avgMaxHit = 0;
     {
-        const a = (preusoHp + stableWard);
+        const lowLife = (allStats[stats.LOW_LIFE]?.total || 0);
+        const a = ((lowLife ? 0 : preusoHp) + stableWard);
         let r = [];
         const m = Math.pow(100,3);
         r[stats.FIRE_RESISTANCE] = m / (175 - Math.min(75,fireRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
