@@ -94,9 +94,13 @@ function filterSectionsByName() {
       }
     });
   }
+
+  function setSectionSearch(str) {
+    const input = document.getElementById("section-search");
+    input.value = str;
+    filterSectionsByName();
+  }
   
   function clearSectionSearch() {
-    const input = document.getElementById("section-search");
-    input.value = "";
-    filterSectionsByName();
+    setSectionSearch("");
   }

@@ -74,6 +74,11 @@
           <button onclick="expandAllSections()">Expand All</button>
           <button onclick="collapseAllSections()">Collapse All</button>
           <div class="search-wrapper">
+            <button onclick="setSectionSearch('[skill]')">S</button>
+            <button onclick="setSectionSearch('[item]')">E</button>
+            <button onclick="setSectionSearch('[idol]')">I</button>
+            <button onclick="setSectionSearch('[passive]')">P</button>
+            <button onclick="setSectionSearch('[blessing]')">B</button>
             <input type="text" id="section-search" placeholder="Search Sections or Stats..." oninput="filterSectionsByName()" list="section-stat-options">
             <button id="clear-search" onclick="clearSectionSearch()" title="Clear Search">✖</button>
             <datalist id="section-stat-options"></datalist>

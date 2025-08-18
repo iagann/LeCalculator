@@ -172,7 +172,8 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
               //console.log("validate", expression);
               
               const result = evaluateExpression(expression);
-              if (isNaN(result)) isValidExpression = false;
+              if (isNaN(result))
+                isValidExpression = false;
 
               //console.log("validate", result, isValidExpression);
             }
