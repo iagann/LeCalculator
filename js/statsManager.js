@@ -59,9 +59,8 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
   mathInput.value = mathExpression;
   mathInput.oninput = () => {
       clearTimeout(inputTimeout);
-      setTimeout(()=>updateSummary(), 1000);      
+      setTimeout(()=>{ updateSummary(); saveCurrentBuildLocally();}, 1000);      
       validateStatEntries();
-      saveCurrentBuildLocally();
       updateSectionSearchOptions();
   };
 
