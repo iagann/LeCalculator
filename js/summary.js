@@ -1607,11 +1607,11 @@ function evaluateExpression(expr) {
     if (!expr.trim()) return 0;
 
     // Convert commas to dots for float compatibility
-    const cleanedExpr = expr; // expr.replace(/,/g, ".");
+    const cleanedExpr = expr.replaceAll(" ",""); // expr.replace(/,/g, ".");
 
     // Check cache
     if (expressionCache.has(cleanedExpr)) {
-        //return expressionCache.get(cleanedExpr);
+        return expressionCache.get(cleanedExpr);
     }
 
     try {
