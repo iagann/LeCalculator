@@ -1769,7 +1769,21 @@ function renderSummary(summaryArray) {
         // Stat text
         const statText = document.createElement("span");
         statText.classList.add("summary-text");
-        statText.innerHTML = `<strong>${summaryStat.name}: </strong><span class="stat-number">${summaryStat.total.replace(/\B(?=(\d{3})+(?!\d))/g, " ")}</span>`;
+
+        const value = Number(summaryStat.total);
+
+        let displayValue;
+        if (value >= 1e9 || statText == "POWER") {
+        // Scientific notation with 3 significant digits
+        displayValue = value.toExponential(3);
+        } else {
+        // Format with space as thousands separator
+        displayValue = value
+            .toString()
+            .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        statText.innerHTML = `<strong>${summaryStat.name}: </strong><span class="stat-number">${displayValue}</span>`;
 
         // Tooltip
         const tooltip = document.createElement("div");
