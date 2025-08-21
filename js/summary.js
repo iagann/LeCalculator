@@ -789,9 +789,33 @@ function processStats(statsArray, firstRun = true) {
                 ...(allStats[stats.INCREASED_MANA_REGEN]?.sources || [])
             ]
         });
-    }     
+    }
     // hit speed
-    {
+    if (cd > 0) {
+        summary.push({ 
+            name: "Cooldown", 
+            total: cd, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.SKILL_COOLDOWN]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Increased Cooldown Recovery Speed", 
+            total: cdr, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.CDR]?.sources || []),
+            ]
+        });
+        summary.push({ 
+            name: "Uses per second", 
+            total: hitsPerSecond, 
+            type: "stat",
+            sources: []
+        });
+    }
+    else {
         summary.push({ 
             name: "Increased Hit Speed", 
             total: increasedHitSpeed, 
@@ -800,9 +824,8 @@ function processStats(statsArray, firstRun = true) {
                 ...(allStats[stats.INCREASED_HITS]?.sources || []),
             ]
         });
-    }
-    // more hits
-    {
+
+        // more hits
         if (moreHits > 0) {
             summary.push({ 
                 name: "More Hits", 
@@ -813,40 +836,45 @@ function processStats(statsArray, firstRun = true) {
                 ]
             });
         }
-    }
-    // hits per second
-    let hitSpeedSummary = `${hitsPerSecond.toFixed(3)}`; 
-    {
-        hitSpeedSummary += ` * (100 + ${increasedHitSpeed})/100`;
-        hitSpeedSummary += ` * (${moreHits}/100) = ${hitsPerSecond.toFixed(3)}`;
 
-        var recurveSummary = `recurve chance: ${recurveChance}\navg hits: ${getAvgRecurveHits(recurveChance-100).toFixed(3)}`;
-        allStats[stats.HITS_PER_SECOND]?.sources.push(recurveSummary);
-        if (recurveChance > 0) {
+        hitsPerSecond = allStats[stats.HITS_PER_SECOND]?.total || 0;
+        hitsPerSecond *= (100 + increasedHitSpeed) / 100;
+        hitsPerSecond *= moreHits/100;
+
+        // hits per second
+        let hitSpeedSummary = `${hitsPerSecond.toFixed(3)}`; 
+        {
+            hitSpeedSummary += ` * (100 + ${increasedHitSpeed})/100`;
+            hitSpeedSummary += ` * (${moreHits}/100) = ${hitsPerSecond.toFixed(3)}`;
+
+            var recurveSummary = `recurve chance: ${recurveChance}\navg hits: ${getAvgRecurveHits(recurveChance-100).toFixed(3)}`;
+            allStats[stats.HITS_PER_SECOND]?.sources.push(recurveSummary);
+            if (recurveChance > 0) {
+                summary.push({ 
+                    name: "Recurve chance", 
+                    total: recurveChance, 
+                    type: "stat",
+                    sources: [
+                        ...(allStats[stats.ADDITIONAL_RECURVE_CHANCE]?.sources || []),
+                        ...(allStats[stats.DEXTERITY]?.sources || []),
+                        ...(allStats[stats.ALL_ATTRIBUTES]?.sources || []),
+                    ]
+                });
+            }
+
             summary.push({ 
-                name: "Recurve chance", 
-                total: recurveChance, 
+                name: "Hits per Second", 
+                total: hitsPerSecond, 
                 type: "stat",
                 sources: [
-                    ...(allStats[stats.ADDITIONAL_RECURVE_CHANCE]?.sources || []),
-                    ...(allStats[stats.DEXTERITY]?.sources || []),
-                    ...(allStats[stats.ALL_ATTRIBUTES]?.sources || []),
+                    hitSpeedSummary,
+                    ...(allStats[stats.HITS_PER_SECOND]?.sources || []),
+                    ...(allStats[stats.INCREASED_HITS]?.sources || []),
+                    ...(allStats[stats.MORE_HIT_SPEED]?.sources || []),
                 ]
             });
         }
-
-        summary.push({ 
-            name: "Hits per Second", 
-            total: hitsPerSecond, 
-            type: "stat",
-            sources: [
-                hitSpeedSummary,
-                ...(allStats[stats.HITS_PER_SECOND]?.sources || []),
-                ...(allStats[stats.INCREASED_HITS]?.sources || []),
-                ...(allStats[stats.MORE_HIT_SPEED]?.sources || []),
-            ]
-        });
-    }
+    }  
 
     // chance to apply ailment
     summary.push({name:"Ailments", type:"section"});
