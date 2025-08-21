@@ -1652,7 +1652,6 @@ function renderSummary(summaryArray) {
     let insideSection = false;
     let sectionContainer = null;
     let sectionContentWrapper = null;
-    let sectionIndex = 0; // We'll increment this each time we encounter a "section" type
 
     summaryArray.forEach((summaryStat, index) => {
         // If we encounter an "hr", just insert an <hr>
@@ -1696,8 +1695,7 @@ function renderSummary(summaryArray) {
 
             // Give this section-content a dataset.index so we know how to restore it
             // We can use "sectionIndex" for sections or reuse "index" if each section in summaryArray is unique.
-            sectionContentWrapper.dataset.index = `section-${sectionIndex}`;
-            sectionIndex++;
+            sectionContentWrapper.dataset.index = `section-${summaryStat.name}`;
 
             // Toggle on click
             const localSectionContentWrapper = sectionContentWrapper;
