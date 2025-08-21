@@ -242,12 +242,12 @@ function processExpressions() {
         return false;
       }
     let allStatsArray = Object.entries(allStats);
-    let wasExpression = false;
+    //let wasExpression = false;
     for (const [statId, statData] of allStatsArray) {
         if (statData.expression) {
             expression = statData.expression;
             /*
-            if (expression.includes("str - int"))
+            if (expression.includes("-int"))
                 console.log(1);
             */
             if (containsLetters(expression))
@@ -265,7 +265,14 @@ function processExpressions() {
                 replaceExpression("ms", increasedMS);
                 replaceExpression("dodgeRating", totalDodgeRating);
                 replaceExpression("cdr", cdr);
-                wasExpression = wasExpression || expression != statData.expression;
+                replaceExpression("fireRes", fireResist);
+                replaceExpression("coldRes", coldResist);
+                replaceExpression("lightningRes", lightningResist);
+                replaceExpression("physRes", physResist);
+                replaceExpression("necroticRes", necroticResist);
+                replaceExpression("poisonRes", poisonResist);
+                replaceExpression("voidRes", voidResist);
+                //wasExpression = wasExpression || expression != statData.expression;
             }
             /*
             if (statId == 50)
@@ -334,6 +341,14 @@ let totalEnduranceThreshold = 0;
 let increasedMS = 0;
 let totalDodgeRating = 0;
 let cdr = 0;
+let fireResist = 0;
+let coldResist = 0;
+let lightningResist = 0;
+let physResist = 0;
+let necroticResist = 0;
+let poisonResist = 0;
+let voidResist = 0;
+
 function processStats(statsArray, firstRun = true) {
     processExpressionsCount = 0;
 
@@ -396,6 +411,15 @@ function processStats(statsArray, firstRun = true) {
     intelligence = allAttributes + (allStats[stats.INTELLIGENCE]?.total || 0);
     attunement = allAttributes + (allStats[stats.ATTUNEMENT]?.total || 0);
     vitality = allAttributes + (allStats[stats.VITALITY]?.total || 0);
+    processExpressions();
+
+    fireResist = (allStats[stats.FIRE_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    coldResist = (allStats[stats.COLD_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    lightningResist = (allStats[stats.LIGHTNING_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    physResist = (allStats[stats.PHYSICAL_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    necroticResist = vitality + (allStats[stats.NECROTIC_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    poisonResist = vitality + (allStats[stats.POISON_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    voidResist = (allStats[stats.VOID_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
 
     processExpressions();
     intelligence = allAttributes + (allStats[stats.INTELLIGENCE]?.total || 0);
@@ -940,17 +964,10 @@ function processStats(statsArray, firstRun = true) {
    
 
     summary.push({name:"Resistances", type:"section"});
-    const fireRes = (allStats[stats.FIRE_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
-    const coldRes = (allStats[stats.COLD_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
-    const lightningRes = (allStats[stats.LIGHTNING_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
-    const physicalRes = (allStats[stats.PHYSICAL_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
-    const necroticRes = vitality + (allStats[stats.NECROTIC_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
-    const poisonRes = vitality + (allStats[stats.POISON_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
-    const voidRes = (allStats[stats.VOID_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
     {
         summary.push({ 
             name: "Fire Resistance", 
-            total: fireRes, 
+            total: fireResist, 
             type: "stat",
             sources: [
                 ...(allStats[stats.FIRE_RESISTANCE]?.sources || []),
@@ -959,7 +976,7 @@ function processStats(statsArray, firstRun = true) {
         });
         summary.push({ 
             name: "Cold Resistance", 
-            total: coldRes, 
+            total: coldResist, 
             type: "stat",
             sources: [
                 ...(allStats[stats.COLD_RESISTANCE]?.sources || []),
@@ -968,7 +985,7 @@ function processStats(statsArray, firstRun = true) {
         });
         summary.push({ 
             name: "Lightning Resistance", 
-            total: lightningRes, 
+            total: lightningResist, 
             type: "stat",
             sources: [
                 ...(allStats[stats.LIGHTNING_RESISTANCE]?.sources || []),
@@ -977,7 +994,7 @@ function processStats(statsArray, firstRun = true) {
         });
         summary.push({ 
             name: "Physical Resistance", 
-            total: physicalRes, 
+            total: physResist, 
             type: "stat",
             sources: [
                 ...(allStats[stats.PHYSICAL_RESISTANCE]?.sources || []),
@@ -986,7 +1003,7 @@ function processStats(statsArray, firstRun = true) {
         });
         summary.push({ 
             name: "Necrotic Resistance", 
-            total: necroticRes, 
+            total: necroticResist, 
             type: "stat",
             sources: [
                 ...(allStats[stats.NECROTIC_RESISTANCE]?.sources || []),
@@ -997,7 +1014,7 @@ function processStats(statsArray, firstRun = true) {
         });
         summary.push({ 
             name: "Poison Resistance", 
-            total: poisonRes, 
+            total: poisonResist, 
             type: "stat",
             sources: [
                 ...(allStats[stats.POISON_RESISTANCE]?.sources || []),
@@ -1008,7 +1025,7 @@ function processStats(statsArray, firstRun = true) {
         });
         summary.push({ 
             name: "Void Resistance", 
-            total: voidRes, 
+            total: voidResist, 
             type: "stat",
             sources: [
                 ...(allStats[stats.VOID_RESISTANCE]?.sources || []),
@@ -1462,13 +1479,13 @@ function processStats(statsArray, firstRun = true) {
         const a = ((lowLife ? 0 : preusoHp) + stableWard);
         let r = [];
         const m = Math.pow(100,3);
-        r[stats.FIRE_RESISTANCE] = m / (175 - Math.min(75,fireRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
-        r[stats.COLD_RESISTANCE] = m / (175 - Math.min(75,coldRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
-        r[stats.LIGHTNING_RESISTANCE] = m / (175 - Math.min(75,lightningRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
-        r[stats.PHYSICAL_RESISTANCE] = m / (175 - Math.min(75,physicalRes)) / (100 - totalArmourDrPhys) / (100 - lessHitDamageTaken);
-        r[stats.NECROTIC_RESISTANCE] = m / (175 - Math.min(75,necroticRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
-        r[stats.POISON_RESISTANCE] = m / (175 - Math.min(75,poisonRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
-        r[stats.VOID_RESISTANCE] = m / (175 - Math.min(75,voidRes)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.FIRE_RESISTANCE] = m / (175 - Math.min(75,fireResist)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.COLD_RESISTANCE] = m / (175 - Math.min(75,coldResist)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.LIGHTNING_RESISTANCE] = m / (175 - Math.min(75,lightningResist)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.PHYSICAL_RESISTANCE] = m / (175 - Math.min(75,physResist)) / (100 - totalArmourDrPhys) / (100 - lessHitDamageTaken);
+        r[stats.NECROTIC_RESISTANCE] = m / (175 - Math.min(75,necroticResist)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.POISON_RESISTANCE] = m / (175 - Math.min(75,poisonResist)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.VOID_RESISTANCE] = m / (175 - Math.min(75,voidResist)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
         let b = (r[stats.FIRE_RESISTANCE] 
             + r[stats.COLD_RESISTANCE] 
             + r[stats.LIGHTNING_RESISTANCE] 
@@ -1541,13 +1558,13 @@ function processStats(statsArray, firstRun = true) {
 
         
         let r2 = [];
-        r2[stats.FIRE_RESISTANCE] = (100 / (175 - Math.min(75,fireRes))) / (100 - lessDotDamageTakenNonPhys) * 100;
-        r2[stats.COLD_RESISTANCE] = (100 / (175 - Math.min(75,coldRes))) / (100 - lessDotDamageTakenNonPhys) * 100;
-        r2[stats.LIGHTNING_RESISTANCE] = (100 / (175 - Math.min(75,lightningRes))) / (100 - lessDotDamageTakenNonPhys) * 100;
-        r2[stats.PHYSICAL_RESISTANCE] = (100 / (175 - Math.min(75,physicalRes))) / (100 - lessDotDamageTakenPhys) * 100;
-        r2[stats.NECROTIC_RESISTANCE] = (100 / (175 - Math.min(75,necroticRes))) / (100 - lessDotDamageTakenNonPhys) * 100;
-        r2[stats.POISON_RESISTANCE] = (100 / (175 - Math.min(75,poisonRes))) / (100 - lessDotDamageTakenNonPhys) * 100;
-        r2[stats.VOID_RESISTANCE] = (100 / (175 - Math.min(75,voidRes))) / (100 - lessDotDamageTakenNonPhys) * 100;
+        r2[stats.FIRE_RESISTANCE] = (100 / (175 - Math.min(75,fireResist))) / (100 - lessDotDamageTakenNonPhys) * 100;
+        r2[stats.COLD_RESISTANCE] = (100 / (175 - Math.min(75,coldResist))) / (100 - lessDotDamageTakenNonPhys) * 100;
+        r2[stats.LIGHTNING_RESISTANCE] = (100 / (175 - Math.min(75,lightningResist))) / (100 - lessDotDamageTakenNonPhys) * 100;
+        r2[stats.PHYSICAL_RESISTANCE] = (100 / (175 - Math.min(75,physResist))) / (100 - lessDotDamageTakenPhys) * 100;
+        r2[stats.NECROTIC_RESISTANCE] = (100 / (175 - Math.min(75,necroticResist))) / (100 - lessDotDamageTakenNonPhys) * 100;
+        r2[stats.POISON_RESISTANCE] = (100 / (175 - Math.min(75,poisonResist))) / (100 - lessDotDamageTakenNonPhys) * 100;
+        r2[stats.VOID_RESISTANCE] = (100 / (175 - Math.min(75,voidResist))) / (100 - lessDotDamageTakenNonPhys) * 100;
         const b2 = (r2[stats.FIRE_RESISTANCE] 
             + r2[stats.COLD_RESISTANCE] 
             + r2[stats.LIGHTNING_RESISTANCE] 

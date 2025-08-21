@@ -168,6 +168,13 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
               expression = expression.replaceAll("endurance",1);
               expression = expression.replaceAll("ms",1);
               expression = expression.replaceAll("cdr",1);
+              expression = expression.replaceAll("fireRes",1);
+              expression = expression.replaceAll("coldRes",1);
+              expression = expression.replaceAll("lightningRes",1);
+              expression = expression.replaceAll("physRes",1);
+              expression = expression.replaceAll("necroticRes",1);
+              expression = expression.replaceAll("poisonRes",1);
+              expression = expression.replaceAll("voidRes",1);
 
               //console.log("validate", expression);
               
