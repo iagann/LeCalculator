@@ -803,7 +803,7 @@ function processStats(statsArray, firstRun = true) {
     }
     // more hits
     {
-        if (moreHits > 100) {
+        if (moreHits > 0) {
             summary.push({ 
                 name: "More Hits", 
                 total: moreHits - 100, 
@@ -1454,16 +1454,29 @@ function processStats(statsArray, firstRun = true) {
 
 
         if (baseFlat > 0 && damageEffectiveness > 0) {
-            let dpsHit = hitsPerSecond;
-            dpsHit *= totalFlat;
+            let dpsHit = totalFlat;
             dpsHit *= (moreFromCrits + 100) / 100;
             dpsHit *= (100 + increasedDamage) / 100;
             dpsHit *= moreDamage / 100;
             dpsHit *= (100 + penetration) / 100;
             dpsHit *= (100 + armourShredDr) / 100;
+            summary.push({ 
+                name: "Hit Speed", 
+                total: hitsPerSecond, 
+                type: "stat",
+                sources: []
+            });
+            summary.push({ 
+                name: "Hit Damage", 
+                total: dpsHit, 
+                type: "stat",
+                sources: []
+            });
+
+            dpsHit *= hitsPerSecond;
             dps += dpsHit;
             summary.push({ 
-                name: "Hit DPS", 
+                name: "DPS", 
                 total: dpsHit, 
                 type: "stat",
                 sources: []
