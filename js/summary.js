@@ -1084,13 +1084,13 @@ function processStats(statsArray, firstRun = true) {
     {
         summary.push({ 
             name: "Total Armour Dr", 
-            total: totalArmourDrPhys, 
+            total: totalArmourDrNonPhys, 
             type: "stat",
             sources: []
         });
         summary.push({ 
             name: "Total Armour Dr Phys", 
-            total: totalArmourDrNonPhys, 
+            total: totalArmourDrPhys, 
             type: "stat",
             sources: []
         });
