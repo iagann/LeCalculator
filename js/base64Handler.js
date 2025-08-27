@@ -27,10 +27,6 @@ function updateSaveString() {
         sectionArray = [sectionName, sectionEnabled];
       else
         sectionArray = [sectionName, sectionEnabled];
-
-    if (sectionName == "[passive falconer] Outlanders' Tenacity") {
-        section.querySelectorAll(".stat-entry");
-    }
   
       section.querySelectorAll(".stat-entry").forEach(statEntry => {
         const statName = statEntry.querySelector('input[placeholder="Choose Stat..."]')?.value || "";

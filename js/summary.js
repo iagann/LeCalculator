@@ -272,6 +272,7 @@ function processExpressions() {
                 replaceExpression("necroticRes", necroticResist);
                 replaceExpression("poisonRes", poisonResist);
                 replaceExpression("voidRes", voidResist);
+                replaceExpression("hpRegen", hpRegen);
                 //wasExpression = wasExpression || expression != statData.expression;
             }
             /*
@@ -348,6 +349,7 @@ let physResist = 0;
 let necroticResist = 0;
 let poisonResist = 0;
 let voidResist = 0;
+let hpRegen = 0;
 
 function processStats(statsArray, firstRun = true) {
     processExpressionsCount = 0;
@@ -378,7 +380,7 @@ function processStats(statsArray, firstRun = true) {
             else {
                 allStats[statId].expression = expression;
             }
-            allStats[statId].sources.push(`[${sectionName}] ${getStatName(statId)}: ${expression}`);
+            allStats[statId].sources.push(`${sectionName} — ${getStatName(statId)}: ${expression}`);
             /*
             if (statId == 50)
                 console.log("allStats[statId].total expression", statId, getStatName(statId), expression);
@@ -397,7 +399,7 @@ function processStats(statsArray, firstRun = true) {
             if (statId == 50)
                 console.log("allStats[statId].total", statId, getStatName(statId), allStats[statId].total - statValue, "=>", allStats[statId].total);
             */
-            allStats[statId].sources.push(`[${sectionName}] ${getStatName(statId)}: ${statValue}`);
+            allStats[statId].sources.push(`${sectionName} — ${getStatName(statId)}: ${statValue}`);
         }
     });
 
@@ -567,10 +569,10 @@ function processStats(statsArray, firstRun = true) {
          // health regen
          const flatHealthRegen = (allStats[stats.FLAT_HEALTH_REGEN]?.total || 0);
          const increasedHealthRegen = allStats[stats.INCREASED_HEALTH_REGEN]?.total || 0;
-         const totalHealthRegen = flatHealthRegen * (1 + increasedHealthRegen / 100);
+         hpRegen = flatHealthRegen * (1 + increasedHealthRegen / 100);
          summary.push({ 
              name: "Health Regen", 
-             total: totalHealthRegen, 
+             total: hpRegen, 
              type: "stat",
              sources: [
                  ...(allStats[stats.FLAT_HEALTH_REGEN]?.sources || []), 
@@ -786,7 +788,7 @@ function processStats(statsArray, firstRun = true) {
             total: increasedMS, 
             type: "stat",
             sources: [
-                ...(allStats[stats.INCREASED_MANA_REGEN]?.sources || [])
+                ...(allStats[stats.INCREASED_MOVEMENT_SPEED]?.sources || [])
             ]
         });
     }
