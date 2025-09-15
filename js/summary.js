@@ -537,6 +537,7 @@ function processStats(statsArray, firstRun = true) {
 
     let stableWard = 0;
     let totalMana = 0;
+    let wps = 0;
     summary.push({name:"HP, mana, ward", type:"section"});
     {
         // health
@@ -623,7 +624,7 @@ function processStats(statsArray, firstRun = true) {
             }
         }
 
-        const wps = allStats[stats.WARD_PER_SECOND]?.total || 0;
+        wps = allStats[stats.WARD_PER_SECOND]?.total || 0;
         const wardThreshold = (allStats[stats.WARD_THRESHOLD]?.total || 0);
         if (wps > 0 || wardThreshold > 0) {
             summary.push({type: "hr"});
@@ -783,7 +784,7 @@ function processStats(statsArray, firstRun = true) {
             });
         }
     }
-
+    
     let penetration = allStats[stats.PENETRATION]?.total || 0;
     {
         summary.push({ 
@@ -1642,10 +1643,16 @@ function processStats(statsArray, firstRun = true) {
     }
     summary.push({name:"POWER", type:"section"});
     summary.push({ 
-            name: "POWER", 
-            total: avgMaxHit * dps, 
+            name: "regen coefficient", 
+            total: regenCoeff(hpRegen + wps), 
             type: "stat",
-            sources: [`avgMaxHit * dps`]
+            sources: [`health regen + ward regen`]
+        });
+    summary.push({ 
+            name: "POWER", 
+            total: avgMaxHit * dps * regenCoeff(hpRegen + wps), 
+            type: "stat",
+            sources: [`avgMaxHit * dps * regen coefficient`]
         });
 
     Object.values(summary).forEach(stat => {
@@ -1653,6 +1660,26 @@ function processStats(statsArray, firstRun = true) {
     });
 
     return Object.values(summary); // Convert object to array
+}
+
+function regenCoeff(regen, opts = {}) {
+  const R  = Math.max(0, Number(regen) || 0);
+  const Rb = (opts.baseline ?? 100); // neutral regen: coefficient = 1
+  const K  = (opts.K ?? 500);        // scale: larger K => slower rise
+  const p  = (opts.power ?? 1);      // curvature: >1 slower start, <1 faster
+  const cap = (opts.cap ?? 2);       // asymptotic cap
+
+  // base saturating curve in [0,1): b(R) = (R/(K+R))^p
+  const b  = Math.pow(R  / (K + R ), p);
+  const bb = Math.pow(Rb / (K + Rb), p);
+
+  // shift/scale so that h(0)=0, h(Rb)=0, h(∞)=1
+  const hRaw = (b - bb) / (1 - bb);
+  const h    = Math.max(0, Math.min(1, hRaw)); // clamp to [0,1]
+
+  // final coefficient in [1, cap]
+  const M = 1 + (cap - 1) * h;
+  return Math.min(cap, M);
 }
 
 function formatNumber(value) {
