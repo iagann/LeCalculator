@@ -175,7 +175,7 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
               expression = expression.replaceAll("necroticRes",1);
               expression = expression.replaceAll("poisonRes",1);
               expression = expression.replaceAll("voidRes",1);
-              expression = expression.replaceAll("hpRegen",1);
+              expression = expression.replaceAll("HpRegen",1);
 
               //console.log("validate", expression);
               

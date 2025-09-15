@@ -9,7 +9,10 @@ function updateSummary() {
       if (!sectionEnabled) return;
   
       const sectionName = section.querySelector(".section-header input[placeholder='Section Name']").value;
-  
+
+      //if (sectionName == "[item][relic] Vessel of Strife")
+      //  console.log(1);
+
       section.querySelectorAll(".stat-entry").forEach(statEntry => {
         const statEnabled = statEntry.querySelector(".stat-enabled")?.checked;
         if (!statEnabled) return;
@@ -246,10 +249,10 @@ function processExpressions() {
     for (const [statId, statData] of allStatsArray) {
         if (statData.expression) {
             expression = statData.expression;
-            /*
-            if (expression.includes("-int"))
-                console.log(1);
-            */
+            
+            //if (expression.includes("HpRegen"))
+            //    console.log(1);
+            
             if (containsLetters(expression))
             {
                 replaceExpression("str", strength);
@@ -272,13 +275,13 @@ function processExpressions() {
                 replaceExpression("necroticRes", necroticResist);
                 replaceExpression("poisonRes", poisonResist);
                 replaceExpression("voidRes", voidResist);
-                replaceExpression("hpRegen", hpRegen);
+                replaceExpression("HpRegen", hpRegen);
                 //wasExpression = wasExpression || expression != statData.expression;
             }
-            /*
-            if (statId == 50)
-                console.log("expression", statId, getStatName(statId), processExpressionsCount, "=>" ,statData.expression, expression);
-            */
+            
+            //if (statId == 50)
+                //console.log("expression", statId, getStatName(statId), processExpressionsCount, "=>" ,statData.expression, expression);
+            
             const statValue = evaluateExpression(expression);
             if (!isNaN(statValue)) {
                 statData.expression = null;
@@ -366,6 +369,9 @@ function processStats(statsArray, firstRun = true) {
     totalDodgeRating = 0;
 
     statsArray.forEach(([statId, expression, sectionName]) => {
+        //if (statId == stats.WARD_PER_SECOND)
+        //    console.log(1);
+
         const statValue = evaluateExpression(expression);
         const statName = getStatName(statId);
 
@@ -413,6 +419,7 @@ function processStats(statsArray, firstRun = true) {
     intelligence = allAttributes + (allStats[stats.INTELLIGENCE]?.total || 0);
     attunement = allAttributes + (allStats[stats.ATTUNEMENT]?.total || 0);
     vitality = allAttributes + (allStats[stats.VITALITY]?.total || 0);
+    hpRegen = NaN; // process later
     processExpressions();
 
     fireResist = (allStats[stats.FIRE_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
@@ -571,6 +578,7 @@ function processStats(statsArray, firstRun = true) {
          const flatHealthRegen = (allStats[stats.FLAT_HEALTH_REGEN]?.total || 0);
          const increasedHealthRegen = allStats[stats.INCREASED_HEALTH_REGEN]?.total || 0;
          hpRegen = flatHealthRegen * (1 + increasedHealthRegen / 100);
+         processExpressions();
          summary.push({ 
              name: "Health Regen", 
              total: hpRegen, 
