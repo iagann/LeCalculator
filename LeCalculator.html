@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/buildList.css?v=20250327">
   <link rel="stylesheet" href="css/summary.css?v=2025032701">
   <link rel="stylesheet" href="css/dragDrop.css?v=20250327">
+  <link rel="stylesheet" href="css/hoverMenu.css?v=20250915">
 
   <!-- Sortable.js (CDN) for drag & drop -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -75,7 +76,21 @@
           <button onclick="collapseAllSections()">Collapse All</button>
           <div class="search-wrapper">
             <button onclick="setSectionSearch('[skill]')">S</button>
-            <button onclick="setSectionSearch('[item]')">E</button>
+            <div class="hover-menu">
+              <button onclick="setSectionSearch('[item]')" aria-haspopup="true" aria-expanded="false">E</button>
+               <div class="panel" role="menu" aria-label="Section shortcuts">
+                <button role="menuitem" onclick="setSectionSearch('[item][helm]')">helm</button>
+                <button role="menuitem" onclick="setSectionSearch('[item][amulet]')">amulet</button>
+                <button role="menuitem" onclick="setSectionSearch('[item][weapon]')">weapon</button>
+                <button role="menuitem" onclick="setSectionSearch('[item][offhand]')">offhand</button>
+                <button role="menuitem" onclick="setSectionSearch('[item][body]')">body</button>
+                <button role="menuitem" onclick="setSectionSearch('[item][ring]')">ring</button>
+                <button role="menuitem" onclick="setSectionSearch('[item][belt]')">belt</button>
+                <button role="menuitem" onclick="setSectionSearch('[item][gloves]')">gloves</button>
+                <button role="menuitem" onclick="setSectionSearch('[item][boots]')">boots</button>
+                <button role="menuitem" onclick="setSectionSearch('[item][relic]')">relic</button>
+              </div>
+            </div>
             <button onclick="setSectionSearch('[idol]')">I</button>
             <button onclick="setSectionSearch('[passive]')">P</button>
             <button onclick="setSectionSearch('[blessing]')">B</button>

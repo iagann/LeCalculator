@@ -135,7 +135,7 @@ function updateSummary() {
       
   
     function formatPercent(value, wasEnabled) {
-        const pct = value.toFixed(1) + "%";
+        const pct = value.toFixed(2) + "%";
       
         if (Math.abs(value) < 0.05) {
           return `<span style="color:gray">+0.0%</span>`;

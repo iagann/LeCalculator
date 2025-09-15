@@ -1,0 +1,64 @@
+  .hover-menu {
+    position: relative;
+    display: inline-block;
+  }
+
+  /*
+  .hover-menu > .main-btn {
+    height: 32px;
+    min-width: 32px;
+    padding: 0 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+  }
+*/
+
+  .hover-menu .panel {
+    position: absolute;
+    top: 100%;          /* directly below the main button */
+    left: -390px;
+    margin-top: -5px;
+    display: none;      /* shown on hover/focus */
+    gap: 6px;
+    padding: 4px;
+    background: #1e1e1e;
+    border: 1px solid #555;
+    border-radius: 5px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    z-index: 1000;
+    white-space: nowrap;
+  }
+
+  /* Show panel on hover or when any child has focus (keyboard friendly) */
+  /*
+  .hover-menu:hover .panel,
+  .hover-menu:focus-within .panel {
+    display: flex;
+  }
+  */
+
+  .hover-menu:hover .panel { display: flex; }
+/*
+  .panel .icon-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f8f8f8;
+    cursor: pointer;
+    display: inline-grid;
+    place-items: center;
+    font-size: 16px;
+  }
+
+  .panel .icon-btn:hover {
+    background: #eef6ff;
+    border-color: #c6e0ff;
+  }
+*/
+
+  .panel button img {
+    height: 50px;
+  }
