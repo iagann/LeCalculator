@@ -753,15 +753,31 @@ function processStats(statsArray, firstRun = true) {
     }
 
     // more damage
+    let moreDamage1 = 0;
+    {
+        moreDamage1 = (allStats[stats.MORE_DAMAGE_1]?.total || 0);
+        if (moreDamage1 > 0) {
+            summary.push({ 
+                name: "More Damage 1", 
+                total: moreDamage1, 
+                type: "stat",
+                sources: [
+                    ...(allStats[stats.MORE_DAMAGE_1]?.sources || []),
+                ]
+            });
+        }
+    }
     let moreDamage = 100;
     {
         moreDamage *= (allStats[stats.MORE_DAMAGE]?.total || 100)/100;
+        moreDamage *= (moreDamage1 + 100) / 100;
         if (moreDamage > 100) {
             summary.push({ 
                 name: "More Damage", 
                 total: moreDamage - 100, 
                 type: "stat",
                 sources: [
+                    ...(allStats[stats.MORE_DAMAGE_1]?.sources || []),
                     ...(allStats[stats.MORE_DAMAGE]?.sources || []),
                 ]
             });

@@ -94,6 +94,8 @@ const stats = Object.freeze({
     CDR: statNum++,
 
     LOW_LIFE: statNum++,
+
+    MORE_DAMAGE_1: statNum++,
 });
 
 function getStatName(key) {
@@ -192,6 +194,8 @@ function getStatName(key) {
         case stats.CDR: return "Cooldown Reduciton Speed";
 
         case stats.LOW_LIFE: return "LOW LIFE";
+
+        case stats.MORE_DAMAGE_1: return "More Damage 1";
     }
     return "Unknown";
 }
