@@ -112,7 +112,7 @@ window.loadFromBase64 = function(inputStr) {
         const sectionEnabled = sectionArr[1] ?? true;
   
         // Create new section
-        const sectionDiv = addSection(sectionName);
+        const sectionDiv = addSection(sectionName, null, true);
         const statList = sectionDiv.querySelector(".stat-list");
   
         // Restore section enabled state
@@ -130,7 +130,7 @@ window.loadFromBase64 = function(inputStr) {
           const statEnabled = entry[2] ?? true;
   
           const statName = getStatName(statID);
-          const statEntry = addStatEntry(statList, statName, expression, true);
+          const statEntry = addStatEntry(statList, statName, expression, true, true);
   
           const statCheckbox = statEntry.querySelector(".stat-enabled");
           if (statCheckbox) {

@@ -1,4 +1,4 @@
-function addSection(name = "", cloneFrom = null) {
+function addSection(name = "", cloneFrom = null, ignoreFocus = false) {
   const sectionsDiv = document.getElementById("sections");
 
   const sectionDiv = document.createElement("div");
@@ -106,7 +106,8 @@ function addSection(name = "", cloneFrom = null) {
   }
 
   makeStatsDraggable(sectionDiv);
-  titleInput.focus();
+  if (!ignoreFocus)
+    titleInput.focus();
   
   return sectionDiv;
 }

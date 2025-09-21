@@ -1,7 +1,7 @@
 // statsManager.js
 
 var inputTimeout;
-function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummaryUpdate = false) { 
+function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummaryUpdate = false, ignoreFocus = true) { 
   const statDiv = document.createElement("div");
   statDiv.classList.add("stat-entry");
 
@@ -93,7 +93,8 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
   statList.appendChild(statDiv);
 
   // Auto-focus on new stat
-  statSelect.focus();
+  if (!ignoreFocus)
+    statSelect.focus();
 
   // Re-initialize draggable for this section
   makeStatsDraggable();

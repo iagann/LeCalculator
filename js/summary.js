@@ -579,13 +579,27 @@ function processStats(statsArray, firstRun = true) {
          const increasedHealthRegen = allStats[stats.INCREASED_HEALTH_REGEN]?.total || 0;
          hpRegen = flatHealthRegen * (1 + increasedHealthRegen / 100);
          processExpressions();
-         summary.push({ 
-             name: "Health Regen", 
-             total: hpRegen, 
+          summary.push({ 
+             name: "Flat Health Regen", 
+             total: flatHealthRegen, 
              type: "stat",
              sources: [
                  ...(allStats[stats.FLAT_HEALTH_REGEN]?.sources || []), 
-                 ...(allStats[stats.INCREASED_HEALTH_REGEN]?.sources || [])
+             ]
+         });
+          summary.push({ 
+             name: "Increased Health Regen", 
+             total: increasedHealthRegen, 
+             type: "stat",
+             sources: [
+                 ...(allStats[stats.INCREASED_HEALTH_REGEN]?.sources || []), 
+             ]
+         });
+         summary.push({ 
+             name: "TOtal Health Regen", 
+             total: hpRegen, 
+             type: "stat",
+             sources: [
              ]
          });
 
