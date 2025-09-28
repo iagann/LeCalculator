@@ -211,7 +211,6 @@ function updateSummary() {
     applySectionSort();
   }
   
-
 function statIsMore(statId) {
     return statId == stats.MORE_DAMAGE
     || statId == stats.MORE_ARMOUR
@@ -311,24 +310,24 @@ function processExpressions() {
     processExpressionsCount++;
 }
 
-function armourDr(value, isPhys) {
+function armorDr(value, isPhys) {
     const x = value;
     const x2 = Math.pow(x, 2);
     const a = 100;
-    totalArmourDrPhys = 1.2 * x / (80 + 0.05 * Math.pow(a + 5, 2) + 1.2 * x) * 0.3;
-    totalArmourDrPhys += 0.0012 * x2 / (180 * (a + 5) + 0.0015 * x2) * 0.55;
+    totalArmorDrPhys = 1.2 * x / (80 + 0.05 * Math.pow(a + 5, 2) + 1.2 * x) * 0.3;
+    totalArmorDrPhys += 0.0012 * x2 / (180 * (a + 5) + 0.0015 * x2) * 0.55;
 
-    totalArmourDrPhys *= 100;
+    totalArmorDrPhys *= 100;
 
-    totalArmourDr = totalArmourDrPhys * 0.7;
+    totalArmorDr = totalArmorDrPhys * 0.7;
 
-    totalArmourDrPhys = Math.min(totalArmourDrPhys, 85);
-    totalArmourDr = Math.min(totalArmourDr, 85);
+    totalArmorDrPhys = Math.min(totalArmorDrPhys, 85);
+    totalArmorDr = Math.min(totalArmorDr, 85);
 
     if (isPhys)
-        return totalArmourDrPhys;
+        return totalArmorDrPhys;
     else
-        return totalArmourDr; 
+        return totalArmorDr; 
 }
 
 let allStats = {};
@@ -368,9 +367,43 @@ function processStats(statsArray, firstRun = true) {
     increasedMS = 0;
     totalDodgeRating = 0;
 
+    var passiveCount = new Map();
+    var passiveSources = new Map();
+
     statsArray.forEach(([statId, expression, sectionName]) => {
         //if (statId == stats.WARD_PER_SECOND)
         //    console.log(1);
+
+        if (sectionName.includes("[passive]") && expression.includes("*")) {
+            let lastIndex = expression.lastIndexOf("*");
+            let result = "0";
+
+            if (lastIndex !== -1 && lastIndex < expression.length - 1) {
+                const tail = expression.substring(lastIndex + 1);
+                let ok = tail.length > 0; // require non-empty (adjust if you want empty allowed)
+                for (let i = 0; ok && i < tail.length; i++) {
+                    const c = tail[i];
+                    const code = c.charCodeAt(0);
+                    const isDigit = code >= 48 && code <= 57; // '0'..'9'
+                    const isSpace = c === " ";                // ASCII space only
+                    if (!isDigit && !isSpace) ok = false;
+                }
+                if (ok) result = tail;
+            }
+            let intResult = evaluateExpression(result);
+            if (!isNaN(intResult) && intResult > 0) {
+                var passiveSectionName = sectionName.substr("[passive]".length).trim();
+                if (!passiveCount.has(passiveSectionName)) {
+                    passiveCount.set(passiveSectionName, 0);
+                }
+                if (!passiveSources.has(passiveSectionName)) {
+                    passiveSources.set(passiveSectionName, []);
+                }
+
+                passiveCount.set(passiveSectionName, passiveCount.get(passiveSectionName) + intResult);
+                passiveSources.get(passiveSectionName).push(`${sectionName} — ${getStatName(statId)}: ${expression}`);
+            }
+        }
 
         const statValue = evaluateExpression(expression);
         const statName = getStatName(statId);
@@ -943,46 +976,46 @@ function processStats(statsArray, firstRun = true) {
             });
     }
 
-    let armourShredDr = 0;
+    let armorShredDr = 0;
     {
 
-        const chanceToShredArmourPhys = allStats[stats.ARMOUR_SHRED_CHANCE_PHYS]?.total || 0;
-        const chanceToShredArmourNonPhys = allStats[stats.ARMOUR_SHRED_CHANCE_NON_PHYS]?.total || 0;
-        const armourShredDuration = allStats[stats.ARMOUR_SHRED_DURATION]?.total || 0;
-        const armourShredStacksPhys = hitsPerSecond * chanceToShredArmourPhys / 100 * 4 *(100 + armourShredDuration) / 100;
-        const armourShredStacksNonPhys = hitsPerSecond * chanceToShredArmourNonPhys / 100 * 4 * (100 + armourShredDuration) / 100;
-        const armourShredEffect = allStats[stats.ARMOUR_SHRED_EFFECT]?.total || 0;
-        const flatArmourShred = allStats[stats.FLAT_ARMOUR_SHRED]?.total || 0;
-        const armourShredDrPhys = armourDr(flatArmourShred + 100 * armourShredStacksPhys * (100 + armourShredEffect) / 100, true);
-        const armourShredDrNonPhys = armourDr(flatArmourShred + 100 * armourShredStacksNonPhys * (100 + armourShredEffect) / 100, false);
-        armourShredDr = Math.max(armourShredDrPhys, armourShredDrNonPhys);
+        const chanceToShredArmorPhys = allStats[stats.ARMOUR_SHRED_CHANCE_PHYS]?.total || 0;
+        const chanceToShredArmorNonPhys = allStats[stats.ARMOUR_SHRED_CHANCE_NON_PHYS]?.total || 0;
+        const armorShredDuration = allStats[stats.ARMOUR_SHRED_DURATION]?.total || 0;
+        const armorShredStacksPhys = hitsPerSecond * chanceToShredArmorPhys / 100 * 4 *(100 + armorShredDuration) / 100;
+        const armorShredStacksNonPhys = hitsPerSecond * chanceToShredArmorNonPhys / 100 * 4 * (100 + armorShredDuration) / 100;
+        const armorShredEffect = allStats[stats.ARMOUR_SHRED_EFFECT]?.total || 0;
+        const flatArmorShred = allStats[stats.FLAT_ARMOUR_SHRED]?.total || 0;
+        const armorShredDrPhys = armorDr(flatArmorShred + 100 * armorShredStacksPhys * (100 + armorShredEffect) / 100, true);
+        const armorShredDrNonPhys = armorDr(flatArmorShred + 100 * armorShredStacksNonPhys * (100 + armorShredEffect) / 100, false);
+        armorShredDr = Math.max(armorShredDrPhys, armorShredDrNonPhys);
         summary.push({ 
-            name: "Chance to Shred Armour Phys", 
-            total: chanceToShredArmourPhys, 
+            name: "Chance to Shred Armor Phys", 
+            total: chanceToShredArmorPhys, 
             type: "stat",
             sources: [
                 ...(allStats[stats.ARMOUR_SHRED_CHANCE_PHYS]?.sources || []),
             ]
         });
         summary.push({ 
-            name: "Chance to Shred Armour Non-Phys", 
-            total: chanceToShredArmourNonPhys, 
+            name: "Chance to Shred Armor Non-Phys", 
+            total: chanceToShredArmorNonPhys, 
             type: "stat",
             sources: [
                 ...(allStats[stats.ARMOUR_SHRED_CHANCE_NON_PHYS]?.sources || []),
             ]
         });
         summary.push({ 
-            name: "Increased Armour Shred Duration", 
-            total: armourShredDuration, 
+            name: "Increased Armor Shred Duration", 
+            total: armorShredDuration, 
             type: "stat",
             sources: [
                 ...(allStats[stats.ARMOUR_SHRED_DURATION]?.sources || []),
             ]
         });
         summary.push({ 
-            name: "Average Armour Shred stacks Phys", 
-            total: armourShredStacksPhys, 
+            name: "Average Armor Shred stacks Phys", 
+            total: armorShredStacksPhys, 
             type: "stat",
             sources: [
                 ...(allStats[stats.ARMOUR_SHRED_DURATION]?.sources || []),
@@ -992,8 +1025,8 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
         summary.push({ 
-            name: "Average Armour Shred stacks Non-Phys", 
-            total: armourShredStacksNonPhys, 
+            name: "Average Armor Shred stacks Non-Phys", 
+            total: armorShredStacksNonPhys, 
             type: "stat",
             sources: [
                 ...(allStats[stats.HITS_PER_SECOND]?.sources || []),
@@ -1002,30 +1035,30 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
         summary.push({ 
-            name: "Increased Armour Shred Effect", 
-            total: armourShredEffect, 
+            name: "Increased Armor Shred Effect", 
+            total: armorShredEffect, 
             type: "stat",
             sources: [
                 ...(allStats[stats.ARMOUR_SHRED_EFFECT]?.sources || []),
             ]
         });
         summary.push({ 
-            name: "Flat Armour Shred", 
-            total: flatArmourShred, 
+            name: "Flat Armor Shred", 
+            total: flatArmorShred, 
             type: "stat",
             sources: [
                 ...(allStats[stats.FLAT_ARMOUR_SHRED]?.sources || []),
             ]
         });
         summary.push({ 
-            name: "More Physical Damage from Armour Shred", 
-            total: armourShredDrPhys, 
+            name: "More Physical Damage from Armor Shred", 
+            total: armorShredDrPhys, 
             type: "stat",
             sources: []
         });
         summary.push({ 
-            name: "More Non-Physical Damage from Armour Shred", 
-            total: armourShredDrNonPhys, 
+            name: "More Non-Physical Damage from Armor Shred", 
+            total: armorShredDrNonPhys, 
             type: "stat",
             sources: []
         });
@@ -1104,22 +1137,22 @@ function processStats(statsArray, firstRun = true) {
     }
 
     summary.push({name:"Armor", type:"section"});
-    const flatArmour = allStats[stats.FLAT_ARMOR]?.total || 0;
+    const flatArmor = allStats[stats.FLAT_ARMOR]?.total || 0;
     {
         summary.push({ 
-            name: "Flat Armour", 
-            total: flatArmour, 
+            name: "Flat Armor", 
+            total: flatArmor, 
             type: "stat",
             sources: [
                 ...(allStats[stats.FLAT_ARMOR]?.sources || []),
             ]
         });
     }
-    const increasedArmour = (allStats[stats.INCREASED_ARMOUR]?.total || 0) + strength * 4;
+    const increasedArmor = (allStats[stats.INCREASED_ARMOUR]?.total || 0) + strength * 4;
     {
         summary.push({ 
-            name: "Increased Armour", 
-            total: increasedArmour, 
+            name: "Increased Armor", 
+            total: increasedArmor, 
             type: "stat",
             sources: [
                 ...(allStats[stats.INCREASED_ARMOUR]?.sources || []),
@@ -1128,38 +1161,38 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
     }
-    const moreArmour = allStats[stats.MORE_ARMOUR]?.total || 100;
+    const moreArmor = allStats[stats.MORE_ARMOUR]?.total || 100;
     {
         summary.push({ 
-            name: "More Armour", 
-            total: moreArmour - 100, 
+            name: "More Armor", 
+            total: moreArmor - 100, 
             type: "stat",
             sources: [
                 ...(allStats[stats.MORE_ARMOUR]?.sources || []),
             ]
         });
     }
-    let totalArmour = flatArmour * (100 + increasedArmour) / 100 * moreArmour / 100;
+    let totalArmor = flatArmor * (100 + increasedArmor) / 100 * moreArmor / 100;
     {
         summary.push({ 
-            name: "Total Armour", 
-            total: totalArmour, 
+            name: "Total Armor", 
+            total: totalArmor, 
             type: "stat",
             sources: []
         });
     }
-    let totalArmourDrPhys = armourDr(totalArmour, true);
-    let totalArmourDrNonPhys = armourDr(totalArmour, false);
+    let totalArmorDrPhys = armorDr(totalArmor, true);
+    let totalArmorDrNonPhys = armorDr(totalArmor, false);
     {
         summary.push({ 
-            name: "Total Armour Dr", 
-            total: totalArmourDrNonPhys, 
+            name: "Total Armor Dr", 
+            total: totalArmorDrNonPhys, 
             type: "stat",
             sources: []
         });
         summary.push({ 
-            name: "Total Armour Dr Phys", 
-            total: totalArmourDrPhys, 
+            name: "Total Armor Dr Phys", 
+            total: totalArmorDrPhys, 
             type: "stat",
             sources: []
         });
@@ -1438,9 +1471,9 @@ function processStats(statsArray, firstRun = true) {
         lessHitDamageTaken *= (1 - 0.35);
     if (blockChance == 100)
         lessHitDamageTaken *= (100 - blockDr) / 100;
-    const armourAppliedToDots = (allStats[stats.ARMOUR_MITIGATION_APPLIED_TO_DOT]?.total || 0);
-    let lessDotDamageTakenPhys = (100 - armourAppliedToDots / 100 * totalArmourDrPhys) * lessDotDamageTaken / 100;
-    let lessDotDamageTakenNonPhys = (100 - armourAppliedToDots / 100 * totalArmourDrNonPhys) * lessDotDamageTaken / 100;
+    const armorAppliedToDots = (allStats[stats.ARMOUR_MITIGATION_APPLIED_TO_DOT]?.total || 0);
+    let lessDotDamageTakenPhys = (100 - armorAppliedToDots / 100 * totalArmorDrPhys) * lessDotDamageTaken / 100;
+    let lessDotDamageTakenNonPhys = (100 - armorAppliedToDots / 100 * totalArmorDrNonPhys) * lessDotDamageTaken / 100;
     lessDamageTaken = 100 - lessDamageTaken;
     lessHitDamageTaken = 100 - lessHitDamageTaken;
     lessDotDamageTakenPhys = 100 - lessDotDamageTakenPhys;
@@ -1528,7 +1561,7 @@ function processStats(statsArray, firstRun = true) {
             dpsHit *= (100 + increasedDamage) / 100;
             dpsHit *= moreDamage / 100;
             dpsHit *= (100 + penetration) / 100;
-            dpsHit *= (100 + armourShredDr) / 100;
+            dpsHit *= (100 + armorShredDr) / 100;
             summary.push({ 
                 name: "Hit Speed", 
                 total: hitsPerSecond, 
@@ -1561,13 +1594,13 @@ function processStats(statsArray, firstRun = true) {
         const a = ((lowLife ? 0 : preusoHp) + stableWard);
         let r = [];
         const m = Math.pow(100,3);
-        r[stats.FIRE_RESISTANCE] = m / (175 - Math.min(75,fireResist)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
-        r[stats.COLD_RESISTANCE] = m / (175 - Math.min(75,coldResist)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
-        r[stats.LIGHTNING_RESISTANCE] = m / (175 - Math.min(75,lightningResist)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
-        r[stats.PHYSICAL_RESISTANCE] = m / (175 - Math.min(75,physResist)) / (100 - totalArmourDrPhys) / (100 - lessHitDamageTaken);
-        r[stats.NECROTIC_RESISTANCE] = m / (175 - Math.min(75,necroticResist)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
-        r[stats.POISON_RESISTANCE] = m / (175 - Math.min(75,poisonResist)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
-        r[stats.VOID_RESISTANCE] = m / (175 - Math.min(75,voidResist)) / (100 - totalArmourDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.FIRE_RESISTANCE] = m / (175 - Math.min(75,fireResist)) / (100 - totalArmorDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.COLD_RESISTANCE] = m / (175 - Math.min(75,coldResist)) / (100 - totalArmorDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.LIGHTNING_RESISTANCE] = m / (175 - Math.min(75,lightningResist)) / (100 - totalArmorDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.PHYSICAL_RESISTANCE] = m / (175 - Math.min(75,physResist)) / (100 - totalArmorDrPhys) / (100 - lessHitDamageTaken);
+        r[stats.NECROTIC_RESISTANCE] = m / (175 - Math.min(75,necroticResist)) / (100 - totalArmorDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.POISON_RESISTANCE] = m / (175 - Math.min(75,poisonResist)) / (100 - totalArmorDrNonPhys) / (100 - lessHitDamageTaken);
+        r[stats.VOID_RESISTANCE] = m / (175 - Math.min(75,voidResist)) / (100 - totalArmorDrNonPhys) / (100 - lessHitDamageTaken);
         let b = (r[stats.FIRE_RESISTANCE] 
             + r[stats.COLD_RESISTANCE] 
             + r[stats.LIGHTNING_RESISTANCE] 
@@ -1660,9 +1693,29 @@ function processStats(statsArray, firstRun = true) {
             name: "EHP vs DoTs", 
             total: ehpDots, 
             type: "stat",
-            sources: [`including armour mitigation applied to DoTs`]
+            sources: [`including armor mitigation applied to DoTs`]
         });
     }
+
+    summary.push({name:"Passives", type:"section"});
+    let totalPassiveCount = 0;
+    for (const [name, total] of passiveCount) {
+        summary.push({
+            name: name,
+            total: total,
+            type: "stat",
+            sources: passiveSources.get(name)
+        });
+        totalPassiveCount += total;
+    }
+    summary.push({
+        name: "Total",
+        total: totalPassiveCount,
+        type: "stat",
+        sources: []
+    });
+
+
     summary.push({name:"POWER", type:"section"});
     summary.push({ 
             name: "regen coefficient", 
@@ -1676,6 +1729,8 @@ function processStats(statsArray, firstRun = true) {
             type: "stat",
             sources: [`avgMaxHit * dps * regen coefficient`]
         });
+
+
 
     Object.values(summary).forEach(stat => {
         stat.total = formatNumber(stat.total);

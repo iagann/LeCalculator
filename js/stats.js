@@ -140,7 +140,7 @@ function getStatName(key) {
         case stats.DAMAGE_EFFECTIVENESS: return "DAMAGE EFFECTIVENESS";
         case stats.INCREASED_DAMAGE: return "Increased Damage";
         case stats.MORE_DAMAGE: return "More Damage";
-        case stats.MORE_ARMOUR: return "More Armour";
+        case stats.MORE_ARMOUR: return "More Armor";
         case stats.MORE_HIT_SPEED: return "More Hit Speed";
         case stats.INCREASED_HITS: return "Increased Hit Speed";
 
@@ -171,15 +171,15 @@ function getStatName(key) {
         case stats.WARD_THRESHOLD: return "Ward Decay Threshold";
         case stats.CRITICAL_STRIKE_AVOIDANCE: return "Critical Strike Avoidance";
         case stats.DODGE_CONVERTED_TO_ENDURANCE: return "Dodge Rating converted to Endurance Threshold";
-        case stats.ARMOUR_SHRED_CHANCE_PHYS: return "Chance to Shred Armour on Hit (phys)";
-        case stats.ARMOUR_SHRED_CHANCE_NON_PHYS: return "Chance to Shred Armour on Hit (non-phys)";
-        case stats.ARMOUR_SHRED_DURATION: return "Increased Armour Shred Duration";
-        case stats.ARMOUR_SHRED_EFFECT: return "Increased Armour Effect";
-        case stats.ARMOUR_MITIGATION_APPLIED_TO_DOT: return "Armour Mitigation Applied to Damage Over Time";
+        case stats.ARMOUR_SHRED_CHANCE_PHYS: return "Chance to Shred Armor on Hit (phys)";
+        case stats.ARMOUR_SHRED_CHANCE_NON_PHYS: return "Chance to Shred Armor on Hit (non-phys)";
+        case stats.ARMOUR_SHRED_DURATION: return "Increased Armor Shred Duration";
+        case stats.ARMOUR_SHRED_EFFECT: return "Increased Armor Effect";
+        case stats.ARMOUR_MITIGATION_APPLIED_TO_DOT: return "Armor Mitigation Applied to Damage Over Time";
         case stats.LESS_HIT_DAMAGE_TAKEN: return "Less Hit Damage Taken";
         case stats.LESS_DOT_DAMAGE_TAKEN: return "Less Damage Over Time Taken";
 
-        case stats.FLAT_ARMOUR_SHRED: return "Flat Armour Shred";
+        case stats.FLAT_ARMOUR_SHRED: return "Flat Armor Shred";
 
         case stats.BLOCK_CHANCE: return "Block Chance";
         case stats.BLOCK_EFFECTIVENESS: return "Block Effectiveness";
