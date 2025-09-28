@@ -49,7 +49,8 @@ function updateSaveString() {
     });
   
     const jsonStr = JSON.stringify(allSections);
-    savedBuildCode = compressBuild(jsonStr);
+    //savedBuildCode = compressBuild(jsonStr);
+    savedBuildCode = jsonStr; // plain
   }
   
 
@@ -66,7 +67,8 @@ document.getElementById("loadInput").addEventListener("input", function() {
 
     // Decompress Base64 and parse JSON to check the build name
     try {
-        const jsonStr = decompressBuild(inputStr);
+        //const jsonStr = decompressBuild(inputStr);
+        const jsonStr = inputStr; // plain
         const parsedData = JSON.parse(jsonStr);
 
         if (!Array.isArray(parsedData) || parsedData.length === 0) {
@@ -95,7 +97,8 @@ document.getElementById("loadInput").addEventListener("input", function() {
 
 window.loadFromBase64 = function(inputStr) {
     try {
-      const jsonStr = decompressBuild(inputStr);
+      //const jsonStr = decompressBuild(inputStr);
+      const jsonStr = inputStr; // plain
       if (!jsonStr) return;
   
       const parsedData = JSON.parse(jsonStr);
