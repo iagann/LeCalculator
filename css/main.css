@@ -25,13 +25,15 @@
     overflow-y: auto;
     background-color: #1e1e1e;
   }
+
+  html, .main-content { scroll-behavior: smooth; }
   
   /* Example styles for sections, stats, etc. */
   .section {
-    background-color: #222;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 5px;
+    background-color: #2b2b2b;
+    padding: 0px 5px;
+    margin-top: 5px;
+    border-radius: 7px;
     transition: background-color 0.2s ease;
   }
   .section:hover {

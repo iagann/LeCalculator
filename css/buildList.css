@@ -28,6 +28,19 @@
     color: #fff;
     transition: left 0.3s ease;
   }
+
+  #scroll-top-btn {
+    position: absolute;
+    right: 10px; /* Aligned with the panel edge */
+    bottom: 5px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    background-color: #6200ea;
+    border: none;
+    color: #fff;
+    transition: left 0.3s ease;
+  }
   
   /* Move button to the edge when collapsed */
   #left-panel.collapsed + #toggle-panel-btn {
@@ -51,7 +64,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between; /* Keeps build name on the left & delete button on the right */
-  padding: 8px 12px;
+  padding: 0px 12px;
   border-top: 1px solid #444; /* Similar to stat separator */
   background-color: #222;
   transition: background-color 0.2s ease;

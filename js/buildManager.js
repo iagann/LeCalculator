@@ -86,6 +86,41 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("sort-reverse-cb").addEventListener("change", () => {
         applySectionSort();
       });
+
+    (function () {
+        const container = document.querySelector('.main-content'); // your scrollable area
+        const btn = document.getElementById('scroll-top-btn');
+        const showAt = 200; // px
+
+        if (!container) {
+            console.warn('Scroll-to-top: .main-content not found; falling back to window');
+        }
+
+        function getScrollTop() {
+         return container ? container.scrollTop : window.scrollY;
+        }
+
+        function toggle() {
+            btn.hidden = getScrollTop() <= showAt;
+        }
+
+        function scrollToTop() {
+            const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                ? 'auto'
+                : 'smooth';
+            if (container) {
+                container.scrollTo({ top: 0, behavior });
+            } else {
+                window.scrollTo({ top: 0, behavior });
+        }
+        }
+
+        btn.addEventListener('click', scrollToTop);
+        (container || window).addEventListener('scroll', toggle, { passive: true });
+        // initialize state
+        document.addEventListener('DOMContentLoaded', toggle);
+        window.addEventListener('load', toggle);
+    })();
 });
 
 function updateBuildNameInURL() {
