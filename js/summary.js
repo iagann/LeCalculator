@@ -55,7 +55,7 @@ function updateSummary() {
             return { element: stat, enabled: statEnabled, statID, expr };
           });
       
-          sectionCache.push({ element: sec, enabled: sectionEnabled, name: sectionName, statEntries });
+          sectionCache.push({ element: sec, enabled: sectionEnabled, name: sectionName, statEntries: statEntries });
         });
       
         return sectionCache;
@@ -629,7 +629,7 @@ function processStats(statsArray, firstRun = true) {
              ]
          });
          summary.push({ 
-             name: "TOtal Health Regen", 
+             name: "Total Health Regen", 
              total: hpRegen, 
              type: "stat",
              sources: [
@@ -674,6 +674,20 @@ function processStats(statsArray, firstRun = true) {
                     sources: [
                         ...(allStats[stats.FLAT_MANA_REGEN]?.sources || []),
                         ...(allStats[stats.INCREASED_MANA_REGEN]?.sources || [])
+                    ]
+                });
+            }
+
+            const manaCost = allStats[stats.MANA_COST]?.total || 0;
+            if (manaCost > 0) {
+                if (!wasManaHr)
+                    summary.push({type: "hr"});
+                summary.push({ 
+                    name: "Mana Cost", 
+                    total: manaCost, 
+                    type: "stat",
+                    sources: [
+                        ...(allStats[stats.MANA_COST]?.sources || []),
                     ]
                 });
             }
@@ -750,15 +764,15 @@ function processStats(statsArray, firstRun = true) {
         });
 
         summary.push({name:"Crits", type:"section"});
-        let baseCrit = (allStats[stats.BASE_CRITICAL_STIKE_CHANCE]?.total || 0);
-        let increasedCrit = (allStats[stats.INCREASED_CRITICAL_STIKE_CHANCE]?.total || 0);
-        let critMulti = 200 + (allStats[stats.CRITICAL_STIKE_MULTIPLIER]?.total || 0);
+        let baseCrit = (allStats[stats.BASE_CRITICAL_STRIKE_CHANCE]?.total || 0);
+        let increasedCrit = (allStats[stats.INCREASED_CRITICAL_STRIKE_CHANCE]?.total || 0);
+        let critMulti = 200 + (allStats[stats.CRITICAL_STRIKE_MULTIPLIER]?.total || 0);
         summary.push({ 
             name: "Total Base Crit Chance", 
             total: baseCrit, 
             type: "stat",
             sources: [
-                ...(allStats[stats.BASE_CRITICAL_STIKE_CHANCE]?.sources || []),
+                ...(allStats[stats.BASE_CRITICAL_STRIKE_CHANCE]?.sources || []),
             ]
         });
         summary.push({ 
@@ -766,7 +780,7 @@ function processStats(statsArray, firstRun = true) {
             total: increasedCrit, 
             type: "stat",
             sources: [
-                ...(allStats[stats.INCREASED_CRITICAL_STIKE_CHANCE]?.sources || []),
+                ...(allStats[stats.INCREASED_CRITICAL_STRIKE_CHANCE]?.sources || []),
             ]
         });
         summary.push({ 
@@ -774,7 +788,7 @@ function processStats(statsArray, firstRun = true) {
             total: critMulti - 200, 
             type: "stat",
             sources: [
-                ...(allStats[stats.CRITICAL_STIKE_MULTIPLIER]?.sources || []),
+                ...(allStats[stats.CRITICAL_STRIKE_MULTIPLIER]?.sources || []),
             ]
         });
         let totalCritChance = baseCrit * (increasedCrit + 100) / 100;
@@ -1529,10 +1543,12 @@ function processStats(statsArray, firstRun = true) {
     var dps = 0;
     {
         let dpsAilment = allStats[stats.AILMENT_DAMAGE]?.total || 0;
+        const echoChance = allStats[stats.ECHO_CHANCE]?.total || 0;
+        const echoDamage = allStats[stats.ECHO_DAMAGE]?.total || 0;
         if (dpsAilment > 0) {
             dpsAilment *= hitsPerSecond;
             dpsAilment *= chanceToAilment / 100;
-            dpsAilment *= (100 + increasedDamage) / 100;
+            dpsAilment *= (100 + increasedDamage + echoChance / 100 * (100 + increasedDamage + echoDamage)) / 100;
             dpsAilment *= moreDamage / 100;
             dpsAilment *= (100 + penetration) / 100;
             if (increasedAilmentDuration > 0)
@@ -1558,7 +1574,7 @@ function processStats(statsArray, firstRun = true) {
         if (baseFlat > 0 && damageEffectiveness > 0) {
             let dpsHit = totalFlat;
             dpsHit *= (moreFromCrits + 100) / 100;
-            dpsHit *= (100 + increasedDamage) / 100;
+            dpsHit *= (100 + increasedDamage + echoChance / 100 * (100 + increasedDamage + echoDamage)) / 100;
             dpsHit *= moreDamage / 100;
             dpsHit *= (100 + penetration) / 100;
             dpsHit *= (100 + armorShredDr) / 100;

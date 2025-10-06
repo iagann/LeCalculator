@@ -63,9 +63,9 @@ const stats = Object.freeze({
 
     BASE_HIT_DAMAGE: statNum++,
     ADDED_FLAT_DAMAGE: statNum++,
-    INCREASED_CRITICAL_STIKE_CHANCE: statNum++,
-    BASE_CRITICAL_STIKE_CHANCE: statNum++,
-    CRITICAL_STIKE_MULTIPLIER: statNum++,
+    INCREASED_CRITICAL_STRIKE_CHANCE: statNum++,
+    BASE_CRITICAL_STRIKE_CHANCE: statNum++,
+    CRITICAL_STRIKE_MULTIPLIER: statNum++,
     
     WARD_RETENTION: statNum++,
     WARD_THRESHOLD: statNum++,
@@ -96,6 +96,11 @@ const stats = Object.freeze({
     LOW_LIFE: statNum++,
 
     MORE_DAMAGE_1: statNum++,
+
+    ECHO_CHANCE: statNum++,
+    ECHO_DAMAGE: statNum++,
+
+    MANA_COST: statNum++,
 });
 
 function getStatName(key) {
@@ -163,9 +168,9 @@ function getStatName(key) {
 
         case stats.BASE_HIT_DAMAGE: return "BASE HIT DAMAGE";
         case stats.ADDED_FLAT_DAMAGE: return "Added Flat Damage";
-        case stats.INCREASED_CRITICAL_STIKE_CHANCE: return "Increased Critical Strike Chance";
-        case stats.BASE_CRITICAL_STIKE_CHANCE: return "Base Critical Strike Chance";
-        case stats.CRITICAL_STIKE_MULTIPLIER: return "Critical Strike Multiplier";
+        case stats.INCREASED_CRITICAL_STRIKE_CHANCE: return "Increased Critical Strike Chance";
+        case stats.BASE_CRITICAL_STRIKE_CHANCE: return "Base Critical Strike Chance";
+        case stats.CRITICAL_STRIKE_MULTIPLIER: return "Critical Strike Multiplier";
 
         case stats.WARD_RETENTION: return "Ward Retention";
         case stats.WARD_THRESHOLD: return "Ward Decay Threshold";
@@ -174,7 +179,7 @@ function getStatName(key) {
         case stats.ARMOUR_SHRED_CHANCE_PHYS: return "Chance to Shred Armor on Hit (phys)";
         case stats.ARMOUR_SHRED_CHANCE_NON_PHYS: return "Chance to Shred Armor on Hit (non-phys)";
         case stats.ARMOUR_SHRED_DURATION: return "Increased Armor Shred Duration";
-        case stats.ARMOUR_SHRED_EFFECT: return "Increased Armor Effect";
+        case stats.ARMOUR_SHRED_EFFECT: return "Increased Armor Shred Effect";
         case stats.ARMOUR_MITIGATION_APPLIED_TO_DOT: return "Armor Mitigation Applied to Damage Over Time";
         case stats.LESS_HIT_DAMAGE_TAKEN: return "Less Hit Damage Taken";
         case stats.LESS_DOT_DAMAGE_TAKEN: return "Less Damage Over Time Taken";
@@ -196,6 +201,11 @@ function getStatName(key) {
         case stats.LOW_LIFE: return "LOW LIFE";
 
         case stats.MORE_DAMAGE_1: return "More Damage 1";
+
+        case stats.ECHO_CHANCE: return "Echo Chance";
+        case stats.ECHO_DAMAGE: return "Increased Echo Damage";
+
+        case stats.MANA_COST: return "Mana Cost";
     }
     return "Unknown";
 }
