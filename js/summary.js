@@ -20,7 +20,9 @@ function updateSummary() {
         const statName = statEntry.querySelector("input[placeholder='Choose Stat...']")?.value;
         const statKey = Object.keys(stats).find(key => getStatName(stats[key]) === statName);
   
-        const expression = statEntry.querySelector("input[placeholder='Math Expression']")?.value || "";
+        const expressionInput = statEntry.querySelector("input[placeholder='Math Expression']");
+        const expression = expressionInput?.value || "";
+        if (expressionInput) expressionInput.title = "";
   
         if (statKey) {
           const statID = stats[statKey];
@@ -30,6 +32,15 @@ function updateSummary() {
     });
   
     const baseSummary = processStats(allStats);
+    document.querySelectorAll("input[placeholder='Math Expression']").forEach(input => {
+        let expression = input.value;
+        expression = replaceExpressionAll(expression);
+        const statValue = evaluateExpression(expression);
+        if (!isNaN(statValue)) {
+            input.title = statValue;
+        }
+       
+    });
     renderSummary(baseSummary);
   
     const baseMap = {};
@@ -227,22 +238,53 @@ function statIsOpposite(statId) {
 }
 
 var processExpressionsCount = 0;
-function processExpressions() {
-    let expression = "";
+function replaceExpressionAll(expression) {
+    function containsLetters(str) {
+        for (let i = 0; i < str.length; i++) {
+            const code = str.charCodeAt(i);
+            // A-Z: 65–90, a-z: 97–122
+            if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122)) {
+                return true;
+            }
+        }
+        return false;
+    }
     function replaceExpression(key, value) {
         if (expression.includes(key) && value > 0)
             expression = expression.replaceAll(key, value);
     }
-    function containsLetters(str) {
-        for (let i = 0; i < str.length; i++) {
-          const code = str.charCodeAt(i);
-          // A-Z: 65–90, a-z: 97–122
-          if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122)) {
-            return true;
-          }
-        }
-        return false;
-      }
+
+    if (containsLetters(expression))
+    {
+        replaceExpression("str", strength);
+        replaceExpression("dex", dexterity);
+        replaceExpression("int", intelligence);
+        replaceExpression("attu", attunement);
+        replaceExpression("vit", vitality);
+        replaceExpression("recurve", getAvgRecurveHits(recurveChance - 100));
+        replaceExpression("hps", hitsPerSecond);
+        replaceExpression("maxHP", maxHealth);
+        replaceExpression("enduranceThreshold", totalEnduranceThreshold);
+        replaceExpression("endurance", totalEndurance);
+        replaceExpression("ms", increasedMS);
+        replaceExpression("dodgeRating", totalDodgeRating);
+        replaceExpression("cdr", cdr);
+        replaceExpression("fireRes", fireResist);
+        replaceExpression("coldRes", coldResist);
+        replaceExpression("lightningRes", lightningResist);
+        replaceExpression("physRes", physResist);
+        replaceExpression("necroticRes", necroticResist);
+        replaceExpression("poisonRes", poisonResist);
+        replaceExpression("voidRes", voidResist);
+        replaceExpression("HpRegen", hpRegen);
+        //wasExpression = wasExpression || expression != statData.expression;
+    }
+    return expression;
+}
+function processExpressions() {
+    let expression = "";
+    
+    
     let allStatsArray = Object.entries(allStats);
     //let wasExpression = false;
     for (const [statId, statData] of allStatsArray) {
@@ -251,33 +293,7 @@ function processExpressions() {
             
             //if (expression.includes("HpRegen"))
             //    console.log(1);
-            
-            if (containsLetters(expression))
-            {
-                replaceExpression("str", strength);
-                replaceExpression("dex", dexterity);
-                replaceExpression("int", intelligence);
-                replaceExpression("attu", attunement);
-                replaceExpression("vit", vitality);
-                replaceExpression("recurve", getAvgRecurveHits(recurveChance - 100));
-                replaceExpression("hps", hitsPerSecond);
-                replaceExpression("maxHP", maxHealth);
-                replaceExpression("enduranceThreshold", totalEnduranceThreshold);
-                replaceExpression("endurance", totalEndurance);
-                replaceExpression("ms", increasedMS);
-                replaceExpression("dodgeRating", totalDodgeRating);
-                replaceExpression("cdr", cdr);
-                replaceExpression("fireRes", fireResist);
-                replaceExpression("coldRes", coldResist);
-                replaceExpression("lightningRes", lightningResist);
-                replaceExpression("physRes", physResist);
-                replaceExpression("necroticRes", necroticResist);
-                replaceExpression("poisonRes", poisonResist);
-                replaceExpression("voidRes", voidResist);
-                replaceExpression("HpRegen", hpRegen);
-                //wasExpression = wasExpression || expression != statData.expression;
-            }
-            
+            expression = replaceExpressionAll(expression);            
             //if (statId == 50)
                 //console.log("expression", statId, getStatName(statId), processExpressionsCount, "=>" ,statData.expression, expression);
             
