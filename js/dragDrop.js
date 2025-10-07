@@ -5,21 +5,30 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   
   // Called once on DOMContentLoaded
-  function makeSectionsDraggable() {
+  function makeCategoriesDraggable() {
     const sectionsContainer = document.getElementById("sections");
   
     // 1) Enable section dragging
     new Sortable(sectionsContainer, {
       animation: 150,
-      handle: ".section-header", // Drag from section header
       ghostClass: "sortable-ghost",
       //filter: "input, select, textarea",
       handle: '.drag-handle',
     });
-  
-    // 2) Enable stat dragging for all existing sections in the DOM
-    document.querySelectorAll(".section").forEach(section => {
-      makeStatsDraggable(section);
+  }
+
+  function makeSectionsDraggable() {
+    document.querySelectorAll(".category-wrapper").forEach(statList => {
+        if (!statList.classList.contains("sortable-applied")) {
+            new Sortable(statList, {
+              animation: 150,
+              ghostClass: "sortable-ghost",
+              //filter: "input, select, textarea",
+              handle: '.drag-handle',
+              onEnd: (evt) => saveCurrentBuildLocally()
+            });
+            statList.classList.add("sortable-applied");
+        }
     });
   }
   

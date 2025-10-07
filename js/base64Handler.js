@@ -16,44 +16,59 @@ let savedBuildCode = "";
 
 // 1) Update the build code from the DOM structure
 function updateSaveString() {
-    const allSections = [document.getElementById("buildNameInput").value];
-  
-    document.querySelectorAll(".section").forEach(section => {
-      const sectionName = section.querySelector('input[placeholder="Section Name"]')?.value || "";
-      const sectionEnabled = section.querySelector(".section-enabled")?.checked ?? true;
-        
-      let sectionArray;
-      if (sectionEnabled)
-        sectionArray = [sectionName, sectionEnabled];
-      else
-        sectionArray = [sectionName, sectionEnabled];
-  
-      section.querySelectorAll(".stat-entry").forEach(statEntry => {
-        const statName = statEntry.querySelector('input[placeholder="Choose Stat..."]')?.value || "";
-        const expression = statEntry.querySelector('input[placeholder="Math Expression"]')?.value || "";
-        const statEnabled = statEntry.querySelector(".stat-enabled")?.checked ?? true;
-  
-        const statKey = statName in statNameToIndex ? statNameToIndex[statName] : NaN;
-        //var statValue = isNaN(Number(expression)) ? expression : Number(expression);
-  
-        if (!isNaN(statKey)) {
-          const statID = statKey;
-          if (statEnabled)
-            sectionArray.push([statID, expression]);
-          else
-            sectionArray.push([statID, expression, statEnabled]);
+    let buildJson = {
+      "type": "LECalculator build code",
+      "link": "https://iagann.github.io/LeCalculator/LeCalculator.html",
+      "build": {
+        "name": document.getElementById("buildNameInput").value,
+        "data": []
+      }
+    };
+
+    document.querySelectorAll(".category").forEach(category => {
+      const categoryName = category.querySelector('input[placeholder="Category Name"]')?.value || "";
+      let categoryJson = {
+        "categoryName": categoryName,
+         "items": []
+      };
+
+      category.querySelectorAll(".section").forEach(section => {
+        const sectionName = section.querySelector('input[placeholder="Section Name"]')?.value || "";
+        const sectionEnabled = section.querySelector(".section-enabled")?.checked ?? true;
+
+        let sectionJson = {
+          "sectionName": sectionName,
+          "enabled": sectionEnabled,
+          "stats": []
         }
+    
+        section.querySelectorAll(".stat-entry").forEach(statEntry => {
+          const statName = statEntry.querySelector('input[placeholder="Choose Stat..."]')?.value || "";
+          const expression = statEntry.querySelector('input[placeholder="Math Expression"]')?.value || "";
+          const statEnabled = statEntry.querySelector(".stat-enabled")?.checked ?? true;
+          const statKey = statName in statNameToIndex ? statNameToIndex[statName] : NaN;
+
+          let statJson = {
+            "statName": statName,
+            "expression": expression,
+            "statId": statKey,
+            "enabled": statEnabled
+          };
+
+          sectionJson.stats.push(statJson);
+        });
+
+        categoryJson.items.push(sectionJson);
       });
-  
-      allSections.push(sectionArray);
+
+       buildJson.build.data.push(categoryJson);
     });
   
-    const jsonStr = JSON.stringify(allSections);
+    const jsonStr = JSON.stringify(buildJson, null, 2);
     //savedBuildCode = compressBuild(jsonStr);
     savedBuildCode = jsonStr; // plain
   }
   
-
 function openLoadDialog() {
   document.getElementById("loadDialog").style.display = "block";
   const loadInput = document.getElementById("loadInput");
@@ -71,12 +86,7 @@ document.getElementById("loadInput").addEventListener("input", function() {
         const jsonStr = inputStr; // plain
         const parsedData = JSON.parse(jsonStr);
 
-        if (!Array.isArray(parsedData) || parsedData.length === 0) {
-            alert("Invalid build data!");
-            return;
-        }
-
-        const buildName = parsedData[0]; // First element in array should be the build name
+        const buildName = parsedData.build.name;
 
         // Check if a build with the same name already exists in localStorage
         if (localStorage.getItem(buildName)) {
@@ -87,7 +97,7 @@ document.getElementById("loadInput").addEventListener("input", function() {
         // If no conflicts, load the build
         document.getElementById("loadDialog").style.display = "none";
         this.value = ""; // Clear input after closing
-        loadFromBase64(inputStr);
+        loadFromCode(inputStr);
 
     } catch (error) {
         alert("Failed to load build: Invalid or corrupted data.");
@@ -95,55 +105,60 @@ document.getElementById("loadInput").addEventListener("input", function() {
     }
 });
 
-window.loadFromBase64 = function(inputStr) {
+window.loadFromCode = function(inputStr) {
     try {
       //const jsonStr = decompressBuild(inputStr);
       const jsonStr = inputStr; // plain
       if (!jsonStr) return;
   
       const parsedData = JSON.parse(jsonStr);
-      const loadedBuildName = parsedData[0]; 
-      const allSections = parsedData.slice(1);
+      const buildJson = parsedData.build;
+      const loadedBuildName = buildJson.name.trim();
       currentBuildName = loadedBuildName;
       document.getElementById("buildNameInput").value = currentBuildName;
-  
+
       // Clear out current sections
       document.getElementById("sections").innerHTML = "";
-  
-      allSections.forEach(sectionArr => {
-        const sectionName = sectionArr[0];
-        const sectionEnabled = sectionArr[1] ?? true;
-  
-        // Create new section
-        const sectionDiv = addSection(sectionName, null, true);
-        const statList = sectionDiv.querySelector(".stat-list");
-  
-        // Restore section enabled state
-        const sectionCheckbox = sectionDiv.querySelector(".section-enabled");
-        if (sectionCheckbox) {
-          sectionCheckbox.checked = sectionEnabled;
-          sectionDiv.classList.toggle("dimmed", !sectionEnabled); // if you're using .dimmed for opacity
-        }
-  
-        // Loop through remaining items (triplets: [statID, expression, statEnabled])
-        for (let i = 2; i < sectionArr.length; i++) {
-          const entry = sectionArr[i];
-          const statID = entry[0];
-          const expression = entry[1];
-          const statEnabled = entry[2] ?? true;
-  
-          const statName = getStatName(statID);
-          const statEntry = addStatEntry(statList, statName, expression, true, true);
-  
-          const statCheckbox = statEntry.querySelector(".stat-enabled");
-          if (statCheckbox) {
-            statCheckbox.checked = statEnabled;
-            statEntry.classList.toggle("dimmed", !statEnabled);
+      const categories = buildJson.data;
+      for (let category of categories) {
+        const categoryName = category.categoryName.trim();
+        const categoryDiv = addCategory(categoryName, true);
+
+        category.items.forEach(section => {
+          const sectionName = section.sectionName.trim();
+          const sectionEnabled = section.enabled;
+    
+          // Create new section
+          const sectionDiv = addSection(categoryDiv.children[1], sectionName, null, true);
+          const statList = sectionDiv.querySelector(".stat-list");
+    
+          // Restore section enabled state
+          const sectionCheckbox = sectionDiv.querySelector(".section-enabled");
+          if (sectionCheckbox) {
+            sectionCheckbox.checked = sectionEnabled;
+            sectionDiv.classList.toggle("dimmed", !sectionEnabled); // if you're using .dimmed for opacity
           }
-        }
-      });
+    
+          section.stats.forEach(stat => {
+            const statID = stat.statId;
+            const expression = stat.expression.trim();
+            const statEnabled = stat.enabled;
+    
+            const statName = getStatName(statID);
+            const statEntry = addStatEntry(statList, statName, expression, true, true);
+    
+            const statCheckbox = statEntry.querySelector(".stat-enabled");
+            if (statCheckbox) {
+              statCheckbox.checked = statEnabled;
+              statEntry.classList.toggle("dimmed", !statEnabled);
+            }
+          })
+        });
+      }
   
+      makeCategoriesDraggable();
       makeSectionsDraggable();
+      makeStatsDraggable();
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key.startsWith("highlight:") && localStorage.getItem(key) === "true") {
@@ -186,7 +201,7 @@ function createNewBuild() {
     window.history.replaceState({}, "", `${window.location.pathname}`);
 
     // Load the default build structure
-    loadFromBase64(base64Default);
+    loadFromCode(base64Default);
     buildNameInput.value = "";
 
     // Focus on the name input

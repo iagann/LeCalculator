@@ -10,9 +10,6 @@ function updateSummary() {
   
       const sectionName = section.querySelector(".section-header input[placeholder='Section Name']").value;
 
-      //if (sectionName == "[item][relic] Vessel of Strife")
-      //  console.log(1);
-
       section.querySelectorAll(".stat-entry").forEach(statEntry => {
         const statEnabled = statEntry.querySelector(".stat-enabled")?.checked;
         if (!statEnabled) return;
@@ -291,12 +288,8 @@ function processExpressions() {
         if (statData.expression) {
             expression = statData.expression;
             
-            //if (expression.includes("HpRegen"))
-            //    console.log(1);
             expression = replaceExpressionAll(expression);            
-            //if (statId == 50)
-                //console.log("expression", statId, getStatName(statId), processExpressionsCount, "=>" ,statData.expression, expression);
-            
+
             const statValue = evaluateExpression(expression);
             if (!isNaN(statValue)) {
                 statData.expression = null;
@@ -304,25 +297,17 @@ function processExpressions() {
                     if (isNaN(statData.total))
                         statData.total = 100;
                     statData.total *= (100 + (statIsOpposite(statId) ? -statValue : statValue)) / 100;
-                    //console.log("more processExpressions", expression, statId, getStatName(statId), statValue, statData.total);
                 }
                 else {
                     if (isNaN(statData.total))
                         statData.total = 0;
                     statData.total += statValue;
-                    /*
-                    if (statId == 50)
-                        console.log("statData.total", statId, getStatName(statId), statData.total - statValue, "=>", statData.total);
-                    */
                 }
             }
             
         }
     }
-/*
-    if (wasExpression)
-        processExpressions();
-*/
+
     processExpressionsCount++;
 }
 
@@ -386,10 +371,11 @@ function processStats(statsArray, firstRun = true) {
     var passiveCount = new Map();
     var passiveSources = new Map();
 
-    statsArray.forEach(([statId, expression, sectionName]) => {
-        //if (statId == stats.WARD_PER_SECOND)
-        //    console.log(1);
+    // process later
+    hpRegen = NaN;
+    cdr = NaN;
 
+    statsArray.forEach(([statId, expression, sectionName]) => {
         if (sectionName.includes("[passive]") && expression.includes("*")) {
             let lastIndex = expression.lastIndexOf("*");
             let result = "0";
@@ -468,7 +454,7 @@ function processStats(statsArray, firstRun = true) {
     intelligence = allAttributes + (allStats[stats.INTELLIGENCE]?.total || 0);
     attunement = allAttributes + (allStats[stats.ATTUNEMENT]?.total || 0);
     vitality = allAttributes + (allStats[stats.VITALITY]?.total || 0);
-    hpRegen = NaN; // process later
+
     processExpressions();
 
     fireResist = (allStats[stats.FIRE_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
@@ -498,7 +484,7 @@ function processStats(statsArray, firstRun = true) {
     const moreHits = (allStats[stats.MORE_HIT_SPEED]?.total || 100);
     
     const cd = allStats[stats.SKILL_COOLDOWN]?.total || 0;
-    cdr = allStats[stats.CDR]?.total || 0;
+    cdr = allStats[stats.COOLDOWN_REDUCTION]?.total || 0;
 
     {
         totalEnduranceThreshold = enduranceThreshold + hpAsEnduranceThreshold;
@@ -909,7 +895,7 @@ function processStats(statsArray, firstRun = true) {
             total: cdr, 
             type: "stat",
             sources: [
-                ...(allStats[stats.CDR]?.sources || []),
+                ...(allStats[stats.COOLDOWN_REDUCTION]?.sources || []),
             ]
         });
         summary.push({ 
@@ -2392,6 +2378,8 @@ const avgHitsLookup = {
   }
   
   function updateSortDropdown() {
+    return; 
+
     const select = document.getElementById("sort-select");
     const reset = document.getElementById("reset-contributions");
   
@@ -2434,21 +2422,23 @@ const avgHitsLookup = {
   }
   
   function applySectionSort() {
-    const sortSelect = document.getElementById("sort-select");
-  const selected = sortSelect.value;
-  const reverseLabel = document.getElementById("sort-reverse-label");
-  
-  // If no sort selected, hide reverse checkbox, reset orders
-  if (!selected) {
-    reverseLabel.style.display = "none"; // Hide checkbox
-    document.querySelectorAll(".section-wrapper").forEach(wrapper => {
-      wrapper.style.order = 0;
-    });
     return;
-  }
 
-  // Otherwise, show the reverse checkbox
-  reverseLabel.style.display = "inline-block";
+    const sortSelect = document.getElementById("sort-select");
+    const selected = sortSelect.value;
+    const reverseLabel = document.getElementById("sort-reverse-label");
+    
+    // If no sort selected, hide reverse checkbox, reset orders
+    if (!selected) {
+        reverseLabel.style.display = "none"; // Hide checkbox
+        document.querySelectorAll(".section-wrapper").forEach(wrapper => {
+        wrapper.style.order = 0;
+        });
+        return;
+    }
+
+    // Otherwise, show the reverse checkbox
+    reverseLabel.style.display = "inline-block";
   
     const sectionContribs = [];
   

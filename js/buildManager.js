@@ -53,8 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const searchInput = document.getElementById("section-search");
     if (searchInput) {
-    searchInput.value = "";
-    filterSectionsByName(); // Reapply filtering to show everything
+        searchInput.value = "";
+        filterSectionsByName(); // Reapply filtering to show everything
     }
 
     document.addEventListener("change", e => {
@@ -71,6 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
+      /*
     document.getElementById("sort-select").addEventListener("change", function () {
         const defaultOption = this.options[0];
       
@@ -86,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("sort-reverse-cb").addEventListener("change", () => {
         applySectionSort();
       });
+      */
 
     (function () {
         const container = document.querySelector('.main-content'); // your scrollable area
@@ -219,8 +221,8 @@ function loadBuildByName(name) {
     currentBuildName = name;
     document.getElementById("buildNameInput").value = name;
 
-    // call your existing "loadFromBase64(code)" function
-    loadFromBase64(code);
+    // call your existing "loadFromCode(code)" function
+    loadFromCode(code);
     collapseAllSections();
     //alert(`Loaded build: "${name}"`);
     handleBuildNameChange();

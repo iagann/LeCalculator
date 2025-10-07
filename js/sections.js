@@ -1,5 +1,80 @@
-function addSection(name = "", cloneFrom = null, ignoreFocus = false) {
+function addCategory(name = "", ignoreFocus = false) {
   const sectionsDiv = document.getElementById("sections");
+
+  const categoryDiv = document.createElement("div");
+  categoryDiv.classList.add("category");
+  categoryDiv.classList.add("collapsed");
+
+  const headerDiv = document.createElement("div");
+  headerDiv.classList.add("category-header");
+
+  const titleInput = document.createElement("input");
+  titleInput.type = "text";
+  titleInput.value = name;
+  titleInput.placeholder = "Category Name";
+  titleInput.oninput = saveCurrentBuildLocally;
+
+  const dragHandle = document.createElement("span");
+  dragHandle.classList.add("drag-handle");
+  dragHandle.innerHTML = "☰";
+
+  const collapseBtn = document.createElement("button");
+  collapseBtn.textContent = "▶";
+  collapseBtn.title = "Expand/collapse category";
+  collapseBtn.onclick = () => toggleCollapse(categoryDiv, collapseBtn);
+
+  const wrapperDiv = document.createElement("div");
+  const addSectionBtn = document.createElement("button");
+  addSectionBtn.textContent = "Add Item";
+  addSectionBtn.onclick = () => {
+      categoryDiv.classList.remove("collapsed");
+      collapseBtn.textContent = "▼";
+
+      if (wrapperDiv.innerHTML == "Empty, add more items!")
+        wrapperDiv.innerHTML = "";
+      const sectionDiv = addSection(wrapperDiv);
+      sectionDiv.querySelector("input[type='text']").focus();
+  };
+
+  const deleteCategoryBtn = document.createElement("button");
+  deleteCategoryBtn.title = "Delete category";
+  deleteCategoryBtn.classList.add("btn-delete");
+  deleteCategoryBtn.textContent = "✖";
+  deleteCategoryBtn.onclick = () => {
+      if (confirm("Are you sure you want to delete this category?")) {
+          categoryDiv.remove();
+          setTimeout(() => {
+              updateSummary();
+              saveCurrentBuildLocally();
+              updateSectionSearchOptions();
+          }, 0);
+      }
+  };
+
+  headerDiv.appendChild(dragHandle);
+  headerDiv.appendChild(collapseBtn);
+  headerDiv.appendChild(titleInput);
+  headerDiv.appendChild(addSectionBtn);
+  headerDiv.appendChild(deleteCategoryBtn);
+  categoryDiv.appendChild(headerDiv);
+
+  wrapperDiv.classList.add("category-wrapper");
+  wrapperDiv.innerHTML = "Empty, add more items!";
+  categoryDiv.appendChild(wrapperDiv);
+
+  if (!ignoreFocus)
+    titleInput.focus();
+
+  sectionsDiv.appendChild(categoryDiv);
+  
+  return categoryDiv;
+}
+
+function addSection(category, name = "", cloneFrom = null, ignoreFocus = false) {
+  const sectionsDiv = category;
+  if (category.innerHTML == "Empty, add more items!") {
+    category.innerHTML = "";
+  }
 
   const sectionDiv = document.createElement("div");
   sectionDiv.classList.add("section");
@@ -38,6 +113,8 @@ function addSection(name = "", cloneFrom = null, ignoreFocus = false) {
       sectionDiv.classList.remove("collapsed");
       collapseBtn.textContent = "▼";
 
+      if (statList.innerHTML == "Empty, add more stats!")
+            statList.innerHTML = "";
       const statDiv = addStatEntry(statList);
       statDiv.querySelector("input[type='text']").focus();
   };
@@ -46,7 +123,7 @@ function addSection(name = "", cloneFrom = null, ignoreFocus = false) {
   duplicateSectionBtn.title = "Duplicate section";
   duplicateSectionBtn.textContent = "📋";
   duplicateSectionBtn.onclick = () => {
-      const clonedSection = addSection(titleInput.value, sectionDiv);
+      const clonedSection = addSection(sectionsDiv, titleInput.value, sectionDiv);
       
       // Clone each stat entry
       const originalStats = statList.querySelectorAll(".stat-entry");
@@ -54,6 +131,8 @@ function addSection(name = "", cloneFrom = null, ignoreFocus = false) {
           const statName = originalStat.querySelector("input[placeholder='Choose Stat...']").value;
           const expression = originalStat.querySelector("input[placeholder='Math Expression']").value;
 
+          if (statList.innerHTML == "Empty, add more stats!")
+            statList.innerHTML = "";
           const newStat = addStatEntry(clonedSection.querySelector(".stat-list"));
           newStat.querySelector("input[placeholder='Choose Stat...']").value = statName;
           newStat.querySelector("input[placeholder='Math Expression']").value = expression;
@@ -72,6 +151,9 @@ function addSection(name = "", cloneFrom = null, ignoreFocus = false) {
   deleteSectionBtn.textContent = "✖";
   deleteSectionBtn.onclick = () => {
       if (confirm("Are you sure you want to delete this section?")) {
+          if (sectionDiv.parentElement.parentElement.children.length == 1) {
+            sectionDiv.parentElement.parentElement.innerHTML = "Empty, add more items!";
+          }
           sectionDiv.remove();
           setTimeout(() => {
               updateSummary();
@@ -93,6 +175,7 @@ function addSection(name = "", cloneFrom = null, ignoreFocus = false) {
 
   const statList = document.createElement("div");
   statList.classList.add("stat-list");
+  statList.innerHTML = "Empty, add more stats!";
   sectionDiv.appendChild(statList);
 
   const wrapperDiv = document.createElement("div");
@@ -105,35 +188,55 @@ function addSection(name = "", cloneFrom = null, ignoreFocus = false) {
     sectionsDiv.appendChild(wrapperDiv);
   }
 
-  makeStatsDraggable(sectionDiv);
   if (!ignoreFocus)
     titleInput.focus();
   
   return sectionDiv;
 }
   
-  function toggleCollapse(sectionDiv, btn) {
-    const collapsed = sectionDiv.classList.toggle("collapsed");
-    btn.textContent = collapsed ? "▶" : "▼";
-  }
-  
-  function collapseAllSections() {
-    document.querySelectorAll(".section").forEach(section => {
-      section.classList.add("collapsed");
-      const collapseButton = section.querySelector(".section-header button");
-      if (collapseButton) {
-        collapseButton.textContent = "▶";
-      }
-    });
-  }
-
-  function expandAllSections() {
-    document.querySelectorAll(".section").forEach(section => {
-        section.classList.remove("collapsed");
-        const collapseButton = section.querySelector(".section-header button");
-        if (collapseButton) {
-            collapseButton.textContent = "▼";
-        }
-    });
+function toggleCollapse(sectionDiv, btn) {
+  const collapsed = sectionDiv.classList.toggle("collapsed");
+  btn.textContent = collapsed ? "▶" : "▼";
 }
   
+function collapseAllSections() {
+  document.querySelectorAll(".section").forEach(section => {
+    section.classList.add("collapsed");
+    const collapseButton = section.querySelector(".section-header button");
+    if (collapseButton) {
+      collapseButton.textContent = "▶";
+    }
+  });
+}
+
+function expandAllSections() {
+  document.querySelectorAll(".section").forEach(section => {
+      section.classList.remove("collapsed");
+      const collapseButton = section.querySelector(".section-header button");
+      if (collapseButton) {
+          collapseButton.textContent = "▼";
+      }
+  });
+}
+
+
+  
+function collapseAllCategories() {
+  document.querySelectorAll(".category").forEach(section => {
+    section.classList.add("collapsed");
+    const collapseButton = section.querySelector(".category-header button");
+    if (collapseButton) {
+      collapseButton.textContent = "▶";
+    }
+  });
+}
+
+function expandAllCategories() {
+  document.querySelectorAll(".category").forEach(section => {
+      section.classList.remove("collapsed");
+      const collapseButton = section.querySelector(".category-header button");
+      if (collapseButton) {
+          collapseButton.textContent = "▼";
+      }
+  });
+}

@@ -1,41 +1,50 @@
 function filterSectionsByName() {
   const query = document.getElementById("section-search").value.trim().toLowerCase();
 
-  document.querySelectorAll(".section").forEach(section => {
-    const nameInput = section.querySelector('input[placeholder="Section Name"]');
-    const sectionName = nameInput?.value.toLowerCase() || "";
+  document.querySelectorAll(".category").forEach(category => {
+    const nameInput = category.querySelector('input[placeholder="Category Name"]');
+    const categoryName = nameInput?.value.toLowerCase() || "";
+    let showCategory = categoryName.includes(query);
 
-    let sectionMatches = sectionName.includes(query);
-    let statMatches = false;
+    category.querySelectorAll(".section").forEach(section => {
+        const nameInput = section.querySelector('input[placeholder="Section Name"]');
+        const sectionName = nameInput?.value.toLowerCase() || "";
+        let showSection = sectionName.includes(query);
+        if (showSection)
+          showCategory = true;
 
-    const statEntries = section.querySelectorAll(".stat-entry");
+        const statEntries = section.querySelectorAll(".stat-entry");
 
-    // Reset visibility of all stat entries
-    statEntries.forEach(entry => {
-      entry.style.display = "";
-    });
+        // Reset visibility of all stat entries
+        statEntries.forEach(entry => {
+          entry.style.display = "";
+        });
 
-    if (!sectionMatches) {
-      // Check if any stat entry matches by stat name OR math expression
-      statEntries.forEach(entry => {
-        const statInput = entry.querySelector("input[placeholder='Choose Stat...']");
-        const exprInput = entry.querySelector("input[placeholder='Math Expression']");
+        if (!showSection) {
+          // Check if any stat entry matches by stat name OR math expression
+          statEntries.forEach(entry => {
+            const statInput = entry.querySelector("input[placeholder='Choose Stat...']");
+            const exprInput = entry.querySelector("input[placeholder='Math Expression']");
 
-        const statName = statInput?.value.toLowerCase() || "";
-        const exprValue = exprInput?.value.toLowerCase() || "";
+            const statName = statInput?.value.toLowerCase() || "";
+            const exprValue = exprInput?.value.toLowerCase() || "";
 
-        const matches = statName.includes(query) || exprValue.includes(query);
+            const matches = statName.includes(query) || exprValue.includes(query);
 
-        if (matches) {
-          statMatches = true;
-        } else {
-          entry.style.display = "none"; // Hide non-matching stat entry
+            if (matches) {
+              showSection = true;
+              showCategory = true;
+            } else {
+              entry.style.display = "none"; // Hide non-matching stat entry
+            }
+          });
         }
-      });
-    }
 
-    // Show or hide section
-    section.style.display = (sectionMatches || statMatches) ? "" : "none";
+        // Show or hide section
+        section.style.display = (showSection) ? "" : "none";
+      });
+
+    category.style.display = (showCategory) ? "" : "none";
   });
 
   // Show/hide clear + collapse/expand buttons

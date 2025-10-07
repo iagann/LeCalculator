@@ -91,7 +91,7 @@ const stats = Object.freeze({
     INCREASED_ENDURANCE_THRESHOLD: statNum++,
 
     SKILL_COOLDOWN: statNum++,
-    CDR: statNum++,
+    COOLDOWN_REDUCTION: statNum++,
 
     LOW_LIFE: statNum++,
 
@@ -196,7 +196,7 @@ function getStatName(key) {
         case stats.INCREASED_ENDURANCE_THRESHOLD: return "Increased Endurance Threshold";
 
         case stats.SKILL_COOLDOWN: return "SKILL COOLDOWN";
-        case stats.CDR: return "Cooldown Reduciton Speed";
+        case stats.COOLDOWN_REDUCTION: return "Cooldown Reduction Speed";
 
         case stats.LOW_LIFE: return "LOW LIFE";
 

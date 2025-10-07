@@ -27,6 +27,21 @@
   }
 
   html, .main-content { scroll-behavior: smooth; }
+
+  .category {
+    /*background-color: #7a7a7a;*/
+    padding: 0px 5px;
+    margin-top: 5px;
+    border-radius: 7px;
+    transition: background-color 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /*cursor: grab;*/
+  }
   
   /* Example styles for sections, stats, etc. */
   .section {
@@ -94,7 +109,11 @@
   }
   
   /* If a section is collapsed, hide the stat-list */
-  .collapsed .stat-list {
+  .category-wrapper {
+    margin: 5px;
+    font-size: 13px;
+  }
+  .collapsed .stat-list, .collapsed .category-wrapper {
     display: none;
   }
   .sortable-ghost {

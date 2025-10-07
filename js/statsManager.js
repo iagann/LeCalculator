@@ -72,6 +72,9 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
   deleteBtn.onclick = (event) => {
       event.stopPropagation();
       if (confirm("Are you sure you want to delete this stat?")) {
+          if (statDiv.parentElement.children.length == 1) {
+            statDiv.parentElement.innerHTML = "Empty, add more stats!";
+          }
           statDiv.remove();
           setTimeout(() => {
               if (!ignoreSummaryUpdate) updateSummary();
@@ -90,6 +93,9 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
   statDiv.appendChild(mathInput);
   statDiv.appendChild(deleteBtn);
 
+  if (statList.innerHTML == "Empty, add more stats!") {
+    statList.innerHTML = "";
+  }
   statList.appendChild(statDiv);
 
   // Auto-focus on new stat
