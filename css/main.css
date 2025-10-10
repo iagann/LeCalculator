@@ -184,7 +184,7 @@ datalist option:hover {
   background-color: #2a2a2a;
   color: #fff;
   border: 1px solid #555;
-  padding: 5px 26px 5px 5px; /* right padding for the button */
+  padding: 5px 26px 5px 10px; /* right padding for the button */
   margin: 5px 0;
   border-radius: 4px;
   width: 150px;
@@ -246,10 +246,4 @@ datalist option:hover {
   background-color: #161616;
   color: #aaa;
   transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-#reset-contributions {
-  margin-left: 8px;
-  padding: 4px 8px;
-  font-size: 13px;
 }
