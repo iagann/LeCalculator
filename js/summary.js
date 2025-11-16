@@ -457,13 +457,16 @@ function processStats(statsArray, firstRun = true) {
 
     processExpressions();
 
-    fireResist = (allStats[stats.FIRE_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
-    coldResist = (allStats[stats.COLD_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
-    lightningResist = (allStats[stats.LIGHTNING_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
-    physResist = (allStats[stats.PHYSICAL_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
-    necroticResist = vitality + (allStats[stats.NECROTIC_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
-    poisonResist = vitality + (allStats[stats.POISON_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
-    voidResist = (allStats[stats.VOID_RESISTANCE]?.total || 0) + (allStats[stats.ALL_RESISTANCES]?.total || 0);
+    let allResist = allStats[stats.ALL_RESISTANCES]?.total || 0;
+    let elementalResist = allStats[stats.ELEMENTAL_RESISTANCE]?.total || 0;
+    fireResist = (allStats[stats.FIRE_RESISTANCE]?.total || 0) + allResist + elementalResist;
+    coldResist = (allStats[stats.COLD_RESISTANCE]?.total || 0) + allResist + elementalResist;
+    lightningResist = (allStats[stats.LIGHTNING_RESISTANCE]?.total || 0) + allResist + elementalResist;
+    physResist = (allStats[stats.PHYSICAL_RESISTANCE]?.total || 0) + allResist;
+    necroticResist = vitality + (allStats[stats.NECROTIC_RESISTANCE]?.total || 0) + allResist;
+    poisonResist = vitality + (allStats[stats.POISON_RESISTANCE]?.total || 0) + allResist;
+    voidResist = (allStats[stats.VOID_RESISTANCE]?.total || 0) + allResist;
+
 
     processExpressions();
     intelligence = allAttributes + (allStats[stats.INTELLIGENCE]?.total || 0);
@@ -897,6 +900,12 @@ function processStats(statsArray, firstRun = true) {
             sources: [
                 ...(allStats[stats.COOLDOWN_REDUCTION]?.sources || []),
             ]
+        });
+        summary.push({ 
+            name: "Total Cooldown", 
+            total: 1 / hitsPerSecond, 
+            type: "stat",
+            sources: []
         });
         summary.push({ 
             name: "Uses per second", 

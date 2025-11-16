@@ -101,6 +101,8 @@ const stats = Object.freeze({
     ECHO_DAMAGE: statNum++,
 
     MANA_COST: statNum++,
+
+    ELEMENTAL_RESISTANCE: statNum++,
 });
 
 function getStatName(key) {
@@ -206,6 +208,8 @@ function getStatName(key) {
         case stats.ECHO_DAMAGE: return "Increased Echo Damage";
 
         case stats.MANA_COST: return "Mana Cost";
+
+        case stats.ELEMENTAL_RESISTANCE: return "Elemental Resistance";
     }
     return "Unknown";
 }
