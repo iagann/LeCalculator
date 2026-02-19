@@ -1,17 +1,3 @@
-// base64Handler.js
-
-function saveToClipboard() {
-    // Ensure we have the latest structure
-    updateSaveString();
-
-    navigator.clipboard.writeText(savedBuildCode).then(() => {
-        alert("Build code copied to clipboard!");
-    }).catch(err => {
-        console.error("Clipboard copy failed:", err);
-    });
-}
-
-// base64Handler.js
 let savedBuildCode = "";
 
 // 1) Update the build code from the DOM structure
