@@ -65,21 +65,3 @@ function makeBuildListDraggable() {
     }
   });
 }
-
-// Then call it after building the list
-function refreshBuildList() {
-  const buildList = document.getElementById("build-list");
-  buildList.innerHTML = "";
-
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    const li = document.createElement("li");
-    li.textContent = key;
-    li.onclick = () => loadBuildByName(key);
-    buildList.appendChild(li);
-  }
-
-  // Call after populating
-  makeBuildListDraggable();
-}
-  
