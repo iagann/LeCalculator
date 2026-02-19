@@ -1,68 +1,52 @@
-# LeCalculator
+# LeCalculator: Production-Grade Build Analysis Engine
 
-**LeCalculator** is a web-based calculator tool built for analyzing **damage, survivability, and overall stat interactions** for character builds in the action RPG **Last Epoch**.
+**LeCalculator** is a client-side analytical engine designed for the high-fidelity simulation and calculation of character statistics, effective health (EHP), and damage-per-second (DPS) for the Action RPG *Last Epoch*.
 
-It allows you to:
-- Input, edit, and organize various character stats by section.
-- Define mathematical expressions for stats (e.g., `5 + dex * 0.5`).
-- Calculate derived stats like DPS, Health, More Damage multipliers, etc.
-- Visualize contributions from different gear pieces or passive nodes via expandable tooltips.
-- Highlight linked values (e.g., see what contributes to a stat when you hover or search).
+## 🏗 Architectural Overview
 
-## Features
+The system is designed as a modular, decoupled frontend application. It leverages a centralized versioning system to ensure asset synchronization across deployments.
 
-- ✨ **Modular UI** with collapsible and duplicable sections.
-- ✎ **Dynamic stat calculation** using JavaScript expressions.
-- 🔍 **Search functionality** for section names, stat names, and math expressions.
-- 🔺 **Tooltip linkage** that highlights related sections and inputs.
-- 🖊️ **Expression parser** supporting custom functions like `recurveHits(x)`.
-- 📂 **Save/load** builds via Base64-encoded strings and local storage.
-- 📅 **Section and summary collapse states** persist between changes.
-- 🔄 **Draggable stat lists** for reordering priorities.
+### Core Components
+* **Calculation Engine (`summary.js`):** The heart of the application. It processes raw stat inputs through iterative passes to resolve complex dependencies (e.g., Attributes -> Health -> Ward Retention -> Stable Ward).
+* **Expression Parser (`statsManager.js`):** Validates and evaluates user-defined mathematical expressions (e.g., `5 + dex * 0.5`).
+* **Persistence Layer (`buildManager.js` & `jsonHandler.js`):** Implements state persistence via `localStorage` and provides serialization/deserialization for `.json` export and import functionality.
+* **UI Orchestration (`sections.js` & `sectionsSearch.js`):** Manages a dynamic, searchable DOM structure for complex build configurations.
 
-## Getting Started
+## 🛡 Stability & Security Analysis
 
-1. Clone the repo:
-```bash
-git clone https://github.com/your-username/lecalculator.git
-cd lecalculator
-```
+### Evaluation Safety
+* **Trade-off:** The engine currently utilizes the `Function` constructor for expression evaluation. While this provides high performance and flexibility for complex math, it introduces a potential XSS vector if importing builds from untrusted third-party sources.
+* **Recommendation:** Sanitize all incoming strings in `jsonHandler.js` before evaluation.
 
-2. Open `index.html` in a modern browser.
+### Performance Optimization
+* **Expression Caching:** To prevent redundant CPU cycles, evaluated expressions are stored in a `Map`-based cache.
+* **Debounced Updates:** Input listeners are throttled via `setTimeout` to ensure the UI remains responsive during rapid data entry.
 
-> No build step or server is required. Everything runs locally in your browser.
+## 📊 Technical Specifications
 
-## File Overview
+| Feature | Implementation Detail |
+| :--- | :--- |
+| **Stat Registry** | Immutable `stats` object containing unique identifiers for all game variables. |
+| **Math Models** | High-precision formulas for Armor Mitigation, Dodge Chance, and Stable Ward decay. |
+| **Dependencies** | Minimal footprint. Utilizes `Sortable.js` for drag-and-drop state management. |
+| **Storage** | LocalStorage-backed build list with explicit `buildOrder` persistence. |
 
-| File | Description |
-|------|-------------|
-| `index.html` | Main UI layout |
-| `sections.js` | Controls creation and manipulation of sections |
-| `summary.js` | Builds the summary section and calculates final stats |
-| `mainGlow.js` | Tooltip interactions and UI highlighting |
-| `statManager.js` | Handles stat entry logic |
-| `base64Handler.js` | Build save/load logic via Base64 |
-| `buildManager.js` | LocalStorage build persistence |
-| `style.css` | Styling and themes |
+## 🚀 Getting Started
 
-## Custom Functions
+### Local Development
+The project is designed to run in an isolated browser environment with no server-side dependencies.
+1.  Clone the repository.
+2.  Open `LeCalculator.html` in a modern, standards-compliant browser.
 
-- `recurveHits(x)`
-  - Calculates average hits per second for recurve bow mechanics.
-  - Integrated directly into expression evaluation logic.
+### Deployment
+Asset injection is handled via a centralized manifest in the HTML head. For production deployments:
+* Ensure the `v` constant in `LeCalculator.html` is incremented to bypass browser-level cache stale-dating.
+* Recommended CI/CD: Static analysis of JavaScript files to ensure no global namespace collisions.
 
-## Planned Features / TODO
-- [ ] Export builds as shareable URLs or JSON
-- [ ] Add defensive EHP calculation support
-- [ ] Compare multiple builds side-by-side
-- [ ] Auto-import from in-game planner tools
+## 🛠 Planned Enhancements (Production Roadmap)
+- [ ] **Security:** Transition from `Function()` evaluation to a sandboxed math parser (e.g., `math.js`) to eliminate XSS risks.
+- [ ] **Integrity:** Implement JSON schema validation for the `importBuildFromFile` function.
+- [ ] **Reliability:** Add a Test Suite (e.g., Jest) to verify calculation accuracy against known game-mechanic benchmarks.
 
-## Contributing
-Pull requests are welcome! Please ensure any new logic is cleanly separated and UI elements are styled consistently.
-
-## License
-MIT
-
----
-**LeCalculator** is a fan-made tool and is not affiliated with Eleventh Hour Games or Last Epoch.
-
+## ⚖ License
+MIT — *LeCalculator is a fan-made tool and is not affiliated with Eleventh Hour Games.*
