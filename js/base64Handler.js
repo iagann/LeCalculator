@@ -187,7 +187,15 @@ function closeLoadDialog() {
 }
 
 function createNewBuild() {
-    const base64Default = "NoIgRghgzgpiA0piVgXQQFwE4FcaIEZ4QBmTXGVRAVmIPLyuAIBY6AGdgAgCouBOBpUQt2xAEzshTFuIlT42RonEA2YqOmpUQA==";
+    // Replaced Base64 default with the raw JSON equivalent since decompression is disabled
+    const emptyBuildJson = JSON.stringify({
+      "type": "LECalculator build code",
+      "link": "https://iagann.github.io/LeCalculator/LeCalculator.html",
+      "build": {
+        "name": "",
+        "data": []
+      }
+    });
 
     // Reset the build name
     const buildNameInput = document.getElementById("buildNameInput");
@@ -200,8 +208,8 @@ function createNewBuild() {
     params.delete("build");
     window.history.replaceState({}, "", `${window.location.pathname}`);
 
-    // Load the default build structure
-    loadFromCode(base64Default);
+    // Load the default build structure using plain JSON
+    loadFromCode(emptyBuildJson);
     buildNameInput.value = "";
 
     // Focus on the name input
