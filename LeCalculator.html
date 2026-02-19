@@ -4,31 +4,47 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>LE Calculator by iagan3228</title>
-  
-  <!-- CSS (split into multiple files as requested) -->
-  <link rel="stylesheet" href="css/general.css?v=20250327">
-  <link rel="stylesheet" href="css/main.css?v=2025032701">
-  <link rel="stylesheet" href="css/buildList.css?v=20250327">
-  <link rel="stylesheet" href="css/summary.css?v=2025032701">
-  <link rel="stylesheet" href="css/dragDrop.css?v=20250327">
-  <link rel="stylesheet" href="css/hoverMenu.css?v=20250915">
 
   <!-- Sortable.js (CDN) for drag & drop -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
   
-  <!-- Your app logic (deferred so HTML loads first) -->
-  <script       src="js/stats.js?v=2025032707"></script>
-  <script defer src="js/pako.js?v=20250327"></script>
-  <script defer src="js/jsonHandler.js?v=2025032701"></script>
-  <script defer src="js/sections.js?v=20250327"></script>
-  <script defer src="js/sectionsSearch.js?v=20250327"></script>
-  <script defer src="js/statsManager.js?v=2025032707"></script>
-  <script defer src="js/dragDrop.js?v=20250327"></script>
-  <script defer src="js/summary.js?v=2025032707"></script>
-  <script defer src="js/buildManager.js?v=2025032702"></script>
-  <!--script defer src="js/mainGlow.js"></script-->
+  <script>
+  (function() {
+    // 1. Centralized Version Control
+    const v = "20260220_01"; 
+    
+    // 2. Asset Definitions
+    const styles = [
+      'general', 'main', 'buildList', 'summary', 'dragDrop', 'hoverMenu'
+    ];
+
+    const scriptsCritical = [
+      'stats'
+    ];
+    
+    const scripts = [
+      'jsonHandler', 'sections', 'sectionsSearch', 
+      'statsManager', 'dragDrop', 'summary', 'buildManager'
+    ];
+
+    // 3. Inject Styles
+    styles.forEach(name => {
+      document.write(`<link rel="stylesheet" href="css/${name}.css?v=${v}">`);
+    });
+
+    // 4. Inject Stats (Blocking - must be first)
+    scriptsCritical.forEach(name => {
+      document.write(`<script src="js/${name}.js?v=${v}"><\/script>`);
+    });
+
+
+    // 5. Inject Logic (Deferred - preserves order)
+    scripts.forEach(name => {
+      document.write(`<script defer src="js/${name}.js?v=${v}"><\/script>`);
+    });
+  })();
+</script>
 </head>
 <body>
   <div id="loading-overlay">
