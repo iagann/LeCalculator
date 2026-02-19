@@ -399,3 +399,16 @@ function copyBuildCodeToClipboard() {
             alert("Failed to copy build code.");
         });
 }
+
+window.addEventListener("load", () => {
+    const overlay = document.getElementById("loading-overlay");
+    if (overlay) {
+        // Trigger the CSS fade out
+        overlay.style.opacity = "0";
+        
+        // Remove it from the DOM entirely after the 0.3s transition finishes
+        setTimeout(() => {
+            overlay.remove();
+        }, 300);
+    }
+});
