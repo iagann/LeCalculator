@@ -77,27 +77,35 @@ function openLoadDialog() {
 }
 
 document.getElementById("loadInput").addEventListener("input", function() {
-    const inputStr = this.value; //.trim();
+    const inputStr = this.value; 
     if (!inputStr) return;
 
-    // Decompress Base64 and parse JSON to check the build name
     try {
-        //const jsonStr = decompressBuild(inputStr);
         const jsonStr = inputStr; // plain
         const parsedData = JSON.parse(jsonStr);
-
         const buildName = parsedData.build.name;
 
-        // Check if a build with the same name already exists in localStorage
-        if (localStorage.getItem(buildName)) {
-            if(!confirm(`A build named "${buildName}" already exists! Overwrite it?`))
+        document.getElementById("loadDialog").style.display = "none";
+        this.value = "";
+
+        // FIX: Use getBuildKey() so it properly detects existing builds
+        if (localStorage.getItem(getBuildKey(buildName))) {
+            if(!confirm(`A build named "${buildName}" already exists! Overwrite it?`)) {
                 return;
+            }
         }
 
-        // If no conflicts, load the build
-        document.getElementById("loadDialog").style.display = "none";
-        this.value = ""; // Clear input after closing
+        // If no conflicts, parse data
         loadFromCode(inputStr);
+
+        // 1. Update the URL state to match the loaded build
+        updateBuildNameInURL();
+
+        // 2. Automatically save it to local storage so it appears in the left panel
+        saveCurrentBuildLocally();
+
+        // 3. Ensure the Copy button visually enables (if you added the disabled UI state)
+        updateCopyButtonState();
 
     } catch (error) {
         alert("Failed to load build: Invalid or corrupted data.");
