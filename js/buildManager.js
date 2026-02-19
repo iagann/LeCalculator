@@ -3,6 +3,14 @@
 // We'll keep a global variable for the "current build name"
 let currentBuildName = "";  // You can default it to something if you like
 
+window.updateCopyButtonState = function() {
+    const copyBtn = document.getElementById("copy-build-btn");
+    const buildNameInput = document.getElementById("buildNameInput");
+    if (copyBtn && buildNameInput) {
+        copyBtn.disabled = buildNameInput.value.trim() === "";
+    }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     // After DOM loads, let's populate the build list
     refreshBuildList();
@@ -23,8 +31,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Update URL while typing
     buildNameInput.addEventListener("input", () => {
-        //updateBuildNameInURL();
+        updateCopyButtonState();
     });
+    updateCopyButtonState();
 
     // Save when user presses Enter
     buildNameInput.addEventListener("keydown", (event) => {
@@ -187,7 +196,6 @@ function saveCurrentBuildLocally() {
     currentBuildName = document.getElementById("buildNameInput").value;
     // If there's no build name, we can't store it
     if (!currentBuildName) {
-        alert("Please enter a build name first.");
         return;
     }
 
@@ -348,7 +356,9 @@ function refreshBuildList() {
 function deleteBuild(buildName) {
     localStorage.removeItem(getBuildKey(buildName));
     refreshBuildList();
-    createNewBuild();
+    if (currentBuildName === buildName) {
+        createNewBuild();
+    }
 }
 
 // 8) A helper to get the current build's base64
@@ -363,7 +373,6 @@ function getCurrentBuildBase64() {
 function copyBuildCodeToClipboard() {
     // Ensure a build exists
     if (!currentBuildName) {
-        alert("Please enter a build name first.");
         return;
     }
 

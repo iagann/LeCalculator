@@ -214,5 +214,8 @@ function createNewBuild() {
 
     // Focus on the name input
     buildNameInput.focus();
+
+    // Explicitly sync the button state since programmatic assignment bypasses event listeners
+    window.updateCopyButtonState();
 }
 
