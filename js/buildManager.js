@@ -257,13 +257,31 @@ function refreshBuildList() {
 
     const currentBuildName = new URLSearchParams(window.location.search).get("build");
 
+    // 1. Safely retrieve the saved order
+    let buildOrder = [];
+    try {
+        const storedOrder = window.localStorage.getItem('buildOrder');
+        if (storedOrder) {
+            buildOrder = JSON.parse(storedOrder);
+        }
+    } catch (e) {
+        console.warn("Failed to parse buildOrder from localStorage", e);
+        buildOrder = [];
+    }
+
+    // 2. Discover actual existing builds to prevent rendering deleted ghosts
+    const existingBuilds = new Set();
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (!key.startsWith("build:")) continue; // Skip non-build items
+        if (key.startsWith("build:")) {
+            existingBuilds.add(key.slice("build:".length));
+        }
+    }
 
-        const buildName = key.slice("build:".length); // Remove prefix for display
+    const renderedBuilds = new Set();
 
-        // Create list item
+    // Helper to generate the DOM node (extracted to keep logic clean)
+    const createBuildNode = (buildName) => {
         const li = document.createElement("li");
         li.setAttribute("data-build-name", buildName);
         li.onclick = () => loadBuildByName(buildName);
@@ -288,8 +306,35 @@ function refreshBuildList() {
 
         li.appendChild(buildNameSpan);
         li.appendChild(deleteBtn);
-        buildList.appendChild(li);
+        return li;
+    };
+
+    // 3. Render builds in the explicit saved order
+    for (const buildName of buildOrder) {
+        if (existingBuilds.has(buildName)) {
+            buildList.appendChild(createBuildNode(buildName));
+            renderedBuilds.add(buildName);
+        }
     }
+
+    // 4. Render trailing builds (newly created or loaded builds not yet in the array)
+    let stateChanged = false;
+    for (const buildName of existingBuilds) {
+        if (!renderedBuilds.has(buildName)) {
+            buildList.appendChild(createBuildNode(buildName));
+            buildOrder.push(buildName);
+            stateChanged = true;
+        }
+    }
+
+    // 5. Cleanup the storage array if there were orphaned entries or new additions
+    if (stateChanged || buildOrder.length !== existingBuilds.size) {
+        const finalOrder = buildOrder.filter(name => existingBuilds.has(name));
+        window.localStorage.setItem('buildOrder', JSON.stringify(finalOrder));
+    }
+
+    // Call after populating
+    makeBuildListDraggable();
 }
 
 

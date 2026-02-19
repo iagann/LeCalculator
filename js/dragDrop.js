@@ -54,8 +54,15 @@ function makeBuildListDraggable() {
   new Sortable(buildListElem, {
     animation: 150,
     ghostClass: "sortable-ghost",
-    // If you want to allow reordering only:
-    group: { name: "localBuilds", pull: false, put: false }
+    group: { name: "localBuilds", pull: false, put: false },
+    onEnd: function (evt) {
+      // Extract the new order from data attributes
+      const listItems = evt.to.querySelectorAll('li');
+      const newOrder = Array.from(listItems).map(li => li.dataset.buildName);
+      
+      // Persist to local storage
+      window.localStorage.setItem('buildOrder', JSON.stringify(newOrder));
+    }
   });
 }
 
