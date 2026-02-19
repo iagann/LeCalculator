@@ -103,6 +103,8 @@ const stats = Object.freeze({
     MANA_COST: statNum++,
 
     ELEMENTAL_RESISTANCE: statNum++,
+
+    GLANCING_BLOW_TO_BLOCK_CHANCE: statNum++,
 });
 
 function getStatName(key) {
@@ -198,7 +200,7 @@ function getStatName(key) {
         case stats.INCREASED_ENDURANCE_THRESHOLD: return "Increased Endurance Threshold";
 
         case stats.SKILL_COOLDOWN: return "SKILL COOLDOWN";
-        case stats.COOLDOWN_REDUCTION: return "Cooldown Reduction Speed";
+        case stats.COOLDOWN_REDUCTION: return "Cooldown Recovery Speed";
 
         case stats.LOW_LIFE: return "LOW LIFE";
 
@@ -210,6 +212,8 @@ function getStatName(key) {
         case stats.MANA_COST: return "Mana Cost";
 
         case stats.ELEMENTAL_RESISTANCE: return "Elemental Resistance";
+
+        case stats.GLANCING_BLOW_TO_BLOCK_CHANCE: return "Glancing Blow Chance To Block Chance";
     }
     return "Unknown";
 }

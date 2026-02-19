@@ -505,13 +505,11 @@ function processStats(statsArray, firstRun = true) {
 
         processExpressions();
 
+        hitsPerSecond = allStats[stats.HITS_PER_SECOND]?.total || 0;
+        hitsPerSecond *= (100 + increasedHitSpeed) / 100;
+        hitsPerSecond *= moreHits/100;
         if (cd > 0) {
-            hitsPerSecond = (1 / cd) * (100 + cdr) / 100;
-        }
-        else {
-            hitsPerSecond = allStats[stats.HITS_PER_SECOND]?.total || 0;
-            hitsPerSecond *= (100 + increasedHitSpeed) / 100;
-            hitsPerSecond *= moreHits/100;
+            hitsPerSecond = 1 / ((hitsPerSecond ? 1 / hitsPerSecond : 0) + cd / (100 + cdr) * 100);
         }
 
         processExpressions();
@@ -1376,6 +1374,8 @@ function processStats(statsArray, firstRun = true) {
     let dodgeChance = 0;
     let glancingBlowChance = (allStats[stats.GLANCING_BLOW_CHANCE]?.total || 0);
     let dodgeToGlancingBlowChance = (allStats[stats.DODGE_CHANCE_TO_GLANCING_BLOW_CHANCE]?.total || 0);
+    let glancingBlowToBlockChance = (allStats[stats.GLANCING_BLOW_TO_BLOCK_CHANCE]?.total || 0);
+    
     {
         const x = totalDodgeRating;
         const x2 = Math.pow(x, 2);
@@ -1399,6 +1399,10 @@ function processStats(statsArray, firstRun = true) {
     }
 
     let blockChance = allStats[stats.BLOCK_CHANCE]?.total || 0;
+    if (glancingBlowToBlockChance > 0) {
+        blockChance += glancingBlowChance;
+        glancingBlowChance = 0;
+    }
     let blockEffect = (allStats[stats.BLOCK_EFFECTIVENESS]?.total || 0)
         * (100 + (allStats[stats.INCREASED_BLOCK_EFFECTIVENESS]?.total || 0)) / 100;
     let blockDr = 0;
