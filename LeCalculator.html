@@ -41,8 +41,11 @@
       <h2>Builds</h2>
 
       <button onclick="createNewBuild()">New</button>
-      <button id="copy-build-btn" onclick="copyBuildCodeToClipboard()">Copy</button>
-      <button onclick="openLoadDialog()">Load</button>
+      <!--button id="copy-build-btn" onclick="copyBuildCodeToClipboard()">Copy</button>
+      <button onclick="openLoadDialog()">Load</button-->
+      <button onclick="exportBuildToFile()">Export</button>
+      <button onclick="document.getElementById('file-import-input').click()">Import</button>
+      <input type="file" id="file-import-input" style="display: none;" accept=".json" onchange="importBuildFromFile(event)">
       
       <hr />
 

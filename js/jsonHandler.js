@@ -213,3 +213,73 @@ function createNewBuild() {
     window.updateCopyButtonState();
 }
 
+/**
+ * Exports the current build to a physical .json file.
+ */
+function exportBuildToFile() {
+    // 1. Ensure build name exists
+    const buildName = document.getElementById("buildNameInput").value.trim();
+    if (!buildName) {
+        alert("Please enter a build name before exporting.");
+        document.getElementById("buildNameInput").focus();
+        return;
+    }
+
+    // 2. Refresh the latest JSON data
+    updateSaveString(); 
+
+    // 3. Create a Blob and trigger a download
+    const blob = new Blob([savedBuildCode], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${buildName.replace(/[^a-z0-9]/gi, '_')}.json`; // Sanitize filename
+    document.body.appendChild(a);
+    a.click();
+    
+    // Cleanup
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+/**
+ * Handles the file selection and reads the content into the application.
+ */
+function importBuildFromFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const content = e.target.result;
+        try {
+            const parsedData = JSON.parse(content);
+            const buildName = parsedData.build.name;
+
+            // Conflict check
+            if (localStorage.getItem(getBuildKey(buildName))) {
+                if (!confirm(`A build named "${buildName}" already exists! Overwrite it?`)) {
+                    event.target.value = ""; // Reset input
+                    return;
+                }
+            }
+
+            // Load the data
+            loadFromCode(content);
+
+            // Sync app state
+            if (typeof updateBuildNameInURL === "function") updateBuildNameInURL();
+            if (typeof saveCurrentBuildLocally === "function") saveCurrentBuildLocally();
+            if (typeof window.updateCopyButtonState === "function") window.updateCopyButtonState();
+
+            // Clear input for subsequent imports
+            event.target.value = "";
+
+        } catch (err) {
+            alert("Failed to import file: Invalid JSON structure.");
+            console.error("Import error:", err);
+        }
+    };
+    reader.readAsText(file);
+}
