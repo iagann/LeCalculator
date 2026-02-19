@@ -8,12 +8,20 @@
     background-color: #1e1e1e;
     border-right: 2px solid #444;
     overflow-y: auto;
+    overflow-x: hidden;
     transition: transform 0.3s ease;
   }
 
- .left-panel-content button {
-  margin-right: 5px;
- }
+  .left-panel-content h2,
+  .left-panel-content button 
+  {
+    margin-left: 5px;
+  }
+
+  .left-panel-content hr {
+    margin: 15px 0 0;
+    border-top: 1px solid #444;
+  }
   
   /* Toggle button (always visible) */
   #toggle-panel-btn {
@@ -49,7 +57,7 @@
   
   /* Left Panel Content */
   .left-panel-content {
-    padding: 20px;
+    padding: 20px 0;
     /*margin-top: 60px;*/
   }
   
@@ -64,11 +72,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between; /* Keeps build name on the left & delete button on the right */
-  padding: 0px 12px;
+  padding: 5px 10px;
   border-top: 1px solid #444; /* Similar to stat separator */
   background-color: #222;
   transition: background-color 0.2s ease;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 /* Hover effect */
@@ -88,14 +97,17 @@
   font-weight: bold;
   border-left: 5px solid #bb86fc; /* Accent border */
   transform: scale(1.02); /* Slight pop-out effect */
+  padding-left: 5px 10px;
 }
 
 /* Build Name Styling */
 .build-name {
-  flex-grow: 1; /* Ensures it takes available space */
+  flex-grow: 1; 
+  min-width: 0; /* Crucial: Allows flex item to shrink smaller than its text content */
   overflow: hidden;
-  white-space: break-spaces;
-  text-overflow: ellipsis;
+  white-space: nowrap; /* Forces text to a single line */
+  text-overflow: ellipsis; /* Adds '...' when text overflows */
+  margin-right: 10px; /* Space between the text and the delete button */
 }
 
 /* Delete Button Styling */

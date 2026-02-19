@@ -50,6 +50,17 @@
 
   <!-- Toggle button (placed separately outside the panel) -->
   <button id="toggle-panel-btn" onclick="toggleLeftPanel()">◄</button>
+  <script>
+    (function() {
+      // Execute synchronously before the browser paints the screen
+      const panel = document.getElementById("left-panel");
+      const btn = document.getElementById("toggle-panel-btn");
+      if (window.localStorage.getItem("leftPanelCollapsed") === "true") {
+        panel.classList.add("collapsed");
+        btn.textContent = "►";
+      }
+    })();
+  </script>
 
   <!-- Main container: includes the middle and right panels -->
   <div class="container">

@@ -162,14 +162,18 @@ function toggleLeftPanel() {
     const panel = document.getElementById("left-panel");
     const button = document.getElementById("toggle-panel-btn");
   
-    panel.classList.toggle("collapsed");
+    // .toggle() returns true if the class was added, false if removed
+    const isCollapsed = panel.classList.toggle("collapsed");
   
     // Toggle button icon
-    if (panel.classList.contains("collapsed")) {
-      button.textContent = "►";
+    if (isCollapsed) {
+        button.textContent = "►";
     } else {
-      button.textContent = "◄";
+        button.textContent = "◄";
     }
+
+    // Persist the user's preference
+    window.localStorage.setItem("leftPanelCollapsed", isCollapsed);
   }
 
 function handleBuildNameChange() {
