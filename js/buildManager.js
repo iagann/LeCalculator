@@ -30,8 +30,11 @@ document.addEventListener("DOMContentLoaded", () => {
     buildNameInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
             event.preventDefault(); // Prevents form submission if inside a form
-            saveCurrentBuildLocally();
+            // 1. Update the URL state first
             updateBuildNameInURL();
+            // 2. Save and trigger the list refresh
+            saveCurrentBuildLocally();
+            // 3. Update search options
             updateSectionSearchOptions();
             buildNameInput.blur(); // Remove focus after saving
         }
@@ -39,8 +42,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Save when focus is lost
     buildNameInput.addEventListener("blur", () => {
-        saveCurrentBuildLocally();
+        // 1. Update the URL state first
         updateBuildNameInURL();
+        // 2. Save and trigger the list refresh
+        saveCurrentBuildLocally();
+        // 3. Update search options
         updateSectionSearchOptions();
     });
 
