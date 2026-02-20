@@ -1810,7 +1810,8 @@ function evaluateExpression(expr) {
 
     try {
         //console.log("evaluate", cleanedExpr);
-        const result = Function(`"use strict"; return (${cleanedExpr});`)();
+        const result = math.evaluate(cleanedExpr);
+        //const result = Function(`"use strict"; return (${cleanedExpr});`)();
         //console.log("evaluate", result);
         expressionCache.set(cleanedExpr, result);
         return result;
