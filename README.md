@@ -12,12 +12,6 @@ The system is designed as a modular, decoupled frontend application. It leverage
 * **Persistence Layer (`buildManager.js` & `jsonHandler.js`):** Implements state persistence via `localStorage` and provides serialization/deserialization for `.json` export and import functionality.
 * **UI Orchestration (`sections.js` & `sectionsSearch.js`):** Manages a dynamic, searchable DOM structure for complex build configurations.
 
-## 🛡 Stability & Security Analysis
-
-### Evaluation Safety
-* **Trade-off:** The engine currently utilizes the `Function` constructor for expression evaluation. While this provides high performance and flexibility for complex math, it introduces a potential XSS vector if importing builds from untrusted third-party sources.
-* **Recommendation:** Sanitize all incoming strings in `jsonHandler.js` before evaluation.
-
 ### Performance Optimization
 * **Expression Caching:** To prevent redundant CPU cycles, evaluated expressions are stored in a `Map`-based cache.
 * **Debounced Updates:** Input listeners are throttled via `setTimeout` to ensure the UI remains responsive during rapid data entry.
@@ -39,14 +33,7 @@ The project is designed to run in an isolated browser environment with no server
 2.  Open `LeCalculator.html` in a modern, standards-compliant browser.
 
 ### Deployment
-Asset injection is handled via a centralized manifest in the HTML head. For production deployments:
-* Ensure the `v` constant in `LeCalculator.html` is incremented to bypass browser-level cache stale-dating.
-* Recommended CI/CD: Static analysis of JavaScript files to ensure no global namespace collisions.
-
-## 🛠 Planned Enhancements (Production Roadmap)
-- [ ] **Security:** Transition from `Function()` evaluation to a sandboxed math parser (e.g., `math.js`) to eliminate XSS risks.
-- [ ] **Integrity:** Implement JSON schema validation for the `importBuildFromFile` function.
-- [ ] **Reliability:** Add a Test Suite (e.g., Jest) to verify calculation accuracy against known game-mechanic benchmarks.
+Asset injection is handled via a centralized manifest in the HTML head. For production deployments ensure the `v` constant in `LeCalculator.html` is incremented to bypass browser-level cache stale-dating.
 
 ## ⚖ License
 MIT — *LeCalculator is a fan-made tool and is not affiliated with Eleventh Hour Games.*
