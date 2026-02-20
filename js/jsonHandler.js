@@ -244,6 +244,77 @@ function exportBuildToFile() {
 }
 
 /**
+ * Strict schema validation for LE Calculator build files.
+ * Returns { valid: true } if successful, or { valid: false, error: "message" } on failure.
+ */
+function validateBuildJSON(data) {
+    try {
+        if (!data || typeof data !== 'object') {
+            return { valid: false, error: "Data is not a valid JSON object." };
+        }
+        
+        // 1. Root Level Validation
+        if (data.type !== "LECalculator build code") {
+            return { valid: false, error: "File 'type' is incorrect or missing." };
+        }
+        if (!data.build || typeof data.build !== 'object') {
+            return { valid: false, error: "Root 'build' object is missing." };
+        }
+        
+        // 2. Build Info Validation
+        const b = data.build;
+        if (typeof b.name !== 'string') {
+            return { valid: false, error: "Build 'name' must be a string." };
+        }
+        if (!Array.isArray(b.data)) {
+            return { valid: false, error: "Build 'data' must be an array." };
+        }
+
+        // 3. Categories Validation
+        for (const [cIdx, category] of b.data.entries()) {
+            if (typeof category.categoryName !== 'string') {
+                return { valid: false, error: `Category ${cIdx + 1} is missing a 'categoryName'.` };
+            }
+            if (!Array.isArray(category.items)) {
+                return { valid: false, error: `Category '${category.categoryName}' is missing an 'items' array.` };
+            }
+
+            // 4. Sections/Items Validation
+            for (const [sIdx, item] of category.items.entries()) {
+                if (typeof item.sectionName !== 'string') {
+                    return { valid: false, error: `Section ${sIdx + 1} in '${category.categoryName}' is missing a 'sectionName'.` };
+                }
+                if (typeof item.enabled !== 'boolean') {
+                    return { valid: false, error: `Section '${item.sectionName}' is missing an 'enabled' state.` };
+                }
+                if (!Array.isArray(item.stats)) {
+                    return { valid: false, error: `Section '${item.sectionName}' is missing a 'stats' array.` };
+                }
+
+                // 5. Individual Stats Validation
+                for (const [stIdx, stat] of item.stats.entries()) {
+                    if (typeof stat.statName !== 'string') {
+                        return { valid: false, error: `Stat ${stIdx + 1} in '${item.sectionName}' is missing a 'statName'.` };
+                    }
+                    if (typeof stat.expression !== 'string') {
+                        return { valid: false, error: `Stat '${stat.statName}' in '${item.sectionName}' is missing an 'expression'.` };
+                    }
+                    if (typeof stat.statId !== 'number') {
+                        return { valid: false, error: `Stat '${stat.statName}' in '${item.sectionName}' has an invalid or missing 'statId'.` };
+                    }
+                    if (typeof stat.enabled !== 'boolean') {
+                        return { valid: false, error: `Stat '${stat.statName}' in '${item.sectionName}' is missing an 'enabled' state.` };
+                    }
+                }
+            }
+        }
+        return { valid: true };
+    } catch (e) {
+        return { valid: false, error: `Validation logic error: ${e.message}` };
+    }
+}
+
+/**
  * Handles the file selection and reads the content into the application.
  */
 function importBuildFromFile(event) {
@@ -255,6 +326,15 @@ function importBuildFromFile(event) {
         const content = e.target.result;
         try {
             const parsedData = JSON.parse(content);
+            
+            // SCHEMA VALIDATION
+            const validation = validateBuildJSON(parsedData);
+            if (!validation.valid) {
+                alert(`Import failed: ${validation.error}`); // Displays specific error
+                event.target.value = "";
+                return;
+            }
+
             const buildName = parsedData.build.name;
 
             // Conflict check
