@@ -160,6 +160,17 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
             if (expression == "") {
               isValidExpression = false;
             }
+            else if (statInput.value == getStatName(stats.POWER_EXPR)) {
+              try {
+                const parsed = JSON.parse(expressionInput.value);
+                // Validate it's an array of exactly 5 numbers
+                isValidExpression = Array.isArray(parsed) && 
+                                    parsed.length === 5 && 
+                                    parsed.every(val => typeof val === 'number' && !isNaN(val));
+                } catch (e) {
+                    isValidExpression = false;
+                }
+            }
             else {
               //console.log("validate", expression);
 

@@ -105,6 +105,8 @@ const stats = Object.freeze({
     ELEMENTAL_RESISTANCE: statNum++,
 
     GLANCING_BLOW_TO_BLOCK_CHANCE: statNum++,
+
+    POWER_EXPR: statNum++,
 });
 
 function getStatName(key) {
@@ -214,6 +216,9 @@ function getStatName(key) {
         case stats.ELEMENTAL_RESISTANCE: return "Elemental Resistance";
 
         case stats.GLANCING_BLOW_TO_BLOCK_CHANCE: return "Glancing Blow Chance To Block Chance";
+
+        case stats.POWER_EXPR: return "POWER (dps,avgMaxHit,ehpHits,ehpDots,regenK)";
+        
     }
     return "Unknown";
 }

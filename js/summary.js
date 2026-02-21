@@ -1640,7 +1640,9 @@ function processStats(statsArray, firstRun = true) {
 
     summary.push({name:"EHP", type:"section"});
     // ehp
-    var avgMaxHit = 0;
+    let avgMaxHit = 0;
+    let ehpDots = 0;
+    let ehpHits = 0;
     {
         const lowLife = (allStats[stats.LOW_LIFE]?.total || 0);
         const a = ((lowLife ? 0 : preusoHp) + stableWard);
@@ -1707,7 +1709,7 @@ function processStats(statsArray, firstRun = true) {
             sources: []
         });
 
-        let ehpHits = a * b;
+        ehpHits = a * b;
         if (glancingBlowChance < 100)
             ehpHits *= 100 / (100 - (1 - 0.35)*(glancingBlowChance));
         if (blockChance < 100)
@@ -1740,7 +1742,7 @@ function processStats(statsArray, firstRun = true) {
             + r2[stats.POISON_RESISTANCE] 
             + r2[stats.VOID_RESISTANCE])
             / 7;
-        let ehpDots = a * b2;
+        ehpDots = a * b2;
         summary.push({ 
             name: "EHP vs DoTs", 
             total: ehpDots, 
@@ -1767,22 +1769,36 @@ function processStats(statsArray, firstRun = true) {
         sources: []
     });
 
-
+    const regenK = regenCoeff(hpRegen + wps);
+    var powerExpr = (allStats[stats.POWER_EXPR]?.expression || null);
+    var power = 0;
+    if (powerExpr) {
+        try {
+            powerExpr = JSON.parse(powerExpr);
+        }
+        catch(error) {
+            powerExpr = [2,1,0.5,0.5,1];
+        }
+    }
+    power =   Math.pow(dps,powerExpr[0])
+            * Math.pow(avgMaxHit,powerExpr[1])
+            * Math.pow(ehpHits,powerExpr[2])
+            * Math.pow(ehpDots,powerExpr[3])
+            * Math.pow(regenK,powerExpr[4]);
+    
     summary.push({name:"POWER", type:"section"});
     summary.push({ 
-            name: "regen coefficient", 
-            total: regenCoeff(hpRegen + wps), 
-            type: "stat",
-            sources: [`health regen + ward regen`]
-        });
+        name: "regen coefficient", 
+        total: regenCoeff(hpRegen + wps), 
+        type: "stat",
+        sources: [`health regen + ward regen`]
+    });
     summary.push({ 
-            name: "POWER", 
-            total: avgMaxHit * dps * regenCoeff(hpRegen + wps), 
-            type: "stat",
-            sources: [`avgMaxHit * dps * regen coefficient`]
-        });
-
-
+        name: "POWER", 
+        total: power, 
+        type: "stat",
+        sources: [`avgMaxHit * dps * regen coefficient`]
+    });
 
     Object.values(summary).forEach(stat => {
         stat.total = formatNumber(stat.total);
