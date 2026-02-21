@@ -170,7 +170,7 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
               expression = expression.replaceAll("vit",1);
               expression = expression.replaceAll("recurve",1);
               expression = expression.replaceAll("hps",1);
-              expression = expression.replaceAll("maxHP",1);
+              expression = expression.replaceAll("maxHealth",1);
               expression = expression.replaceAll("enduranceThreshold",1);
               expression = expression.replaceAll("endurance",1);
               expression = expression.replaceAll("ms",1);

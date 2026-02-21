@@ -281,7 +281,7 @@ function replaceExpressionAll(expression) {
         replaceExpression("vit", vitality);
         replaceExpression("recurve", getAvgRecurveHits(recurveChance - 100));
         replaceExpression("hps", hitsPerSecond);
-        replaceExpression("maxHP", maxHealth);
+        replaceExpression("maxHealth", maxHP);
         replaceExpression("enduranceThreshold", totalEnduranceThreshold);
         replaceExpression("endurance", totalEndurance);
         replaceExpression("ms", increasedMS);
@@ -360,7 +360,7 @@ let attunement = 0;
 let vitality = 0;
 let recurveChance = 0;
 let hitsPerSecond = 0;
-let maxHealth = 0;
+let maxHP = 0;
 let totalEndurance = 0;
 let totalEnduranceThreshold = 0;
 let increasedMS = 0;
@@ -384,7 +384,7 @@ function processStats(statsArray, firstRun = true) {
     attunement = 0;
     recurveChance = 0;
     hitsPerSecond = 0;
-    maxHealth = 0;
+    maxHP = 0;
     totalEnduranceThreshold = 0;
     increasedMS = 0;
     totalDodgeRating = 0;
@@ -498,10 +498,10 @@ function processStats(statsArray, firstRun = true) {
 
     const flatHealth = vitality * 6 + (allStats[stats.FLAT_HEALTH]?.total || 0);
     const increasedHealth = allStats[stats.INCREASED_HEALTH]?.total || 0;
-    maxHealth = flatHealth * (1 + increasedHealth / 100);
+    maxHP = flatHealth * (1 + increasedHealth / 100);
 
     const enduranceThreshold = allStats[stats.ENDURANCE_THRESHOLD]?.total || 0;
-    const hpAsEnduranceThreshold = (allStats[stats.MAX_HEALTH_AS_ENDURANCE_THRESHOLD]?.total || 0) / 100 * maxHealth;
+    const hpAsEnduranceThreshold = (allStats[stats.MAX_HEALTH_AS_ENDURANCE_THRESHOLD]?.total || 0) / 100 * maxHP;
     increasedMS = allStats[stats.INCREASED_MOVEMENT_SPEED]?.total || 0;
 
     const increasedHitSpeed = allStats[stats.INCREASED_HITS]?.total || 0;
@@ -516,7 +516,7 @@ function processStats(statsArray, firstRun = true) {
         if ((allStats[stats.DODGE_CONVERTED_TO_ENDURANCE]?.total || 0)) {
             totalEnduranceThreshold += totalDodgeRating;
         }
-        totalEnduranceThreshold = Math.min(maxHealth, totalEnduranceThreshold);
+        totalEnduranceThreshold = Math.min(maxHP, totalEnduranceThreshold);
 
         totalEndurance = allStats[stats.ENDURANCE]?.total || 0;
 
@@ -625,7 +625,7 @@ function processStats(statsArray, firstRun = true) {
         });
         summary.push({ 
             name: "Total Health", 
-            total: maxHealth, 
+            total: maxHP, 
             type: "stat",
             sources: [
             ]
@@ -1265,7 +1265,7 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
     }
-    //const hpAsEnduranceThreshold = (allStats[stats.MAX_HEALTH_AS_ENDURANCE_THRESHOLD]?.total || 0) / 100 * maxHealth;
+    //const hpAsEnduranceThreshold = (allStats[stats.MAX_HEALTH_AS_ENDURANCE_THRESHOLD]?.total || 0) / 100 * maxHP;
     {
         summary.push({ 
             name: "Maximum Health as Endurance Threshold", 
@@ -1276,7 +1276,7 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
     }
-    //const totalEnduranceThreshold = Math.min(maxHealth, enduranceThreshold + hpAsEnduranceThreshold);
+    //const totalEnduranceThreshold = Math.min(maxHP, enduranceThreshold + hpAsEnduranceThreshold);
     {
         summary.push({ 
             name: "Total Endurance Threshold", 
@@ -1292,7 +1292,7 @@ function processStats(statsArray, firstRun = true) {
     let manaBeforeHealth = (allStats[stats.MANA_BEFORE_HEALTH]?.total || 0);
     let enduranceAppliedToMana = (allStats[stats.ENDURANCE_APPLIED_TO_MANA]?.total || 0);
 
-    let preusoHp = maxHealth
+    let preusoHp = maxHP
         - totalEnduranceThreshold 
         + totalEnduranceThreshold * 100 / (100 - Math.min(60, totalEndurance));
     let maxManaDeplete = 0;
@@ -1311,7 +1311,7 @@ function processStats(statsArray, firstRun = true) {
             total: preusoHp, 
             type: "stat",
             sources: [
-                `HP part without Endurance: total HP - endurance threshold = ${(maxHealth - totalEnduranceThreshold).toFixed(3)}`,
+                `HP part without Endurance: total HP - endurance threshold = ${(maxHP - totalEnduranceThreshold).toFixed(3)}`,
                 `Preudo Endurance HP: endurance threshold * (100 - endurance) / 100 
                     = ${totalEnduranceThreshold.toFixed(3)} * (100 - ${Math.min(60, totalEndurance)}) / 100 
                     = ${(totalEnduranceThreshold * 100 / (100 - Math.min(60, totalEndurance))).toFixed(3)}`
