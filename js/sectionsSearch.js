@@ -102,6 +102,8 @@ function filterSectionsByName() {
         }
       }
     });
+
+    window.updateVisibleDeltas();
   }
 
   function setSectionSearch(str) {

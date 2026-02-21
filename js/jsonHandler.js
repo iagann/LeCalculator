@@ -91,7 +91,7 @@ document.getElementById("loadInput").addEventListener("input", function() {
         saveCurrentBuildLocally();
 
         // 3. Ensure the Copy button visually enables (if you added the disabled UI state)
-        updateCopyButtonState();
+        window.updateCopyButtonState();
 
     } catch (error) {
         alert("Failed to load build: Invalid or corrupted data.");
@@ -349,9 +349,9 @@ function importBuildFromFile(event) {
             loadFromCode(content);
 
             // Sync app state
-            if (typeof updateBuildNameInURL === "function") updateBuildNameInURL();
-            if (typeof saveCurrentBuildLocally === "function") saveCurrentBuildLocally();
-            if (typeof window.updateCopyButtonState === "function") window.updateCopyButtonState();
+            updateBuildNameInURL();
+            saveCurrentBuildLocally();
+            window.updateCopyButtonState();
 
             // Clear input for subsequent imports
             event.target.value = "";

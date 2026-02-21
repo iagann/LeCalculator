@@ -197,6 +197,10 @@ function addSection(category, name = "", cloneFrom = null, ignoreFocus = false) 
 function toggleCollapse(sectionDiv, btn) {
   const collapsed = sectionDiv.classList.toggle("collapsed");
   btn.textContent = collapsed ? "▶" : "▼";
+
+  if (!collapsed) {
+      window.updateVisibleDeltas();
+  }
 }
   
 function collapseAllSections() {
@@ -217,6 +221,8 @@ function expandAllSections() {
           collapseButton.textContent = "▼";
       }
   });
+
+  window.updateVisibleDeltas();
 }
 
 
@@ -239,4 +245,6 @@ function expandAllCategories() {
           collapseButton.textContent = "▼";
       }
   });
+
+  window.updateVisibleDeltas();
 }

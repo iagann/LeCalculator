@@ -1,6 +1,7 @@
 // summary.js
 
 let highlightSummaryNames = new Set();
+let highlightSummaryBase = {};
 function updateSummary() {
     const allStats = [];
   
@@ -40,36 +41,105 @@ function updateSummary() {
     });
     renderSummary(baseSummary);
   
-    const baseMap = {};
+    highlightSummaryBase = {};
     highlightSummaryNames.forEach(name => {
         const found = baseSummary.find(s => s.name === name && s.type !== "section" && s.type !== "hr");
-        baseMap[name] = found ? found.total : 0;
-      });
-
-    function collectSectionCache() {
-        const sectionCache = [];
-      
-        document.querySelectorAll(".section").forEach((sec) => {
-          const sectionEnabled = sec.querySelector(".section-enabled")?.checked;
-          const sectionName = sec.querySelector(".section-header input[placeholder='Section Name']")?.value || "";
-      
-          const statEntries = Array.from(sec.querySelectorAll(".stat-entry")).map(stat => {
-            const statEnabled = stat.querySelector(".stat-enabled")?.checked;
-            const statName = stat.querySelector("input[placeholder='Choose Stat...']")?.value;
-            const statKey = Object.keys(stats).find(k => getStatName(stats[k]) === statName);
-            const statID = statKey ? stats[statKey] : null;
-            const expr = stat.querySelector("input[placeholder='Math Expression']")?.value || "";
-      
-            return { element: stat, enabled: statEnabled, statID, expr };
-          });
-      
-          sectionCache.push({ element: sec, enabled: sectionEnabled, name: sectionName, statEntries: statEntries });
+        highlightSummaryBase[name] = found ? found.total : 0;
+    });
+  
+    document.querySelectorAll(".contribution-info").forEach(el => el.remove());
+    
+    let sectionCache = [];
+    document.querySelectorAll(".section").forEach((sec) => {
+        const sectionEnabled = sec.querySelector(".section-enabled")?.checked;
+        const sectionName = sec.querySelector(".section-header input[placeholder='Section Name']")?.value || "";
+    
+        const statEntries = Array.from(sec.querySelectorAll(".stat-entry")).map(stat => {
+        const statEnabled = stat.querySelector(".stat-enabled")?.checked;
+        const statName = stat.querySelector("input[placeholder='Choose Stat...']")?.value;
+        const statKey = Object.keys(stats).find(k => getStatName(stats[k]) === statName);
+        const statID = statKey ? stats[statKey] : null;
+        const expr = stat.querySelector("input[placeholder='Math Expression']")?.value || "";
+    
+        return { element: stat, enabled: statEnabled, statID, expr };
         });
+    
+        sectionCache.push({ element: sec, enabled: sectionEnabled, name: sectionName, statEntries: statEntries });
+    });
+    window.currentSectionCache = sectionCache;
+
+    updateVisibleDeltas();
       
-        return sectionCache;
-      }
+    updateSortDropdown();
+    applySectionSort();
+}
+
+function addContribInfo(parentElem, deltas, wasEnabled) {
+    const container = document.createElement("span");
+    container.classList.add("contribution-info");
+    container.style.borderLeft = "1px solid #888";
+    container.style.marginLeft = "8px";
+    container.style.paddingLeft = "8px";
+    container.style.display = "inline-block";
+    container.style.verticalAlign = "middle";
+
+    const itemWidth = "120px";
+
+    function formatPercent(value, wasEnabled) {
+        const pct = value.toFixed(2) + "%";
       
-      function computeDelta(element, sectionCache) {
+        if (Math.abs(value) < 0.05) {
+          return `<span style="color:gray">+0.0%</span>`;
+        }
+      
+        const isPositive = value >= 0;
+      
+        if (wasEnabled) {
+          // The stat/section is currently ENABLED.
+          // If removing it results in a negative delta → it contributes positively → green
+          return isPositive
+            ? `<span style="color:#267526;">+${pct}</span>`
+            : `<span style="color:#ff4e4e;">${pct}</span>`;
+        } else {
+          // The stat/section is currently DISABLED.
+          // If adding it results in a positive delta → it would contribute → green
+          return isPositive
+            ? `<span style="color:#267526;">+${pct}</span>`
+            : `<span style="color:#ff4e4e;">${pct}</span>`;
+        }
+    }
+
+    highlightSummaryNames.forEach(name => {
+        const val = deltas[name];
+        const span = document.createElement("span");
+        span.style.display = "inline-block";
+        span.style.width = itemWidth;
+        span.style.marginRight = "5px";
+        span.style.verticalAlign = "top";
+        span.innerHTML = `<div style="text-align:right">${name}:<br>${formatPercent(val, wasEnabled)}</div>`;
+        container.appendChild(span);
+    });
+
+    parentElem.insertAdjacentElement("afterend", container);
+}
+
+function calculateAndRenderDelta(el) {
+    // HUGE OPTIMIZATION: If no stats are highlighted to track, don't compute anything!
+    if (highlightSummaryNames.size === 0) return;
+
+    const deleteBtn = el.querySelector(".btn-delete");
+    if (!deleteBtn) return;
+    
+    // CACHE CHECK: If it already has the contribution info appended, skip recalculation!
+    if (deleteBtn.nextElementSibling && deleteBtn.nextElementSibling.classList.contains("contribution-info")) {
+        return;
+    }
+    
+    const isEnabled = el.classList.contains("section") 
+        ? el.querySelector(".section-enabled")?.checked 
+        : el.querySelector(".stat-enabled")?.checked;
+
+    function computeDelta(element, sectionCache) {
         // 1) Build final states after toggling
         const finalSectionEnabled = new Map();
         const finalStatEnabled = new Map();
@@ -124,10 +194,10 @@ function updateSummary() {
         // 3) Compute new summary from toggledStats
         const newSummary = processStats(toggledStats);
       
-        // 4) Compare vs baseMap for each highlight stat
+        // 4) Compare vs highlightSummaryBase for each highlight stat
         const deltas = {};
         highlightSummaryNames.forEach(name => {
-          const oldVal = baseMap[name] || 0;
+          const oldVal = highlightSummaryBase[name] || 0;
           const newVal = newSummary.find(s => s.name === name && s.type !== "section" && s.type !== "hr")?.total || 0;
           if (isNaN(newVal))
             console.log("isNan");
@@ -142,82 +212,33 @@ function updateSummary() {
         });
       
         return deltas;
-      }
-      
-  
-    function formatPercent(value, wasEnabled) {
-        const pct = value.toFixed(2) + "%";
-      
-        if (Math.abs(value) < 0.05) {
-          return `<span style="color:gray">+0.0%</span>`;
-        }
-      
-        const isPositive = value >= 0;
-      
-        if (wasEnabled) {
-          // The stat/section is currently ENABLED.
-          // If removing it results in a negative delta → it contributes positively → green
-          return isPositive
-            ? `<span style="color:#267526;">+${pct}</span>`
-            : `<span style="color:#ff4e4e;">${pct}</span>`;
-        } else {
-          // The stat/section is currently DISABLED.
-          // If adding it results in a positive delta → it would contribute → green
-          return isPositive
-            ? `<span style="color:#267526;">+${pct}</span>`
-            : `<span style="color:#ff4e4e;">${pct}</span>`;
-        }
-      }
-      
-  
-    document.querySelectorAll(".contribution-info").forEach(el => el.remove());
-  
-    function addContribInfo(parentElem, deltas, wasEnabled) {
-        const container = document.createElement("span");
-        container.classList.add("contribution-info");
-        container.style.borderLeft = "1px solid #888";
-        container.style.marginLeft = "8px";
-        container.style.paddingLeft = "8px";
-        container.style.display = "inline-block";
-        container.style.verticalAlign = "middle";
-    
-        const itemWidth = "120px";
-    
-        highlightSummaryNames.forEach(name => {
-            const val = deltas[name];
-            const span = document.createElement("span");
-            span.style.display = "inline-block";
-            span.style.width = itemWidth;
-            span.style.marginRight = "5px";
-            span.style.verticalAlign = "top";
-            span.innerHTML = `<div style="text-align:right">${name}:<br>${formatPercent(val, wasEnabled)}</div>`;
-            container.appendChild(span);
-        });
-    
-        parentElem.insertAdjacentElement("afterend", container);
     }
     
-    const sectionCache = collectSectionCache();
+    const deltas = computeDelta(el, window.currentSectionCache);
+    addContribInfo(deleteBtn, deltas, isEnabled);
+}
+
+window.updateVisibleDeltas = function() {
+    if (!window.currentSectionCache || highlightSummaryNames.size === 0) return;
+    
     document.querySelectorAll(".section").forEach(sec => {
-        const secCopy = sec;
-        const deltas = computeDelta(secCopy, sectionCache);
-        const deleteBtn = secCopy.querySelector(".btn-delete");
-        if (deleteBtn) {
-          addContribInfo(deleteBtn, deltas, secCopy.querySelector(".section-enabled")?.checked);
+        // Is the section's parent category collapsed?
+        const category = sec.closest('.category');
+        const isCategoryCollapsed = category && category.classList.contains("collapsed");
+        
+        if (!isCategoryCollapsed) {
+            // Section header is visible, ensure its delta is calculated
+            calculateAndRenderDelta(sec);
+            
+            // Are the stats inside this section visible?
+            if (!sec.classList.contains("collapsed")) {
+                sec.querySelectorAll(".stat-entry").forEach(stat => {
+                    calculateAndRenderDelta(stat);
+                });
+            }
         }
-      
-        sec.querySelectorAll(".stat-entry").forEach(stat => {
-          const statDeltas = computeDelta(stat, sectionCache);
-          const statDeleteBtn = stat.querySelector(".btn-delete");
-          if (statDeleteBtn) {
-            addContribInfo(statDeleteBtn, statDeltas, stat.querySelector(".stat-enabled")?.checked);
-          }
-        });
-      });
-      
-    updateSortDropdown();
-    applySectionSort();
-  }
+    });
+}
   
 function statIsMore(statId) {
     return statId == stats.MORE_DAMAGE
