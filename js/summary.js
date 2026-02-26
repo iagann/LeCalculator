@@ -1770,21 +1770,22 @@ function processStats(statsArray, firstRun = true) {
     });
 
     const regenK = regenCoeff(hpRegen + wps);
+    let powerCoefficients = [2,1,0.5,0.5,1];
     var powerExpr = (allStats[stats.POWER_EXPR]?.expression || null);
     var power = 0;
     if (powerExpr) {
         try {
-            powerExpr = JSON.parse(powerExpr);
+            powerCoefficients = JSON.parse(powerExpr);
         }
         catch(error) {
-            powerExpr = [2,1,0.5,0.5,1];
+
         }
     }
-    power =   Math.pow(dps,powerExpr[0])
-            * Math.pow(avgMaxHit,powerExpr[1])
-            * Math.pow(ehpHits,powerExpr[2])
-            * Math.pow(ehpDots,powerExpr[3])
-            * Math.pow(regenK,powerExpr[4]);
+    power =   Math.pow(dps,powerCoefficients[0])
+            * Math.pow(avgMaxHit,powerCoefficients[1])
+            * Math.pow(ehpHits,powerCoefficients[2])
+            * Math.pow(ehpDots,powerCoefficients[3])
+            * Math.pow(regenK,powerCoefficients[4]);
     
     summary.push({name:"POWER", type:"section"});
     summary.push({ 
