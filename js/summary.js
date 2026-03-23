@@ -282,6 +282,7 @@ function replaceExpressionAll(expression) {
         replaceExpression("recurve", getAvgRecurveHits(recurveChance - 100));
         replaceExpression("hps", hitsPerSecond);
         replaceExpression("maxHealth", maxHP);
+        replaceExpression("maxMana", maxMP);
         replaceExpression("enduranceThreshold", totalEnduranceThreshold);
         replaceExpression("endurance", totalEndurance);
         replaceExpression("ms", increasedMS);
@@ -361,6 +362,7 @@ let vitality = 0;
 let recurveChance = 0;
 let hitsPerSecond = 0;
 let maxHP = 0;
+let maxMP = 0;
 let totalEndurance = 0;
 let totalEnduranceThreshold = 0;
 let increasedMS = 0;
@@ -385,6 +387,7 @@ function processStats(statsArray, firstRun = true) {
     recurveChance = 0;
     hitsPerSecond = 0;
     maxHP = 0;
+    maxMP = 0;
     totalEnduranceThreshold = 0;
     increasedMS = 0;
     totalDodgeRating = 0;
@@ -600,7 +603,6 @@ function processStats(statsArray, firstRun = true) {
     }
 
     let stableWard = 0;
-    let totalMana = 0;
     let wps = 0;
     summary.push({name:"HP, mana, ward", type:"section"});
     {
@@ -666,13 +668,14 @@ function processStats(statsArray, firstRun = true) {
         {
             const flatMana = attunement * 2 + (allStats[stats.FLAT_MANA]?.total || 0);
             const increasedMana = allStats[stats.INCREASED_MANA]?.total || 0;
-            totalMana = flatMana * (1 + increasedMana / 100);
-            const wasManaHr = totalMana > 100;
+            maxMP = flatMana * (1 + increasedMana / 100);
+            processExpressions();
+            const wasManaHr = maxMP > 100;
             if (wasManaHr) {
                 summary.push({type: "hr"});
                 summary.push({ 
                     name: "Mana", 
-                    total: totalMana, 
+                    total: maxMP, 
                     type: "stat",
                     sources: [
                         ...(allStats[stats.FLAT_MANA]?.sources || []), 
@@ -1304,7 +1307,7 @@ function processStats(statsArray, firstRun = true) {
         const maxHitBeforeHpDepletes = preusoHp / (1 - ratio);
         const maxTheoreticalManaDeplete = maxHitBeforeHpDepletes * ratio / 5;
         const enduranceRatio = (100 + enduranceAppliedToMana / 100 * Math.min(60, totalEndurance)) / 100;
-        maxManaDeplete = Math.min(totalMana * enduranceRatio, maxTheoreticalManaDeplete / enduranceRatio);
+        maxManaDeplete = Math.min(maxMP * enduranceRatio, maxTheoreticalManaDeplete / enduranceRatio);
     }
     preusoHp += maxManaDeplete * 5;
 
