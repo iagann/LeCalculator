@@ -1117,6 +1117,7 @@ function processStats(statsArray, firstRun = true) {
             type: "stat",
             sources: [
                 ...(allStats[stats.FIRE_RESISTANCE]?.sources || []),
+                ...(allStats[stats.ELEMENTAL_RESISTANCE]?.sources || []),
                 ...(allStats[stats.ALL_RESISTANCES]?.sources || []),
             ]
         });
@@ -1126,6 +1127,7 @@ function processStats(statsArray, firstRun = true) {
             type: "stat",
             sources: [
                 ...(allStats[stats.COLD_RESISTANCE]?.sources || []),
+                ...(allStats[stats.ELEMENTAL_RESISTANCE]?.sources || []),
                 ...(allStats[stats.ALL_RESISTANCES]?.sources || []),
             ]
         });
@@ -1135,6 +1137,7 @@ function processStats(statsArray, firstRun = true) {
             type: "stat",
             sources: [
                 ...(allStats[stats.LIGHTNING_RESISTANCE]?.sources || []),
+                ...(allStats[stats.ELEMENTAL_RESISTANCE]?.sources || []),
                 ...(allStats[stats.ALL_RESISTANCES]?.sources || []),
             ]
         });
