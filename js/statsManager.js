@@ -182,6 +182,7 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
               expression = expression.replaceAll("recurve",1);
               expression = expression.replaceAll("hps",1);
               expression = expression.replaceAll("maxHealth",1);
+              expression = expression.replaceAll("maxMana",1);
               expression = expression.replaceAll("enduranceThreshold",1);
               expression = expression.replaceAll("endurance",1);
               expression = expression.replaceAll("ms",1);
@@ -200,6 +201,7 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
               const result = evaluateExpression(expression);
               if (isNaN(result))
                 isValidExpression = false;
+              evaluateExpression(expression);
 
               //console.log("validate", result, isValidExpression);
             }

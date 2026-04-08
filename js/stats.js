@@ -107,6 +107,11 @@ const stats = Object.freeze({
     GLANCING_BLOW_TO_BLOCK_CHANCE: statNum++,
 
     POWER_EXPR: statNum++,
+
+    MORE_DAMAGE_2: statNum++,
+
+    DODGE_CONVERTED_TO_ARMOR: statNum++,
+    MORE_DODGE_RATING: statNum++,
 });
 
 function getStatName(key) {
@@ -207,6 +212,7 @@ function getStatName(key) {
         case stats.LOW_LIFE: return "LOW LIFE";
 
         case stats.MORE_DAMAGE_1: return "More Damage 1";
+        case stats.MORE_DAMAGE_2: return "More Damage 2";
 
         case stats.ECHO_CHANCE: return "Echo Chance";
         case stats.ECHO_DAMAGE: return "Increased Echo Damage";
@@ -218,6 +224,9 @@ function getStatName(key) {
         case stats.GLANCING_BLOW_TO_BLOCK_CHANCE: return "Glancing Blow Chance To Block Chance";
 
         case stats.POWER_EXPR: return "POWER (dps,avgMaxHit,ehpHits,ehpDots,regenK)";
+
+        case stats.DODGE_CONVERTED_TO_ARMOR: return "Dodge Rating converted to Armor";
+        case stats.MORE_DODGE_RATING: return "More Dodge Rating";
         
     }
     return "Unknown";

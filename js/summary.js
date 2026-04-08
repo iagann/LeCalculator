@@ -243,6 +243,7 @@ window.updateVisibleDeltas = function() {
 function statIsMore(statId) {
     return statId == stats.MORE_DAMAGE
     || statId == stats.MORE_ARMOUR
+    || statId == stats.MORE_DODGE_RATING
     || statId == stats.MORE_HIT_SPEED
     || statId == stats.LESS_DAMAGE_TAKEN
     || statId == stats.LESS_HIT_DAMAGE_TAKEN
@@ -497,7 +498,8 @@ function processStats(statsArray, firstRun = true) {
 
     const flatDodge = (allStats[stats.DODGE_RATING]?.total || 0) + dexterity * 4;
     const increasedDodge = allStats[stats.INCREASED_DODGE_RATING]?.total || 0;
-    totalDodgeRating = flatDodge * (100 + increasedDodge) / 100;
+    const moreDodge = allStats[stats.MORE_DODGE_RATING]?.total || 100;
+    totalDodgeRating = flatDodge * (100 + increasedDodge) / 100 * moreDodge / 100;
 
     const flatHealth = vitality * 6 + (allStats[stats.FLAT_HEALTH]?.total || 0);
     const increasedHealth = allStats[stats.INCREASED_HEALTH]?.total || 0;
@@ -864,10 +866,25 @@ function processStats(statsArray, firstRun = true) {
             });
         }
     }
+    let moreDamage2 = 0;
+    {
+        moreDamage2 = (allStats[stats.MORE_DAMAGE_2]?.total || 0);
+        if (moreDamage2 > 0) {
+            summary.push({ 
+                name: "More Damage 2", 
+                total: moreDamage2, 
+                type: "stat",
+                sources: [
+                    ...(allStats[stats.MORE_DAMAGE_2]?.sources || []),
+                ]
+            });
+        }
+    }
     let moreDamage = 100;
     {
         moreDamage *= (allStats[stats.MORE_DAMAGE]?.total || 100)/100;
         moreDamage *= (moreDamage1 + 100) / 100;
+        moreDamage *= (moreDamage2 + 100) / 100;
         if (moreDamage > 100) {
             summary.push({ 
                 name: "More Damage", 
@@ -875,6 +892,7 @@ function processStats(statsArray, firstRun = true) {
                 type: "stat",
                 sources: [
                     ...(allStats[stats.MORE_DAMAGE_1]?.sources || []),
+                    ...(allStats[stats.MORE_DAMAGE_2]?.sources || []),
                     ...(allStats[stats.MORE_DAMAGE]?.sources || []),
                 ]
             });
@@ -1223,12 +1241,16 @@ function processStats(statsArray, firstRun = true) {
         });
     }
     let totalArmor = flatArmor * (100 + increasedArmor) / 100 * moreArmor / 100;
+    if ((allStats[stats.DODGE_CONVERTED_TO_ARMOR]?.total || 0)) {
+        totalArmor += totalDodgeRating;
+        totalDodgeRating = 0;
+    }
     {
         summary.push({ 
             name: "Total Armor", 
             total: totalArmor, 
             type: "stat",
-            sources: []
+            sources: [allStats[stats.DODGE_CONVERTED_TO_ARMOR]?.sources || []]
         });
     }
     let totalArmorDrPhys = armorDr(totalArmor, true);
@@ -1374,6 +1396,14 @@ function processStats(statsArray, firstRun = true) {
                 ...(allStats[stats.INCREASED_DODGE_RATING]?.sources || []),
             ]
         });
+        summary.push({ 
+            name: "More Dodge Rating", 
+            total: moreDodge, 
+            type: "stat",
+            sources: [
+                ...(allStats[stats.MORE_DODGE_RATING]?.sources || []),
+            ]
+        });
     }
     //let totalDodgeRating = flatDodge * (100 + increasedDodge) / 100;
     {
@@ -1401,6 +1431,7 @@ function processStats(statsArray, firstRun = true) {
     let dodgeChance = 0;
     let glancingBlowChance = (allStats[stats.GLANCING_BLOW_CHANCE]?.total || 0);
     let dodgeToGlancingBlowChance = (allStats[stats.DODGE_CHANCE_TO_GLANCING_BLOW_CHANCE]?.total || 0);
+    let isDodgeToArmor = (allStats[stats.DODGE_CONVERTED_TO_ARMOR]?.total || 0);
     let glancingBlowToBlockChance = (allStats[stats.GLANCING_BLOW_TO_BLOCK_CHANCE]?.total || 0);
     
     {
