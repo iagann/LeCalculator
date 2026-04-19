@@ -880,11 +880,26 @@ function processStats(statsArray, firstRun = true) {
             });
         }
     }
+    let moreDamage3 = 0;
+    {
+        moreDamage3 = (allStats[stats.MORE_DAMAGE_3]?.total || 0);
+        if (moreDamage3 > 0) {
+            summary.push({ 
+                name: "More Damage 3", 
+                total: moreDamage3, 
+                type: "stat",
+                sources: [
+                    ...(allStats[stats.MORE_DAMAGE_3]?.sources || []),
+                ]
+            });
+        }
+    }
     let moreDamage = 100;
     {
         moreDamage *= (allStats[stats.MORE_DAMAGE]?.total || 100)/100;
         moreDamage *= (moreDamage1 + 100) / 100;
         moreDamage *= (moreDamage2 + 100) / 100;
+        moreDamage *= (moreDamage3 + 100) / 100;
         if (moreDamage > 100) {
             summary.push({ 
                 name: "More Damage", 
@@ -893,6 +908,7 @@ function processStats(statsArray, firstRun = true) {
                 sources: [
                     ...(allStats[stats.MORE_DAMAGE_1]?.sources || []),
                     ...(allStats[stats.MORE_DAMAGE_2]?.sources || []),
+                    ...(allStats[stats.MORE_DAMAGE_3]?.sources || []),
                     ...(allStats[stats.MORE_DAMAGE]?.sources || []),
                 ]
             });
