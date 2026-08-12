@@ -531,11 +531,14 @@ function processStats(statsArray, firstRun = true) {
 
         processExpressions();
 
-        hitsPerSecond = allStats[stats.HITS_PER_SECOND]?.total || 0;
+        hitsPerSecond = allStats[stats.HITS_PER_SECOND]?.total || 1;
         hitsPerSecond *= (100 + increasedHitSpeed) / 100;
         hitsPerSecond *= moreHits/100;
         if (cd > 0) {
-            hitsPerSecond = 1 / ((hitsPerSecond ? 1 / hitsPerSecond : 0) + cd / (100 + cdr) * 100);
+            hitsPerSecond =
+            // even on CD, on average there is average 0.5 / HPS delay of previous attack
+                1 / ((hitsPerSecond ? 0.5 / hitsPerSecond : 0) 
+                + cd / (100 + cdr) * 100);
         }
 
         processExpressions();
@@ -774,8 +777,21 @@ function processStats(statsArray, firstRun = true) {
     }
 
     let baseFlat = (allStats[stats.BASE_HIT_DAMAGE]?.total || 0);
-    // increased damage
     let damageEffectiveness = (allStats[stats.DAMAGE_EFFECTIVENESS]?.total || 0);
+
+    let damageEffectivenessExpr = (allStats[stats.DAMAGE_EFFECTIVENESS_EXPR]?.expression || null);
+    if (damageEffectivenessExpr != null) {
+        let r = getAverageSkillStats(damageEffectivenessExpr, increasedHitSpeed, moreHits, cdr);
+        baseFlat = r.avgBaseDamage;
+        damageEffectiveness = r.avgEffectiveness;
+        hitsPerSecond = r.hitsPerSecond;
+
+        //console.log("reference", getAverageSkillStats(damageEffectivenessExpr, 0, 100, 0));
+        //console.log("10 hit speed", getAverageSkillStats(damageEffectivenessExpr, 10, 100, 0));
+        //console.log("10 more hits", getAverageSkillStats(damageEffectivenessExpr, 0, 110, 0));
+        //console.log("10 cdr", getAverageSkillStats(damageEffectivenessExpr, 0, 100, 10));
+    }
+
     let totalFlat = 0;
     let moreFromCrits = 0;
     if (baseFlat > 0 && damageEffectiveness > 0) {
@@ -991,10 +1007,6 @@ function processStats(statsArray, firstRun = true) {
                 ]
             });
         }
-
-        hitsPerSecond = allStats[stats.HITS_PER_SECOND]?.total || 0;
-        hitsPerSecond *= (100 + increasedHitSpeed) / 100;
-        hitsPerSecond *= moreHits/100;
 
         // hits per second
         let hitSpeedSummary = `${hitsPerSecond.toFixed(3)}`; 

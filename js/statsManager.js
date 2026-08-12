@@ -171,6 +171,25 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
                     isValidExpression = false;
                 }
             }
+            else if (statInput.value == getStatName(stats.DAMAGE_EFFECTIVENESS_EXPR)) {
+              try {
+                  const parsed = JSON.parse(expressionInput.value);
+                  // Must be a non-empty array of skill rows
+                  isValidExpression = Array.isArray(parsed) && parsed.length > 0 &&
+                      parsed.every(row =>
+                          Array.isArray(row) &&
+                          row.length === 4 &&
+                          row.every(val => typeof val === 'number' && !isNaN(val)) &&
+                          row[0] >= 0 &&   // baseDamage
+                          row[1] > 0 &&    // baseAttackSpeed (must be positive, used as divisor)
+                          row[2] >= 0 &&   // damage effectiveness
+                          row[3] >= 0      // cooldown (0 = no cooldown / fallback)
+                      ) &&
+                      parsed.some(row => row[3] === 0); // at least one always-available fallback skill
+              } catch (e) {
+                  isValidExpression = false;
+              }
+            }
             else {
               //console.log("validate", expression);
 

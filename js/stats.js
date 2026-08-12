@@ -114,6 +114,8 @@ const stats = Object.freeze({
     MORE_DODGE_RATING: statNum++,
 
     MORE_DAMAGE_3: statNum++,
+
+    DAMAGE_EFFECTIVENESS_EXPR: statNum++,
 });
 
 function getStatName(key) {
@@ -229,7 +231,9 @@ function getStatName(key) {
         case stats.POWER_EXPR: return "POWER (dps,avgMaxHit,ehpHits,ehpDots,regenK)";
 
         case stats.DODGE_CONVERTED_TO_ARMOR: return "Dodge Rating converted to Armor";
-        case stats.MORE_DODGE_RATING: return "More Dodge Rating";        
+        case stats.MORE_DODGE_RATING: return "More Dodge Rating";      
+        
+        case stats.DAMAGE_EFFECTIVENESS_EXPR: return "DAMAGE EFFECTIVENESS EXPRESSION";
     }
     return "Unknown";
 }
