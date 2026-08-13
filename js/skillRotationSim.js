@@ -120,6 +120,6 @@ function getAverageSkillStats(damageEffectivenessExpr, increasedHitSpeed, moreHi
     const skills = JSON.parse(damageEffectivenessExpr);
     const result = simulateSkillRotation(skills, increasedHitSpeed, moreHits, crd);
     innerCache.set(key, result);
-    console.log(damageEffectivenessExpr, increasedHitSpeed, moreHits, crd, result);
+    //console.log(damageEffectivenessExpr, increasedHitSpeed, moreHits, crd, result);
     return result;
 }

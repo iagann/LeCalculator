@@ -116,6 +116,12 @@ const stats = Object.freeze({
     MORE_DAMAGE_3: statNum++,
 
     DAMAGE_EFFECTIVENESS_EXPR: statNum++,
+
+    SKILL_COUNT: statNum++,
+    MINION_COUNT: statNum++,
+    SKELETON_COUNT: statNum++,
+    REDIRECT: statNum++,
+    ACID_SKIN: statNum++,
 });
 
 function getStatName(key) {
@@ -234,6 +240,12 @@ function getStatName(key) {
         case stats.MORE_DODGE_RATING: return "More Dodge Rating";      
         
         case stats.DAMAGE_EFFECTIVENESS_EXPR: return "DAMAGE EFFECTIVENESS EXPRESSION";
+
+        case stats.SKILL_COUNT: return "SKILL_COUNT";
+        case stats.MINION_COUNT: return "MINION_COUNT";
+        case stats.SKELETON_COUNT: return "SKELETON_COUNT";
+        case stats.REDIRECT: return "REDIRECT";
+        case stats.ACID_SKIN: return "ACID_SKIN";
     }
     return "Unknown";
 }

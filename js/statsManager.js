@@ -214,6 +214,8 @@ function addStatEntry(statList, statName = "", mathExpression = "", ignoreSummar
               expression = expression.replaceAll("poisonRes",1);
               expression = expression.replaceAll("voidRes",1);
               expression = expression.replaceAll("HpRegen",1);
+              expression = expression.replaceAll("minionCount",0);
+              expression = expression.replaceAll("skeletonCount",0);
 
               //console.log("validate", expression);
               

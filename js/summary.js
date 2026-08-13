@@ -297,6 +297,8 @@ function replaceExpressionAll(expression) {
         replaceExpression("poisonRes", poisonResist);
         replaceExpression("voidRes", voidResist);
         replaceExpression("HpRegen", hpRegen);
+        replaceExpression("minionCount", minionCount);
+        replaceExpression("skeletonCount", skeletonCount);
         //wasExpression = wasExpression || expression != statData.expression;
     }
     return expression;
@@ -377,6 +379,9 @@ let necroticResist = 0;
 let poisonResist = 0;
 let voidResist = 0;
 let hpRegen = 0;
+let skillCount = 1;
+let minionCount = 0;
+let skeletonCount = 0;
 
 function processStats(statsArray, firstRun = true) {
     processExpressionsCount = 0;
@@ -471,6 +476,10 @@ function processStats(statsArray, firstRun = true) {
 
     let summary = [];
 
+    skillCount = allStats[stats.SKILL_COUNT]?.total || 1;
+    minionCount = allStats[stats.MINION_COUNT]?.total || 1;
+    skeletonCount = allStats[stats.SKELETON_COUNT]?.total || 1;
+
     // attributes
     summary.push({name:"Attributes", type:"section"});
     const allAttributes = allStats[stats.ALL_ATTRIBUTES]?.total || 0;
@@ -539,6 +548,7 @@ function processStats(statsArray, firstRun = true) {
             // even on CD, on average there is average 0.5 / HPS delay of previous attack
                 1 / ((hitsPerSecond ? 0.5 / hitsPerSecond : 0) 
                 + cd / (100 + cdr) * 100);
+            hitsPerSecond *= skillCount;
         }
 
         processExpressions();
@@ -784,12 +794,7 @@ function processStats(statsArray, firstRun = true) {
         let r = getAverageSkillStats(damageEffectivenessExpr, increasedHitSpeed, moreHits, cdr);
         baseFlat = r.avgBaseDamage;
         damageEffectiveness = r.avgEffectiveness;
-        hitsPerSecond = r.hitsPerSecond;
-
-        //console.log("reference", getAverageSkillStats(damageEffectivenessExpr, 0, 100, 0));
-        //console.log("10 hit speed", getAverageSkillStats(damageEffectivenessExpr, 10, 100, 0));
-        //console.log("10 more hits", getAverageSkillStats(damageEffectivenessExpr, 0, 110, 0));
-        //console.log("10 cdr", getAverageSkillStats(damageEffectivenessExpr, 0, 100, 10));
+        hitsPerSecond = r.hitsPerSecond * skillCount;
     }
 
     let totalFlat = 0;
@@ -810,6 +815,7 @@ function processStats(statsArray, firstRun = true) {
 
         summary.push({name:"Crits", type:"section"});
         let baseCrit = (allStats[stats.BASE_CRITICAL_STRIKE_CHANCE]?.total || 0);
+        let acidSkin = (allStats[stats.ACID_SKIN]?.total || 0);
         let increasedCrit = (allStats[stats.INCREASED_CRITICAL_STRIKE_CHANCE]?.total || 0);
         let critMulti = 200 + (allStats[stats.CRITICAL_STRIKE_MULTIPLIER]?.total || 0);
         summary.push({ 
@@ -817,9 +823,18 @@ function processStats(statsArray, firstRun = true) {
             total: baseCrit, 
             type: "stat",
             sources: [
-                ...(allStats[stats.BASE_CRITICAL_STRIKE_CHANCE]?.sources || []),
-            ]
+                ...(allStats[stats.BASE_CRITICAL_STRIKE_CHANCE]?.sources || [])            ]
         });
+        if (acidSkin > 0) {
+            acidSkin = 1;
+            summary.push({ 
+                name: "Acid Skin", 
+                total: 1, 
+                type: "stat",
+                sources: [
+                    ...(allStats[stats.ACID_SKIN]?.sources || [])            ]
+            });
+        }
         summary.push({ 
             name: "Total Increased Crit Chance", 
             total: increasedCrit, 
@@ -837,6 +852,8 @@ function processStats(statsArray, firstRun = true) {
             ]
         });
         let totalCritChance = baseCrit * (increasedCrit + 100) / 100;
+        if (acidSkin > 0)
+            totalCritChance += 20;
         summary.push({type:"hr"});
         summary.push({ 
             name: "Total Crit Chance", 
@@ -1041,7 +1058,13 @@ function processStats(statsArray, firstRun = true) {
                 ]
             });
         }
-    }  
+    }
+    summary.push({ 
+        name: "Skill count", 
+        total: skillCount, 
+        type: "stat",
+        sources: [...(allStats[stats.SKILL_COUNT]?.sources || [])]
+    });
 
     // chance to apply ailment
     summary.push({name:"Ailments", type:"section"});
@@ -1580,6 +1603,8 @@ function processStats(statsArray, firstRun = true) {
     }
 
     let lessDamageTaken = (allStats[stats.LESS_DAMAGE_TAKEN]?.total || 100);
+    let redirect = Math.min(allStats[stats.REDIRECT]?.total || 0, 75);
+    lessDamageTaken *= (100 - redirect) / 100;
     let lessHitDamageTaken = lessDamageTaken * (allStats[stats.LESS_HIT_DAMAGE_TAKEN]?.total || 100) / 100;
     const lessDotDamageTaken = lessDamageTaken * (allStats[stats.LESS_DOT_DAMAGE_TAKEN]?.total || 100) / 100;
     if (glancingBlowChance == 100)
@@ -1589,14 +1614,16 @@ function processStats(statsArray, firstRun = true) {
     const armorAppliedToDots = (allStats[stats.ARMOUR_MITIGATION_APPLIED_TO_DOT]?.total || 0);
     let lessDotDamageTakenPhys = (100 - armorAppliedToDots / 100 * totalArmorDrPhys) * lessDotDamageTaken / 100;
     let lessDotDamageTakenNonPhys = (100 - armorAppliedToDots / 100 * totalArmorDrNonPhys) * lessDotDamageTaken / 100;
+   
     lessDamageTaken = 100 - lessDamageTaken;
     lessHitDamageTaken = 100 - lessHitDamageTaken;
     lessDotDamageTakenPhys = 100 - lessDotDamageTakenPhys;
     lessDotDamageTakenNonPhys = 100 - lessDotDamageTakenNonPhys;
+    
 
     if (lessHitDamageTaken > 0 || lessDotDamageTakenNonPhys > 0) {
         summary.push({type:"hr"});
-/*
+
         summary.push({ 
             name: "Less Damage Taken", 
             total: lessDamageTaken, 
@@ -1605,7 +1632,18 @@ function processStats(statsArray, firstRun = true) {
                 ...(allStats[stats.LESS_DAMAGE_TAKEN]?.sources || []),
             ]
         });
-*/
+
+        if (redirect > 0) {
+            summary.push({ 
+                name: "Redirect", 
+                total: redirect, 
+                type: "stat",
+                sources: [
+                    ...(allStats[stats.REDIRECT]?.sources || []),
+                ]
+            });
+        }
+
         summary.push({ 
             name: "Less Hit Damage Taken", 
             total: lessHitDamageTaken, 
