@@ -53,15 +53,15 @@ function updateSummary() {
     document.querySelectorAll(".section").forEach((sec) => {
         const sectionEnabled = sec.querySelector(".section-enabled")?.checked;
         const sectionName = sec.querySelector(".section-header input[placeholder='Section Name']")?.value || "";
-    
+
         const statEntries = Array.from(sec.querySelectorAll(".stat-entry")).map(stat => {
-        const statEnabled = stat.querySelector(".stat-enabled")?.checked;
-        const statName = stat.querySelector("input[placeholder='Choose Stat...']")?.value;
-        const statKey = Object.keys(stats).find(k => getStatName(stats[k]) === statName);
-        const statID = statKey ? stats[statKey] : null;
-        const expr = stat.querySelector("input[placeholder='Math Expression']")?.value || "";
-    
-        return { element: stat, enabled: statEnabled, statID, expr };
+            const statEnabled = stat.querySelector(".stat-enabled")?.checked;
+            const statName = stat.querySelector("input[placeholder='Choose Stat...']")?.value;
+            const statKey = Object.keys(stats).find(k => getStatName(stats[k]) === statName);
+            const statID = statKey ? stats[statKey] : null;
+            const expr = stat.querySelector("input[placeholder='Math Expression']")?.value || "";
+        
+            return { element: stat, enabled: statEnabled, statID, expr };
         });
     
         sectionCache.push({ element: sec, enabled: sectionEnabled, name: sectionName, statEntries: statEntries });
@@ -446,16 +446,18 @@ function processStats(statsArray, firstRun = true) {
 
         if (isNaN(statValue)) {
             if (allStats[statId].expression) {
-                allStats[statId].expression += " + " + expression;
-            }
-            else {
+                if (statIsMore(statId)) {
+                    allStats[statId].expression = statIsOpposite(statId)
+                        ? `( (${allStats[statId].expression}) + (${expression}) / (100 + (${allStats[statId].expression}) ) * 100)`
+                        : `( (${allStats[statId].expression}) + (${expression}) * (100 + (${allStats[statId].expression}) ) / 100)`;
+                } else {
+                    allStats[statId].expression += ` + (${expression})`;
+                }
+            } else {
                 allStats[statId].expression = expression;
             }
+
             allStats[statId].sources.push(`${sectionName} — ${getStatName(statId)}: ${expression}`);
-            /*
-            if (statId == 50)
-                console.log("allStats[statId].total expression", statId, getStatName(statId), expression);
-            */
         }
         else {
             if (statIsMore(statId)) {
@@ -466,10 +468,7 @@ function processStats(statsArray, firstRun = true) {
             else {
                 allStats[statId].total += statValue;
             }
-            /*
-            if (statId == 50)
-                console.log("allStats[statId].total", statId, getStatName(statId), allStats[statId].total - statValue, "=>", allStats[statId].total);
-            */
+            
             allStats[statId].sources.push(`${sectionName} — ${getStatName(statId)}: ${statValue}`);
         }
     });
